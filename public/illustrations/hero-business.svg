@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 560" role="img" aria-labelledby="t d">
+<title id="t">Business formation illustration</title><desc id="d">A founder dashboard with a document, building, shield and progress cards.</desc>
+<defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#315f9d"/><stop offset="1" stop-color="#172a46"/></linearGradient><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f5e6bf"/><stop offset="1" stop-color="#d7a548"/></linearGradient><filter id="s" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#172a46" flood-opacity=".14"/></filter></defs>
+<ellipse cx="356" cy="505" rx="260" ry="28" fill="#172a46" opacity=".08"/>
+<rect x="88" y="76" width="545" height="381" rx="30" fill="#fff" filter="url(#s)"/>
+<rect x="88" y="76" width="545" height="58" rx="30" fill="url(#g1)"/><rect x="88" y="111" width="545" height="23" fill="url(#g1)"/>
+<circle cx="122" cy="105" r="7" fill="#d7a548"/><circle cx="145" cy="105" r="7" fill="#fff" opacity=".5"/><circle cx="168" cy="105" r="7" fill="#fff" opacity=".25"/>
+<rect x="118" y="159" width="142" height="264" rx="18" fill="#f2f5f9"/>
+<rect x="139" y="185" width="91" height="12" rx="6" fill="#172a46" opacity=".85"/><rect x="139" y="213" width="65" height="8" rx="4" fill="#9eb0c3"/>
+<rect x="136" y="251" width="104" height="40" rx="10" fill="#dce7f4"/><circle cx="154" cy="271" r="8" fill="#315f9d"/><rect x="170" y="263" width="51" height="7" rx="4" fill="#315f9d"/><rect x="170" y="276" width="38" height="5" rx="3" fill="#7590b1"/>
+<rect x="136" y="307" width="104" height="40" rx="10" fill="#fff"/><circle cx="154" cy="327" r="8" fill="#d7a548"/><rect x="170" y="319" width="51" height="7" rx="4" fill="#52647a"/><rect x="170" y="332" width="38" height="5" rx="3" fill="#9aabba"/>
+<rect x="136" y="363" width="104" height="40" rx="10" fill="#fff"/><circle cx="154" cy="383" r="8" fill="#51a481"/><rect x="170" y="375" width="51" height="7" rx="4" fill="#52647a"/><rect x="170" y="388" width="38" height="5" rx="3" fill="#9aabba"/>
+<rect x="286" y="159" width="318" height="264" rx="18" fill="#f9fbfd" stroke="#e5ebf1"/>
+<text x="312" y="194" fill="#172a46" font-family="Arial,sans-serif" font-size="16" font-weight="700">Formation overview</text>
+<rect x="312" y="217" width="266" height="82" rx="14" fill="url(#g1)"/>
+<text x="333" y="244" fill="#d6e2ef" font-family="Arial,sans-serif" font-size="11">CURRENT STATUS</text><text x="333" y="270" fill="#fff" font-family="Arial,sans-serif" font-size="20" font-weight="700">Information review</text>
+<circle cx="538" cy="258" r="25" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="7"/><path d="M538 233a25 25 0 0 1 22 37" fill="none" stroke="#d7a548" stroke-width="7" stroke-linecap="round"/><text x="528" y="264" fill="#fff" font-family="Arial,sans-serif" font-size="13" font-weight="700">62%</text>
+<rect x="312" y="318" width="126" height="78" rx="12" fill="#fff" stroke="#e4eaf1"/><rect x="454" y="318" width="124" height="78" rx="12" fill="#fff" stroke="#e4eaf1"/>
+<circle cx="337" cy="343" r="12" fill="#e4f4ed"/><path d="m331 343 4 4 8-9" fill="none" stroke="#1f8f64" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><text x="356" y="345" fill="#172a46" font-family="Arial,sans-serif" font-size="12" font-weight="700">Details saved</text><text x="325" y="374" fill="#8190a1" font-family="Arial,sans-serif" font-size="10">12 items complete</text>
+<circle cx="478" cy="343" r="12" fill="#fbf1dc"/><path d="M478 336v8l5 3" fill="none" stroke="#c68d28" stroke-width="2.5" stroke-linecap="round"/><text x="497" y="345" fill="#172a46" font-family="Arial,sans-serif" font-size="12" font-weight="700">Next action</text><text x="467" y="374" fill="#8190a1" font-family="Arial,sans-serif" font-size="10">Review address</text>
+<g transform="translate(25 232)"><rect width="120" height="128" rx="18" fill="#fff" filter="url(#s)"/><path d="M33 89V49l27-19 27 19v40" fill="#e9f0f8" stroke="#315f9d" stroke-width="4" stroke-linejoin="round"/><path d="M48 89V62h24v27M23 92h75" fill="none" stroke="#172a46" stroke-width="5" stroke-linecap="round"/><circle cx="60" cy="50" r="6" fill="#d7a548"/></g>
+<g transform="translate(564 36)"><rect width="128" height="142" rx="20" fill="#fff" filter="url(#s)"/><path d="M64 28 96 41v25c0 25-13 42-32 51-19-9-32-26-32-51V41l32-13Z" fill="url(#g2)"/><path d="m50 69 10 10 20-23" fill="none" stroke="#172a46" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><text x="64" y="130" text-anchor="middle" fill="#172a46" font-family="Arial,sans-serif" font-size="11" font-weight="700">SECURE SETUP</text></g>
+</svg>
