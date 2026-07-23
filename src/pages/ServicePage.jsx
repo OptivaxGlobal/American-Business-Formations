@@ -7,6 +7,8 @@ import ServiceGrid from '../components/ServiceGrid'
 import PageHero from '../components/PageHero'
 import Breadcrumbs from '../components/Breadcrumbs'
 import Reveal from '../components/Reveal'
+import SEO from '../components/SEO'
+import { serviceSchema, breadcrumbSchema, faqSchema } from '../data/seo'
 
 export default function ServicePage({ forcedSlug }) {
   const params = useParams()
@@ -14,8 +16,22 @@ export default function ServicePage({ forcedSlug }) {
   const service = services[slug]
   if (!service) return <Navigate to="/404" replace />
   const Icon = service.icon
+  const path = `/${slug}`
 
   return <>
+    <SEO
+      title={service.title}
+      description={service.short}
+      path={path}
+      jsonLd={{
+        '@context': 'https://schema.org',
+        '@graph': [
+          serviceSchema({ name: service.title, description: service.short, path }),
+          breadcrumbSchema([{ name: 'Home', path: '/' }, { name: 'Services', path: '/services' }, { name: service.title }]),
+          faqSchema(service.faq)
+        ].map(({ '@context': _drop, ...rest }) => rest)
+      }}
+    />
     <PageHero
       crumbs={<Breadcrumbs items={[{ label: 'Services', to: '/services' }, { label: service.title }]} />}
       eyebrow={<><Icon size={17}/>{service.eyebrow}</>}

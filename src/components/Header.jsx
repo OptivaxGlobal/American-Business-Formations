@@ -87,7 +87,7 @@ export default function Header() {
           <NavLink to="/about" onClick={closeAll}>About</NavLink>
           <NavLink to="/contact" onClick={closeAll}>Contact</NavLink>
           <div className="nav-actions">
-            <Link className="btn btn-ghost" to={user ? '/dashboard' : '/login'} onClick={closeAll}>{user ? 'Dashboard' : 'Log in'}</Link>
+            <Link className="btn btn-ghost" to={user ? (user.role==='admin' ? '/admin' : '/dashboard') : '/login'} onClick={closeAll}>{user ? (user.role==='admin' ? 'Admin portal' : 'Dashboard') : 'Log in'}</Link>
             <Link className="btn btn-primary" to="/start" onClick={closeAll}>Get started</Link>
           </div>
         </nav>

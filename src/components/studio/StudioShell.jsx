@@ -7,6 +7,7 @@ import {
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useApp } from '../../context/AppContext'
+import SEO from '../SEO'
 
 const primary = [
   ['/studio', Home, 'Home'],
@@ -33,9 +34,9 @@ export default function StudioShell(){
     document.body.style.overflow = open ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [open])
-  return <div className="studio-app">
+  return <><SEO title="Business Studio" description="Your American Business Formations workspace." path={location.pathname} noindex /><div className="studio-app">
     <aside className={`studio-sidebar ${open?'is-open':''}`}>
-      <div className="studio-logo-row"><NavLink to="/" className="studio-logo"><span>AB</span><strong>American<br/>Business Formations</strong></NavLink><button className="studio-close" onClick={()=>setOpen(false)} aria-label="Close navigation"><X/></button></div>
+      <div className="studio-logo-row"><NavLink to="/" className="studio-logo"><img src="/logo.webp" alt="American Business Formations" className="brand-mini"/></NavLink><button className="studio-close" onClick={()=>setOpen(false)} aria-label="Close navigation"><X/></button></div>
       <button className="business-switcher" onClick={()=>setBusinessOpen(!businessOpen)} aria-expanded={businessOpen}><span className="business-avatar"><Store/></span><span><small>Current business</small><strong>{business}</strong></span><ChevronDown className={businessOpen?'rotated':''}/></button>
       {businessOpen&&<div className="business-popover"><button><span>AV</span><div><strong>{business}</strong><small>Formation in progress</small></div><BadgeCheck/></button><button className="new-business"><Rocket/> Start another business</button></div>}
       <nav className="studio-nav">
@@ -63,7 +64,7 @@ export default function StudioShell(){
       </header>
       <Outlet/>
     </main>
-  </div>
+  </div></>
 }
 
 function routeLabel(path){

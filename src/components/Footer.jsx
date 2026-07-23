@@ -31,7 +31,7 @@ export default function Footer() {
       </div>
       <div className="container footer-bottom">
         <span>© {new Date().getFullYear()} American Business Formations. All rights reserved.</span>
-        <div><Link to="/privacy">Privacy</Link><Link to="/terms">Terms</Link><Link to="/disclaimer">Disclaimer</Link></div>
+        <div><Link to="/privacy">Privacy</Link><Link to="/terms">Terms</Link><Link to="/disclaimer">Disclaimer</Link><Link to="/cookie-policy">Cookies</Link><Link to="/refund-policy">Refunds</Link><Link to="/accessibility">Accessibility</Link><Link to="/do-not-sell">Do Not Sell My Info</Link></div>
       </div>
     </footer>
   )

@@ -2,6 +2,7 @@ import { ArrowRight, BookOpen, FileText, Search } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import PageHero from '../components/PageHero'
 import Reveal from '../components/Reveal'
+import SEO from '../components/SEO'
 
 export const posts=[
   {slug:'how-to-start-an-llc',category:'LLC Basics',title:'How to prepare for starting an LLC',excerpt:'A practical checklist of the decisions and information founders commonly organize first.',read:'7 min read'},
@@ -13,6 +14,7 @@ export const posts=[
 ]
 
 export default function Resources(){return <>
+  <SEO title="Resource Center" description="Educational content, checklists, and planning tools for founders." path="/resources" />
   <PageHero
     className="dark"
     eyebrow="Resource center"

@@ -11,7 +11,7 @@ const replies = [
 export default function ChatWidget() {
   const [open, setOpen] = useState(false)
   const [text, setText] = useState('')
-  const [messages, setMessages] = useState([{ from: 'bot', text: 'Hi! I’m the ABF guide. What would you like help with?' }])
+  const [messages, setMessages] = useState([{ from: 'bot', text: 'Hi! I’m the ABF Business Guide. What would you like help with?' }])
 
   const send = (e) => {
     e.preventDefault()
@@ -23,7 +23,7 @@ export default function ChatWidget() {
 
   return <div className="chat-widget">
     {open && <div className="chat-panel">
-      <div className="chat-head"><div><Bot/><span><strong>ABF Guide</strong><small>Online</small></span></div><button onClick={() => setOpen(false)}><X/></button></div>
+      <div className="chat-head"><div><Bot/><span><strong>ABF Business Guide</strong><small>Online</small></span></div><button onClick={() => setOpen(false)} aria-label="Close chat"><X/></button></div>
       <div className="chat-body">{messages.map((message, i) => <div key={i} className={`chat-message ${message.from}`}>{message.text}</div>)}</div>
       <form onSubmit={send}><input value={text} onChange={e => setText(e.target.value)} placeholder="Type your question..."/><button><Send size={18}/></button></form>
     </div>}

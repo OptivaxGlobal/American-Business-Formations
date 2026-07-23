@@ -1,6 +1,7 @@
 import { Star } from 'lucide-react'
 import PageHero from '../components/PageHero'
 import Reveal from '../components/Reveal'
+import SEO from '../components/SEO'
 const reviews=[
   ['Maya Reynolds','Creative agency founder','The guided questions made the setup feel approachable. I always knew what was complete and what needed attention.'],
   ['James Walker','Consulting business owner','The dashboard is the best part. Documents, status, reminders, and services all live in one place.'],
@@ -10,6 +11,7 @@ const reviews=[
   ['Ethan Brooks','Technology consultant','I like that the structure is ready for real backend integrations while still working as a frontend demo.']
 ]
 export default function Reviews(){return <>
+  <SEO title="Customer Stories" description="Sample testimonial content for the completed UI project." path="/reviews" />
   <PageHero
     eyebrow="Customer stories"
     title="Founders deserve a calmer starting experience"

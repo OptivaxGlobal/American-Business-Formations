@@ -8,6 +8,8 @@ import StateSelector from '../components/StateSelector'
 import PricingCards from '../components/PricingCards'
 import FAQ from '../components/FAQ'
 import Reveal from '../components/Reveal'
+import SEO from '../components/SEO'
+import { faqSchema } from '../data/seo'
 import { serviceGroups } from '../data/services'
 
 const homeFaq = [
@@ -74,6 +76,12 @@ function TestimonialCarousel() {
 
 export default function Home() {
   return <>
+    <SEO
+      title="Start and Manage Your U.S. Business"
+      description="American Business Formations — guided LLC formation, compliance, and business services."
+      path="/"
+      jsonLd={faqSchema(homeFaq)}
+    />
     <section className="hero home-hero">
       <div className="container hero-grid-3">
         <img className="hero-side-art left" src="/illustrations/hero-business.svg" alt="" aria-hidden="true" />

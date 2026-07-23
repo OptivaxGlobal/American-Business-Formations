@@ -2,9 +2,15 @@ import { ArrowRight, CheckCircle2, HeartHandshake, Lightbulb, ShieldCheck, Users
 import { Link } from 'react-router-dom'
 import PageHero from '../components/PageHero'
 import Reveal from '../components/Reveal'
+import SEO from '../components/SEO'
 
 export default function About(){
   return <>
+    <SEO
+      title="About Us"
+      description="We designed a modern experience that helps founders understand the next step, keep information organized, and access the services required to launch responsibly."
+      path="/about"
+    />
     <PageHero
       eyebrow="About American Business Formations"
       title="Business setup should feel clear, not intimidating."

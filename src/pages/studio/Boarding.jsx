@@ -2,6 +2,7 @@ import { ArrowLeft, ArrowRight, BadgeCheck, BarChart3, Building2, Check, Chevron
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { api, withLocalFallback } from '../../lib/api'
+import SEO from '../../components/SEO'
 
 const order=['stage','focus','products','marketing']
 const data={
@@ -46,13 +47,13 @@ export default function Boarding(){
   const choose=id=>setAnswers(prev=>({...prev,[step]:config.single?[id]:(prev[step]||[]).includes(id)?(prev[step]||[]).filter(x=>x!==id):[...(prev[step]||[]),id]}))
   const continueFlow=async()=>{localStorage.setItem('abf-boarding',JSON.stringify(answers)); if(idx<order.length-1){navigate(`/boarding/131616968/${order[idx+1]}`);return} setSaving(true);await withLocalFallback(()=>api.submitBoarding(answers),()=>({ok:true}));setSaving(false);navigate('/studio')}
   const back=()=>idx===0?navigate('/'):navigate(`/boarding/131616968/${order[idx-1]}`)
-  return <div className="boarding-page">
-    <header className="boarding-header"><div className="boarding-logo"><span>AB</span><strong>American Business Formations</strong></div><div className="boarding-help">Need help? <Link to="/contact">Contact support</Link></div></header>
+  return <><SEO title="Personalize Your Studio" description="Tell us about your business to personalize your studio." path="/boarding" noindex /><div className="boarding-page">
+    <header className="boarding-header"><div className="boarding-logo"><img src="/logo.webp" alt="American Business Formations" className="brand-mini"/></div><div className="boarding-help">Need help? <Link to="/contact">Contact support</Link></div></header>
     <div className="boarding-progress"><i style={{width:`${((idx+1)/order.length)*100}%`}}/></div>
     <main className="boarding-content">
       <div className="boarding-heading" key={`h-${step}`}><span>{config.eyebrow}</span><h1>{config.title}</h1><p>{config.description}</p></div>
       <div className={`boarding-options ${config.single?'three':''}`} key={`o-${step}`}>{config.options.map(([id,Icon,title,copy])=><button key={id} onClick={()=>choose(id)} className={selected.includes(id)?'selected':''}><i><Icon/></i><div><strong>{title}</strong><p>{copy}</p></div><span className="boarding-check">{selected.includes(id)?<Check/>:<ChevronRight/>}</span></button>)}</div>
     </main>
     <footer className="boarding-footer"><button className="boarding-back" onClick={back}><ArrowLeft/> Back</button><span>Step {idx+1} of {order.length}</span><button disabled={!selected.length||saving} className="boarding-next" onClick={continueFlow}>{saving?'Preparing studio...':idx===order.length-1?'Open my studio':'Continue'} <ArrowRight/></button></footer>
-  </div>
+  </div></>
 }
