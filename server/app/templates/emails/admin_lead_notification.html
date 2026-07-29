@@ -1,0 +1,9 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<p style="font-size:15px;line-height:1.6;">New lead captured from <strong>{{ source }}</strong>.</p>
+<table role="presentation" width="100%" style="font-size:14px;margin:16px 0;">
+  <tr><td style="padding:6px 0;color:#616d7e;">Name / business</td><td>{{ business_name or name }}</td></tr>
+  <tr><td style="padding:6px 0;color:#616d7e;">Email</td><td>{{ email }}</td></tr>
+</table>
+<p><a href="{{ admin_url }}" style="display:inline-block;background:#2657d9;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:bold;">View in admin</a></p>
+{% endblock %}

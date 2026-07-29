@@ -1,22 +1,30 @@
-import { Star } from 'lucide-react'
+import { MessageSquareText } from 'lucide-react'
 import PageHero from '../components/PageHero'
 import Reveal from '../components/Reveal'
 import SEO from '../components/SEO'
-const reviews=[
-  ['Maya Reynolds','Creative agency founder','The guided questions made the setup feel approachable. I always knew what was complete and what needed attention.'],
-  ['James Walker','Consulting business owner','The dashboard is the best part. Documents, status, reminders, and services all live in one place.'],
-  ['Sofia Bennett','Online shop founder','I could prepare my business information before the filing conversation, which saved a lot of back and forth.'],
-  ['Noah Harris','Property services owner','The site feels professional on mobile and desktop. The onboarding steps are simple and easy to follow.'],
-  ['Ava Collins','Wellness brand founder','The service pages explain the purpose clearly without overwhelming me with legal language.'],
-  ['Ethan Brooks','Technology consultant','I like that the structure is ready for real backend integrations while still working as a frontend demo.']
-]
-export default function Reviews(){return <>
-  <SEO title="Customer Stories" description="Sample testimonial content for the completed UI project." path="/reviews" />
-  <PageHero
-    eyebrow="Customer stories"
-    title="Founders deserve a calmer starting experience"
-    description="Sample testimonial content for the completed UI project."
-    actions={<div className="rating-badge"><div>★★★★★</div><strong>4.8 out of 5</strong><small>Based on sample project content</small></div>}
-  />
-  <section className="section"><div className="container review-grid">{reviews.map(([name,role,text],i)=><Reveal as="article" delay={i%6} key={name}><div className="stars">★★★★★</div><p>“{text}”</p><div className="person"><div>{name[0]}</div><span><strong>{name}</strong><small>{role}</small></span></div></Reveal>)}</div></section>
-</>}
+import { loadTestimonials } from '../data/testimonials'
+
+export default function Reviews(){
+  const reviews = loadTestimonials().filter(r => !r.placeholder)
+  return <>
+    <SEO title="Customer Stories" description="Verified customer stories from Texas founders who formed their LLC with American Business Formations." path="/reviews" />
+    <PageHero
+      eyebrow="Customer stories"
+      title="What our customers say"
+      description="We only publish reviews we can verify came from real customers. As formations complete, verified stories will appear here."
+    />
+    <section className="section"><div className="container">
+      {reviews.length > 0
+        ? <div className="review-grid">{reviews.map((r,i)=>(
+            <Reveal as="article" delay={i%6} key={r.id || r.name}>
+              <p>&ldquo;{r.quote}&rdquo;</p>
+              <div className="person"><div>{r.name?.[0] || '?'}</div><span><strong>{r.name}</strong><small>{r.role}</small></span></div>
+            </Reveal>
+          ))}</div>
+        : <div className="alert-banner info" style={{ maxWidth: 640, margin: '0 auto' }}>
+            <MessageSquareText size={20}/>
+            <p style={{ margin: 0 }}>We don&rsquo;t have verified customer reviews published yet. We&rsquo;d rather show nothing than a fabricated quote check back as real formations complete, or read about <a href="/about">how we work</a> in the meantime.</p>
+          </div>}
+    </div></section>
+  </>
+}

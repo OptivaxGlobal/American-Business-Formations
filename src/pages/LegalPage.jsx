@@ -1,13 +1,27 @@
 import { useLocation } from 'react-router-dom'
 import PageHero from '../components/PageHero'
+import Breadcrumbs from '../components/Breadcrumbs'
 import SEO from '../components/SEO'
-const content={
-  '/privacy':['Privacy Policy','This sample privacy page explains how account, contact, onboarding, and usage information may be handled after a real backend is connected. Replace this content with a policy reviewed for your actual data practices, vendors, jurisdictions, retention rules, cookies, analytics, and user rights.'],
-  '/terms':['Terms of Service','This project contains sample terms only. Replace them with final terms that describe your company, services, payments, refunds, user obligations, intellectual property, limitations, disputes, and governing law.'],
-  '/disclaimer':['Service Disclaimer','American Business Formations is presented here as a frontend project. General information and automated workflows are not legal, tax, accounting, financial, insurance, or investment advice. Real services should be reviewed and delivered by appropriately qualified professionals and providers.'],
-  '/cookie-policy':['Cookie Policy','This sample cookie policy describes the categories of cookies a production deployment may use — essential session cookies, and optional analytics or preference cookies used only with consent. Replace this content with a policy reviewed for your actual cookie and consent-management setup.'],
-  '/refund-policy':['Refund Policy','This sample refund policy describes how service-fee refund requests may be handled, separate from government filing fees which are generally non-refundable once submitted to a state. Replace this content with final refund terms reviewed by qualified counsel.'],
-  '/accessibility':['Accessibility Statement','American Business Formations aims to design a platform usable by people of all abilities, including keyboard navigation, screen-reader support, and sufficient color contrast. If you encounter an accessibility barrier, contact support so it can be reviewed.'],
-  '/do-not-sell':['Do Not Sell or Share My Personal Information','This sample page describes how a customer may request that their personal information not be sold or shared, consistent with applicable state privacy laws. Replace this content with a verified process reviewed by qualified counsel before relying on it.']
+import { legalPages } from '../data/legal'
+import { SUPPORT_EMAIL } from '../data/seo'
+
+export default function LegalPage(){
+  const location = useLocation()
+  const page = legalPages[location.pathname] || legalPages['/disclaimer']
+
+  return <>
+    <SEO title={page.title} description={page.intro} path={location.pathname} />
+    <PageHero
+      crumbs={<Breadcrumbs items={[{ label: 'Legal', to: '/privacy' }, { label: page.title }]} />}
+      eyebrow="Legal information"
+      title={page.title}
+      description={`Last updated: ${page.updated}`}
+    />
+    <article className="article-body container article-container">
+      <p className="lead">{page.intro}</p>
+      {page.sections.map(([heading, body]) => <div key={heading}><h2>{heading}</h2><p>{body}</p></div>)}
+      <h2>Contact</h2>
+      <p>Questions about this page can be directed to <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.</p>
+    </article>
+  </>
 }
-export default function LegalPage(){const location=useLocation();const [title,intro]=content[location.pathname]||content['/disclaimer'];return <><SEO title={title} description={intro} path={location.pathname} /><PageHero eyebrow="Legal information" title={title} description="Last updated: July 21, 2026" /><article className="article-body container article-container"><p className="lead">{intro}</p><h2>Information collected</h2><p>A production website may collect contact details, account credentials, business information, selected services, uploaded documents, payment references, technical logs, and communication history.</p><h2>How information may be used</h2><p>Information may be used to provide requested services, operate accounts, communicate updates, support compliance workflows, improve the platform, prevent misuse, and meet legal obligations.</p><h2>Third-party services</h2><p>Payment processors, filing providers, cloud hosting, analytics, email, banking, insurance, tax, and identity providers may have separate terms and privacy practices.</p><h2>Contact</h2><p>Questions can be directed to support@americanbusinessformations.com. Replace this address before production if needed.</p></article></>}

@@ -1,5 +1,12 @@
 import { SITE_URL, SITE_NAME } from '../components/SEO'
 
+// Single source of truth for the company's published contact address.
+// A phone number and street address were not found anywhere in this
+// project do not add invented ones. If the business owner supplies real
+// values, set them here (and in EMAIL vars server-side) rather than
+// scattering them across components.
+export const SUPPORT_EMAIL = 'info@americanbusinessformations.com'
+
 export const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
@@ -8,16 +15,9 @@ export const organizationSchema = {
   logo: `${SITE_URL}/logo.webp`,
   contactPoint: {
     '@type': 'ContactPoint',
-    telephone: '+1-307-555-0184',
     contactType: 'customer service',
-    email: 'support@americanbusinessformations.com',
-    areaServed: 'US'
-  },
-  address: {
-    '@type': 'PostalAddress',
-    addressLocality: 'Sheridan',
-    addressRegion: 'WY',
-    addressCountry: 'US'
+    email: SUPPORT_EMAIL,
+    areaServed: 'US-TX'
   }
 }
 

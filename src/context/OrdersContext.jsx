@@ -24,7 +24,7 @@ export function OrdersProvider({ children }) {
     return { serviceFees, stateFees, addOns, total: serviceFees + stateFees + addOns }
   }, [cart])
 
-  // Mock checkout only — no real payment processor is connected. An order is
+  // Mock checkout only no real payment processor is connected. An order is
   // recorded locally as "paid" for demo purposes; a real integration must
   // verify payment via a signed server-side webhook before marking anything paid.
   const checkout = (businessId) => {

@@ -1,0 +1,6 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<p style="font-size:15px;line-height:1.6;">Confirm your email address to secure your account.</p>
+<p><a href="{{ verify_url }}" style="display:inline-block;background:#2657d9;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:bold;">Verify email address</a></p>
+<p style="font-size:13px;color:#616d7e;">This link expires in 24 hours. If you didn't create an account, you can ignore this email.</p>
+{% endblock %}

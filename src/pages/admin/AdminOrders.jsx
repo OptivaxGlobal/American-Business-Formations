@@ -7,7 +7,7 @@ export default function AdminOrders(){
   const businessName = id => businesses.find(b=>b.id===id)?.name || 'Unknown'
 
   return <div className="dash-card">
-    <div className="admin-toolbar"><h3>Orders & payments</h3><span className="admin-badge">Recorded locally — no real payment processor connected</span></div>
+    <div className="admin-toolbar"><h3>Orders & payments</h3><span className="admin-badge">Recorded locally no real payment processor connected</span></div>
     <div style={{overflowX:'auto'}}><table className="admin-table">
       <thead><tr><th>Order</th><th>Business</th><th>Service fees</th><th>State fees</th><th>Add-ons</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
       <tbody>

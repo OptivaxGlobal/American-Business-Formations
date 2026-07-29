@@ -2,10 +2,13 @@ import { Check, Minus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Reveal from './Reveal'
 
+// Prices below are service-fee-only placeholders pending owner confirmation.
+// The state filing fee is never included in these numbers and is always
+// itemized separately during onboarding and at checkout.
 export const defaultPlans = [
-  { name: 'Launch', theme: 'launch', price: '$0', note: 'plus state fee', description: 'A straightforward formation starting point.', features: ['LLC formation intake', 'Standard processing queue', 'Digital document center', 'Business checklist'], missing: ['Annual compliance support', 'Operating agreement', 'Branding tools'] },
-  { name: 'Essential', theme: 'essential', price: '$199', note: 'per year + state fee', popular: true, description: 'Formation plus core compliance support.', features: ['Everything in Launch', 'Priority processing queue', 'Operating agreement request', 'Annual compliance reminders', 'Funding profile access', 'Business coaching resources'], missing: ['Website and domain tools'] },
-  { name: 'Growth', theme: 'growth', price: '$249', note: 'per year + state fee', description: 'A broader toolkit for launching and growing.', features: ['Everything in Essential', 'Domain planning tools', 'Website project intake', 'Logo brief builder', 'Business email setup request', 'Digital business card profile'], missing: [] }
+  { name: 'Foundation', theme: 'launch', price: '$0', note: 'service fee + state filing fee', description: 'A straightforward formation starting point.', features: ['LLC formation intake', 'Standard processing queue', 'Digital document center', 'Formation checklist'], missing: ['Compliance reminders', 'Operating agreement', 'Registered agent service'] },
+  { name: 'Accelerated', theme: 'essential', price: '$199', note: 'per year + state filing fee', popular: true, description: 'Formation plus core compliance support.', features: ['Everything in Foundation', 'Priority processing queue', 'Operating agreement request', 'Compliance reminders', 'Registered agent (1 year)'], missing: ['DBA / assumed name filing'] },
+  { name: 'Complete', theme: 'growth', price: '$249', note: 'per year + state filing fee', description: 'Our most complete formation and compliance package.', features: ['Everything in Accelerated', 'DBA / assumed name filing', 'EIN assistance included', 'Formation documents vault', 'Priority support'], missing: [] }
 ]
 
 // Admin-editable override, saved from /admin/plans. Falls back to the

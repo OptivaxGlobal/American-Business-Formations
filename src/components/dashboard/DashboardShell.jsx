@@ -21,7 +21,7 @@ export default function DashboardShell(){
   const location=useLocation()
   const title = location.pathname.startsWith('/dashboard/businesses/') ? 'Business details' : (labels[location.pathname]||'Dashboard')
 
-  return <><SEO title={title==='Dashboard'?'Dashboard':`${title} — Dashboard`} description="Your American Business Formations client dashboard." path={location.pathname} noindex />
+  return <><SEO title={title==='Dashboard'?'Dashboard':`${title} Dashboard`} description="Your American Business Formations client dashboard." path={location.pathname} noindex />
     <section className="dashboard-page">
       <aside className={mobile?'open':''}>
         <div className="dash-brand"><img src="/logo.webp" alt="American Business Formations" className="brand-mini-light"/><button onClick={()=>setMobile(false)} aria-label="Close navigation"><X/></button></div>

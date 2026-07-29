@@ -1,8 +1,12 @@
 import { MessageSquare, Send } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useApp } from '../../context/AppContext'
+import { validateText } from '../../validations/commonValidation'
+import { fieldAria, focusFirstInvalid } from '../../lib/formErrors'
 
 function load(){ try { return JSON.parse(localStorage.getItem('abf-tickets'))||[] } catch { return [] } }
+
+const ALLOWED_PRIORITIES = ['low', 'normal', 'urgent']
 
 export default function Support(){
   const { notify } = useApp()
@@ -10,15 +14,32 @@ export default function Support(){
   const [subject, setSubject] = useState('')
   const [priority, setPriority] = useState('normal')
   const [message, setMessage] = useState('')
+  const [errors, setErrors] = useState({})
+  const fieldRefs = useRef({})
+
+  const validateSubject = (value) => validateText(value, { required: true, min: 3, max: 200, label: 'Subject' })
+  const validateMessage = (value) => validateText(value, { required: true, min: 10, max: 2000, label: 'Message' })
 
   const submit = e => {
     e.preventDefault()
-    if (!subject.trim() || !message.trim()) return
-    const ticket = { id: `tkt-${Date.now()}`, subject, priority, message, status: 'open', createdAt: new Date().toISOString() }
+    const subjectResult = validateSubject(subject)
+    const messageResult = validateMessage(message)
+    const priorityValid = ALLOWED_PRIORITIES.includes(priority)
+    const nextErrors = {
+      subject: subjectResult.valid ? '' : subjectResult.message,
+      message: messageResult.valid ? '' : messageResult.message,
+      priority: priorityValid ? '' : 'Select a valid priority.'
+    }
+    setErrors(nextErrors)
+    if (Object.values(nextErrors).some(Boolean)) {
+      focusFirstInvalid(fieldRefs, nextErrors, ['subject', 'priority', 'message'])
+      return
+    }
+    const ticket = { id: `tkt-${Date.now()}-${Math.random().toString(36).slice(2,7)}`, subject: subjectResult.normalized, priority, message: messageResult.normalized, status: 'open', createdAt: new Date().toISOString() }
     const next = [ticket, ...tickets]
     setTickets(next)
     localStorage.setItem('abf-tickets', JSON.stringify(next))
-    setSubject(''); setMessage('')
+    setSubject(''); setMessage(''); setErrors({})
     notify('Support ticket created.')
   }
 
@@ -32,10 +53,14 @@ export default function Support(){
     </div>
     <div className="dash-card">
       <div className="dash-card-head"><div><span>New ticket</span><h3>Contact support</h3></div></div>
-      <form className="contact-form ticket-form" onSubmit={submit}>
-        <label>Subject<input required value={subject} onChange={e=>setSubject(e.target.value)} placeholder="What do you need help with?"/></label>
-        <label>Priority<select value={priority} onChange={e=>setPriority(e.target.value)}><option value="low">Low</option><option value="normal">Normal</option><option value="urgent">Urgent</option></select></label>
-        <label>Message<textarea required rows="5" value={message} onChange={e=>setMessage(e.target.value)}></textarea></label>
+      <form className="contact-form ticket-form" onSubmit={submit} noValidate>
+        <label>Subject<input required value={subject} onChange={e=>{setSubject(e.target.value); if(errors.subject) setErrors(er=>({...er,subject:''}))}} onBlur={()=>setErrors(er=>({...er,subject: validateSubject(subject).valid?'':validateSubject(subject).message}))} placeholder="What do you need help with?" ref={el=>fieldRefs.current.subject=el} {...fieldAria('ticket-subject-error', errors.subject)}/>
+          {errors.subject && <p id="ticket-subject-error" className="field-error">{errors.subject}</p>}
+        </label>
+        <label>Priority<select value={priority} onChange={e=>setPriority(e.target.value)} ref={el=>fieldRefs.current.priority=el}><option value="low">Low</option><option value="normal">Normal</option><option value="urgent">Urgent</option></select></label>
+        <label>Message<textarea required rows="5" value={message} onChange={e=>{setMessage(e.target.value); if(errors.message) setErrors(er=>({...er,message:''}))}} onBlur={()=>setErrors(er=>({...er,message: validateMessage(message).valid?'':validateMessage(message).message}))} ref={el=>fieldRefs.current.message=el} {...fieldAria('ticket-message-error', errors.message)}></textarea>
+          {errors.message && <p id="ticket-message-error" className="field-error">{errors.message}</p>}
+        </label>
         <button className="btn btn-primary">Submit ticket <Send size={16}/></button>
       </form>
     </div>

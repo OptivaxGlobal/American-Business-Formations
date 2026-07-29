@@ -1,8 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /dashboard
-Disallow: /studio
-Disallow: /boarding
 Disallow: /formation-details
 Disallow: /login
 Disallow: /signup
@@ -11,5 +9,7 @@ Disallow: /verify-email
 Disallow: /forgot-password
 Disallow: /reset-password
 Disallow: /two-factor
+Disallow: /404
+Disallow: /500
 
 Sitemap: https://americanbusinessformations.com/sitemap.xml

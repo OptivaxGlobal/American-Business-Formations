@@ -1,16 +1,22 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, Menu, Phone, X } from 'lucide-react'
+import { ArrowRight, ChevronDown, Mail, Menu, X } from 'lucide-react'
 import { Link, NavLink } from 'react-router-dom'
 import Logo from './Logo'
 import { serviceGroups, services } from '../data/services'
 import { useApp } from '../context/AppContext'
+import { SUPPORT_EMAIL } from '../data/seo'
+import { loadAnnouncement } from '../data/announcement'
 
 export default function Header() {
   const [open, setOpen] = useState(false)
   const [servicesOpen, setServicesOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [openGroups, setOpenGroups] = useState(() => Object.fromEntries(serviceGroups.map(g => [g.title, true])))
   const { user } = useApp()
   const dropdownRef = useRef(null)
+  const announcement = loadAnnouncement()
+
+  const toggleGroup = (title) => setOpenGroups(prev => ({ ...prev, [title]: !prev[title] }))
 
   const closeAll = () => { setOpen(false); setServicesOpen(false) }
 
@@ -40,12 +46,14 @@ export default function Header() {
 
   return (
     <header className={`site-header ${scrolled ? 'scrolled' : ''}`}>
-      <div className="topbar">
-        <div className="container topbar-inner">
-          <span>Guided business formation for founders across the United States</span>
-          <a href="tel:+13075550184"><Phone size={14} /> +1 (307) 555-0184</a>
+      {announcement.enabled && announcement.message && (
+        <div className="topbar">
+          <div className="container topbar-inner">
+            <span>{announcement.message}</span>
+            <a href={`mailto:${SUPPORT_EMAIL}`}><Mail size={14} /> {SUPPORT_EMAIL}</a>
+          </div>
         </div>
-      </div>
+      )}
       <div className="container nav-wrap">
         <Logo />
         <button className="mobile-menu-btn" onClick={() => setOpen(!open)} aria-label="Toggle navigation" aria-expanded={open}>
@@ -62,33 +70,50 @@ export default function Header() {
             <button onClick={() => setServicesOpen(!servicesOpen)} aria-haspopup="true" aria-expanded={servicesOpen}>
               Services <ChevronDown size={16} />
             </button>
-            <div className="mega-menu" role="menu">
-              {serviceGroups.map(group => (
-                <div key={group.title}>
-                  <h4>{group.title}</h4>
-                  {group.items.map(([slug, label]) => {
-                    const Icon = services[slug]?.icon
-                    return (
-                      <Link key={slug} to={`/${slug}`} onClick={closeAll} className="mega-menu-item" role="menuitem">
-                        {Icon && <i><Icon size={16} /></i>}
-                        <div>
-                          <strong>{label}</strong>
-                          {services[slug]?.short && <small>{services[slug].short}</small>}
-                        </div>
-                      </Link>
-                    )
-                  })}
-                </div>
-              ))}
+            <div className="mega-menu mega-menu-compact" role="menu">
+              <div className="mega-menu-columns">
+                {serviceGroups.map(group => {
+                  const isGroupOpen = openGroups[group.title]
+                  return (
+                    <div className="mega-menu-col" key={group.title}>
+                      <button
+                        type="button"
+                        className="mega-menu-col-head"
+                        onClick={() => toggleGroup(group.title)}
+                        aria-expanded={isGroupOpen}
+                      >
+                        {group.title}
+                        <ChevronDown size={14} className="mega-menu-col-chevron" />
+                      </button>
+                      {isGroupOpen && group.items.map(([slug, label]) => {
+                        const Icon = services[slug]?.icon
+                        return (
+                          <Link key={slug} to={`/${slug}`} onClick={closeAll} className="mega-menu-item" role="menuitem">
+                            {Icon && <i><Icon size={16} /></i>}
+                            <span>{label}</span>
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  )
+                })}
+              </div>
+              <div className="mega-menu-cta">
+                <span>Ready to make your business official?</span>
+                <Link to="/formation-details" onClick={closeAll} className="btn btn-primary btn-sm" role="menuitem">
+                  Start My LLC <ArrowRight size={15}/>
+                </Link>
+              </div>
             </div>
           </div>
+          <NavLink to="/how-it-works" onClick={closeAll}>How It Works</NavLink>
           <NavLink to="/pricing" onClick={closeAll}>Pricing</NavLink>
           <NavLink to="/resources" onClick={closeAll}>Resources</NavLink>
           <NavLink to="/about" onClick={closeAll}>About</NavLink>
           <NavLink to="/contact" onClick={closeAll}>Contact</NavLink>
           <div className="nav-actions">
-            <Link className="btn btn-ghost" to={user ? (user.role==='admin' ? '/admin' : '/dashboard') : '/login'} onClick={closeAll}>{user ? (user.role==='admin' ? 'Admin portal' : 'Dashboard') : 'Log in'}</Link>
-            <Link className="btn btn-primary" to="/start" onClick={closeAll}>Get started</Link>
+            <Link className="btn btn-ghost" to={user ? (user.role==='admin' ? '/admin' : '/dashboard') : '/login'} onClick={closeAll}>{user ? (user.role==='admin' ? 'Admin portal' : 'Dashboard') : 'Sign In'}</Link>
+            <Link className="btn btn-primary" to="/formation-details" onClick={closeAll}>Start My LLC</Link>
           </div>
         </nav>
       </div>

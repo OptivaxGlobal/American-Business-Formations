@@ -1,48 +1,49 @@
 import { useState } from 'react'
 import {
-  ArrowRight, BadgeCheck, Building2, Calculator, CheckCircle2, ChevronDown,
-  ChevronLeft, ChevronRight, FileCheck2, Phone, ShieldCheck, Sparkles, X
+  ArrowRight, CalendarClock, CheckCircle2, ChevronDown, FileCheck2,
+  Lock, Mail, MessageCircle, ReceiptText, ShieldCheck, Sparkles, TrendingUp, X
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import StateSelector from '../components/StateSelector'
+import BusinessNameStartForm from '../components/BusinessNameStartForm'
 import PricingCards from '../components/PricingCards'
+import PlatformPreview from '../components/PlatformPreview'
 import FAQ from '../components/FAQ'
 import Reveal from '../components/Reveal'
 import SEO from '../components/SEO'
-import { faqSchema } from '../data/seo'
+import { faqSchema, SUPPORT_EMAIL } from '../data/seo'
 import { serviceGroups } from '../data/services'
+import { loadTestimonials } from '../data/testimonials'
 
 const homeFaq = [
-  ['What do I need to start an LLC?', 'You will usually need a preferred business name, formation state, business address, ownership details, management structure, and registered-agent information.'],
-  ['Are state fees included in plan prices?', 'No. State filing fees are separate and vary by jurisdiction. The selected state is shown throughout the onboarding flow so pricing can be connected later.'],
-  ['Can a non-US resident use the website?', 'The intake experience can collect non-resident founder information. Final legal, tax, banking, and identification requirements depend on the selected services and providers.'],
-  ['Does the site include a client dashboard?', 'Yes. This project includes login, signup, onboarding, dashboard, order progress, document cards, reminders, and recommended next steps.'],
-  ['Is the frontend ready for Flask?', 'Yes. API calls are centralized in src/lib/api.js, Vite proxies /api to Flask in development, and a starter Flask server is included.']
+  ['What do I need to form an LLC?', 'Generally your preferred business name, a registered agent, a registered office address, management structure, and organizer information. Our guided questionnaire walks you through each requirement in plain language.'],
+  ['Is the state filing fee included in your plan prices?', 'No. The Texas state filing fee is always shown separately from our service fee, both during onboarding and at checkout, so you know exactly what goes to the state.'],
+  ['How do I know my business name is available?', 'We run a preliminary name review during onboarding, but final availability is determined only by the Texas Secretary of State when your Certificate of Formation is filed. We never guarantee a name is available.'],
+  ['Which states do you support?', 'LLC formation is currently available in Texas only, with the architecture in place to support more states as we grow.'],
+  ['Does the platform include a client dashboard?', 'Yes. Every account includes a dashboard with formation status, documents, compliance reminders, service management, and support messaging.']
 ]
 
-const testimonials = [
-  ['“The process finally felt organized. I knew what information was missing and what was happening next.”', 'Maya R.', 'Creative studio owner'],
-  ['“I liked having formation, documents, and reminders in one dashboard instead of juggling notes and emails.”', 'Marcus T.', 'Home services founder'],
-  ['“The guided questions made it much easier to prepare everything before speaking with the filing team.”', 'Elena P.', 'Online retail founder']
+const featureCards = [
+  { icon: FileCheck2, title: 'Guided Formation', body: 'A clear, step-by-step questionnaire instead of a blank government form.' },
+  { icon: ShieldCheck, title: 'Secure Document Access', body: 'Your formation records, agreements, and receipts in one protected place.' },
+  { icon: Sparkles, title: 'Registered Agent Options', body: 'Use our registered agent service or appoint your own eligible agent.' },
+  { icon: ReceiptText, title: 'Clear Fee Breakdown', body: 'Your service fee and the government filing fee, always itemized separately.' },
+  { icon: TrendingUp, title: 'Progress Tracking', body: 'Follow your filing from submission through approval, in real time.' },
+  { icon: CalendarClock, title: 'Compliance Reminders', body: 'Never miss a filing, renewal, or reporting deadline again.' }
 ]
-
-const categoryIcons = [Building2, Calculator, Sparkles]
 
 function CategoryAccordion() {
   const [open, setOpen] = useState(0)
   return (
     <div className="category-accordion">
       {serviceGroups.map((group, index) => {
-        const Icon = categoryIcons[index % categoryIcons.length]
         const isOpen = open === index
         return (
           <Reveal as="article" delay={index} className={`category-row ${isOpen ? 'open' : ''}`} key={group.title}>
             <button onClick={() => setOpen(isOpen ? -1 : index)} aria-expanded={isOpen}>
-              <span className="category-row-label"><Icon size={20} /> {group.title}</span>
-              {isOpen ? <ChevronDown className="rot" /> : <ChevronDown />}
+              <span className="category-row-label">{group.title}</span>
+              <ChevronDown />
             </button>
             <div className="category-row-body">
-              <p>Explore every {group.title.toLowerCase()} tool in one guided workspace.</p>
               <div className="category-tag-row">
                 {group.items.map(([slug, label]) => <Link key={slug} to={`/${slug}`}>{label}</Link>)}
               </div>
@@ -54,154 +55,129 @@ function CategoryAccordion() {
   )
 }
 
-function TestimonialCarousel() {
-  const [index, setIndex] = useState(0)
-  const [quote, name, role] = testimonials[index]
-  const go = dir => setIndex((index + dir + testimonials.length) % testimonials.length)
-  return (
-    <Reveal as="div" className="testimonial-carousel">
-      <article>
-        <div className="stars">★★★★★</div>
-        <p>{quote}</p>
-        <div className="person"><div>{name[0]}</div><span><strong>{name}</strong><small>{role}</small></span></div>
-      </article>
-      <div className="carousel-controls">
-        <button onClick={() => go(-1)} aria-label="Previous story"><ChevronLeft /></button>
-        <div className="carousel-dots">{testimonials.map((_, i) => <i key={i} className={i === index ? 'active' : ''} />)}</div>
-        <button onClick={() => go(1)} aria-label="Next story"><ChevronRight /></button>
-      </div>
-    </Reveal>
-  )
-}
-
 export default function Home() {
+  const reviews = loadTestimonials().filter(r => !r.placeholder)
+
   return <>
     <SEO
-      title="Start and Manage Your U.S. Business"
-      description="American Business Formations — guided LLC formation, compliance, and business services."
+      title="LLC Formation Made Simple"
+      description="American Business Formations helps you form your LLC and manage compliance through one guided platform. Currently available for Texas LLC formations."
       path="/"
       jsonLd={faqSchema(homeFaq)}
     />
-    <section className="hero home-hero">
-      <div className="container hero-grid-3">
-        <img className="hero-side-art left" src="/illustrations/hero-business.svg" alt="" aria-hidden="true" />
-        <Reveal as="div" className="hero-copy">
-          <div className="eyebrow"><Sparkles size={16}/> Built for first-time founders</div>
-          <h1>Great businesses <span>start here.</span></h1>
-          <p>Form your LLC, organize compliance, and access practical business tools through one guided platform built for American entrepreneurs.</p>
-          <StateSelector />
+
+    {/* Hero */}
+    <section className="hero home-hero home-hero-split">
+      <div className="container hero-grid">
+        <Reveal as="div" className="hero-copy hero-copy-left">
+          <div className="eyebrow"><Sparkles size={16}/> Business formation made simple</div>
+          <h1>Make Your Business <span>Official.</span></h1>
+          <p>Form your LLC through a clear, guided process and manage your important formation documents from one secure platform.</p>
+          <BusinessNameStartForm source="homepage_hero" buttonText="Start My LLC" />
+          <div className="hero-secondary-row">
+            <div className="state-lock-badge"><Lock size={14}/> Texas</div>
+            <Link to="/how-it-works" className="text-link">See How It Works <ArrowRight size={16}/></Link>
+          </div>
+          <p className="hero-availability-note">Currently available for Texas LLC formations.</p>
+          <div className="trust-row"><ShieldCheck size={16}/> <span>Secure checkout · Guided application · Status tracking · Real support</span></div>
         </Reveal>
-        <img className="hero-side-art right" src="/illustrations/registered-agent.svg" alt="" aria-hidden="true" />
-      </div>
-      <Reveal as="div" delay={2} className="container hero-badge-row">
-        <span><BadgeCheck size={16}/> Guided, plain-language setup</span>
-        <span><FileCheck2 size={16}/> Documents organized for you</span>
-        <span><ShieldCheck size={16}/> Compliance reminders built in</span>
-      </Reveal>
-    </section>
-
-    <section className="logo-strip"><div className="container"><span>Designed to support modern founders</span><div><b>STARTUP DAILY</b><b>FOUNDER LAB</b><b>SMALL BIZ NETWORK</b><b>VENTURE DESK</b><b>COMMERCE WEEKLY</b></div></div></section>
-
-    <section className="section intro-section">
-      <div className="container split-grid">
-        <Reveal as="div" delay={0} className="image-panel"><img src="/illustrations/dashboard-preview.svg" alt="American Business Formations client dashboard preview"/></Reveal>
-        <Reveal as="div" delay={1} className="content-panel">
-          <div className="section-heading"><span>Built for your first time</span><h2>Built to make the first steps feel manageable</h2></div>
-          <p>Business formation involves choices, paperwork, and deadlines. Our experience breaks the work into clear stages, keeps important information organized, and gives founders a practical next action.</p>
-          <ul className="check-list"><li><CheckCircle2/> Guided forms that save progress</li><li><CheckCircle2/> A dashboard for milestones and documents</li><li><CheckCircle2/> Services that grow with the business</li></ul>
-          <Link className="text-link" to="/about">Why American Business Formations <ArrowRight/></Link>
+        <Reveal as="div" delay={1} className="hero-visual">
+          <PlatformPreview/>
         </Reveal>
       </div>
     </section>
 
-    <section className="section ai-section">
-      <div className="container split-grid reverse-mobile">
-        <Reveal as="div" delay={0} className="content-panel">
-          <div className="eyebrow"><Sparkles size={16}/> ABF Guide</div>
-          <h2>Your AI sidekick for every step</h2>
-          <p>The included interface features an on-site guide, task recommendations, dashboard reminders, and a Flask-ready structure for adding real AI or support integrations later.</p>
-          <div className="feature-pills"><span>Formation questions</span><span>Deadline guidance</span><span>Service discovery</span><span>Dashboard help</span></div>
-          <Link className="btn btn-primary" to="/start">Try the guided flow</Link>
-        </Reveal>
-        <Reveal as="div" delay={1} className="assistant-demo">
-          <div className="assistant-top"><div className="assistant-avatar">A</div><div><strong>ABF Guide</strong><small>Business setup assistant</small></div><span>Online</span></div>
-          <div className="demo-message user-message">What should I prepare before starting an LLC?</div>
-          <div className="demo-message bot-message">Start with your preferred name, state, business address, ownership details, and registered-agent plan. I’ll keep the process organized.</div>
-          <div className="demo-options"><button>Choose my state</button><button>Compare plans</button><button>See required details</button></div>
-        </Reveal>
-      </div>
-    </section>
-
-    <section className="section process-section-light">
-      <div className="container">
-        <div className="section-heading centered"><span>A simpler path</span><h2>Make it official in minutes</h2></div>
-        <div className="process-grid-light">
-          <Reveal as="article" delay={0}><div className="step-number-light">01</div><h3>Tell us about the business</h3><p>Choose your state, enter a preferred name, and answer a focused set of questions.</p></Reveal>
-          <Reveal as="article" delay={1}><div className="step-number-light">02</div><h3>Review your formation plan</h3><p>See selected services, package details, state fee placeholders, and information still needed.</p></Reveal>
-          <Reveal as="article" delay={2}><div className="step-number-light">03</div><h3>Track every milestone</h3><p>Use the dashboard for progress, documents, reminders, requests, and recommended next steps.</p></Reveal>
-        </div>
-        <div className="center-action"><Link className="btn btn-primary" to="/start">Launch my business <ArrowRight size={18}/></Link></div>
-      </div>
-    </section>
-
+    {/* Feature cards */}
     <section className="section soft-section">
       <div className="container">
-        <div className="section-heading centered"><span>Business formation & support</span><h2>Start, protect, operate, and grow</h2><p>Choose the category you need now and add more tools as your business develops.</p></div>
+        <div className="section-heading centered"><span>Why founders choose us</span><h2>A platform built around what matters</h2></div>
+        <div className="values-grid values-grid-6">
+          {featureCards.map(({ icon: Icon, title, body }, i) => (
+            <Reveal as="article" delay={i % 6} key={title}><Icon/><h3>{title}</h3><p>{body}</p></Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* Simple process */}
+    <section className="section process-section-light">
+      <div className="container">
+        <div className="section-heading centered"><span>A simpler path</span><h2>Four steps to a filed LLC</h2></div>
+        <div className="process-grid-light">
+          <Reveal as="article" delay={0}><div className="step-number-light">01</div><h3>Tell us about your business</h3><p>Enter your proposed name and answer a focused set of questions.</p></Reveal>
+          <Reveal as="article" delay={1}><div className="step-number-light">02</div><h3>Select your formation services</h3><p>Choose a package and any add-ons registered agent, EIN assistance, operating agreement, and more.</p></Reveal>
+          <Reveal as="article" delay={2}><div className="step-number-light">03</div><h3>Review and submit your order</h3><p>See your service fee, the state filing fee, and any add-ons broken out clearly before you pay.</p></Reveal>
+          <Reveal as="article" delay={3}><div className="step-number-light">04</div><h3>Track everything from your dashboard</h3><p>Follow your Certificate of Formation from submission through approval.</p></Reveal>
+        </div>
+        <div className="center-action"><Link className="btn btn-primary" to="/formation-details">Start My LLC <ArrowRight size={18}/></Link></div>
+      </div>
+    </section>
+
+    {/* Service categories */}
+    <section className="section">
+      <div className="container">
+        <div className="section-heading centered"><span>Formation & support</span><h2>Everything you need, organized in one place</h2><p>Start with formation, then stay on top of what comes next.</p></div>
         <CategoryAccordion />
         <div className="center-action"><Link className="btn btn-outline" to="/services">View all services <ArrowRight size={18}/></Link></div>
       </div>
     </section>
 
-    <section className="section testimonials-section">
-      <div className="container">
-        <div className="section-heading centered"><span>Founder stories</span><h2>Confidence from the very first step</h2></div>
-        <TestimonialCarousel />
-      </div>
-    </section>
-
+    {/* Comparison */}
     <section className="section compare-section">
       <div className="container">
-        <div className="section-heading centered"><span>Why go guided</span><h2>Independence doesn't mean doing it alone</h2></div>
+        <div className="section-heading centered"><span>Why go guided</span><h2>Filing on your own is possible this makes it easier</h2></div>
         <div className="compare-grid">
           <Reveal as="div" delay={0} className="compare-card highlight">
             <h3>With American Business Formations</h3>
             <ul className="check-list">
-              <li><CheckCircle2/> We prepare and file your paperwork</li>
-              <li><CheckCircle2/> Every requirement organized and tracked</li>
-              <li><CheckCircle2/> Deadlines and renewals handled for you</li>
-              <li><CheckCircle2/> Step-by-step guidance built for beginners</li>
+              <li><CheckCircle2/> A guided questionnaire built for state requirements</li>
+              <li><CheckCircle2/> Registered agent, EIN, and compliance reminders in one place</li>
+              <li><CheckCircle2/> One dashboard for status, documents, and support</li>
+              <li><CheckCircle2/> Transparent, itemized pricing</li>
             </ul>
-            <Link className="btn btn-primary" to="/start">Get started</Link>
+            <Link className="btn btn-primary" to="/formation-details">Get started</Link>
           </Reveal>
           <Reveal as="div" delay={1} className="compare-card">
-            <h3>On your own</h3>
+            <h3>Filing directly with the state</h3>
             <ul className="check-list muted-list">
-              <li><X/> Research requirements and file by yourself</li>
-              <li><X/> Track deadlines and forms manually</li>
-              <li><X/> Juggle between agencies and paperwork</li>
-              <li><X/> Figure it out through trial and error</li>
+              <li><X/> Navigate government forms and terminology yourself</li>
+              <li><X/> Track renewal and tax deadlines manually</li>
+              <li><X/> Coordinate registered agent, EIN, and banking separately</li>
+              <li><X/> No guided dashboard for status or documents</li>
             </ul>
           </Reveal>
         </div>
       </div>
     </section>
 
+    {/* Pricing preview */}
     <section className="section pricing-section">
-      <div className="container"><div className="section-heading centered"><span>Flexible plans</span><h2>Choose the plan that fits your path</h2><p>Sample service pricing is ready to connect to your own checkout and backend rules.</p></div><PricingCards/></div>
+      <div className="container"><div className="section-heading centered"><span>Flexible plans</span><h2>Choose the plan that fits your business</h2><p>Prices shown are our service fee. The state filing fee is always itemized separately.</p></div><PricingCards/></div>
     </section>
 
+    {/* Testimonials */}
+    <section className="section testimonials-section">
+      <div className="container">
+        <div className="section-heading centered"><span>Founder stories</span><h2>What our customers say</h2></div>
+        {reviews.length > 0
+          ? <Reveal as="div" className="testimonial-carousel"><article><p>&ldquo;{reviews[0].quote}&rdquo;</p><div className="person"><div>{reviews[0].name?.[0]}</div><span><strong>{reviews[0].name}</strong><small>{reviews[0].role}</small></span></div></article></Reveal>
+          : <div className="alert-banner info" style={{ maxWidth: 640, margin: '0 auto' }}><MessageCircle size={20}/><p style={{ margin: 0 }}>We don&rsquo;t publish reviews until we can verify they&rsquo;re from real customers so this section is honestly empty for now. Read <Link to="/about">how we work</Link> instead.</p></div>}
+      </div>
+    </section>
+
+    {/* Help / support */}
     <section className="section help-section">
       <div className="container help-grid">
         <Reveal as="div" delay={0} className="help-copy">
-          <div className="section-heading"><span>We're here to help</span><h2>Figuring it out on your own can be exhausting</h2><p>Good thing you don't have to. Click the chat button below, or give us a call at <a href="tel:+13075550184">+1 (307) 555-0184</a>.</p></div>
+          <div className="section-heading"><span>We&rsquo;re here to help</span><h2>Questions about forming your LLC?</h2><p>Reach our support team by email, or use the chat button in the corner of your screen.</p></div>
           <Link className="btn btn-primary" to="/contact">Talk to our team <ArrowRight size={18}/></Link>
         </Reveal>
         <Reveal as="div" delay={1} className="help-visual">
           <div className="help-phone-card">
-            <Phone size={20}/>
+            <Mail size={20}/>
             <span>American Business Formations</span>
-            <strong>00:06</strong>
-            <small>Don't worry, we'll take care of it</small>
+            <strong style={{fontSize:'1.1rem'}}>{SUPPORT_EMAIL}</strong>
+            <small>We respond during business hours</small>
           </div>
         </Reveal>
       </div>
@@ -211,8 +187,8 @@ export default function Home() {
       <FAQ items={homeFaq} searchable dark />
       <div className="closing-cta">
         <Reveal as="div" className="container closing-cta-inner">
-          <div><span>Every plan comes with support built in</span><h2>Turn your "someday" goal into today's success.</h2></div>
-          <StateSelector compact title="Select your formation state" />
+          <div><span>Every plan includes support and status tracking</span><h2>Turn your business idea into a filed LLC.</h2></div>
+          <BusinessNameStartForm source="homepage_closing_cta" compact buttonText="Start My LLC" />
         </Reveal>
       </div>
     </div>

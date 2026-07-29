@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext'
 import { useBusiness } from '../../context/BusinessContext'
 import { sampleApplications, applicationStatuses } from '../../data/adminDemoData'
 import { logAudit } from '../../lib/auditLog'
+import { validateRequiredSelect } from '../../validations/commonValidation'
 
 export default function AdminApplications(){
   const { user, notify } = useApp()
@@ -10,11 +11,13 @@ export default function AdminApplications(){
   const [sampleStatuses, setSampleStatuses] = useState(() => Object.fromEntries(sampleApplications.map(a=>[a.id,a.status])))
 
   const changeReal = (id, status) => {
+    if (!validateRequiredSelect(status, applicationStatuses).valid) return
     updateBusiness(id, { status })
     logAudit(user?.email||'admin', 'Updated application status', `${id} -> ${status}`)
     notify('Application status updated.')
   }
   const changeSample = (id, status) => {
+    if (!validateRequiredSelect(status, applicationStatuses).valid) return
     setSampleStatuses(prev => ({ ...prev, [id]: status }))
     logAudit(user?.email||'admin', 'Updated application status (sample)', `${id} -> ${status}`)
   }

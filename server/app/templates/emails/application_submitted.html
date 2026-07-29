@@ -1,0 +1,6 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<p style="font-size:15px;line-height:1.6;">We received your Texas LLC formation application for <strong>{{ business_name }}</strong>.</p>
+<p style="font-size:15px;line-height:1.6;">Our team will review your information before it's submitted to the Texas Secretary of State. You can track every stage from your dashboard we'll never mark a filing as approved until the state confirms it.</p>
+<p><a href="{{ dashboard_url }}" style="display:inline-block;background:#2657d9;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:bold;">View my dashboard</a></p>
+{% endblock %}
