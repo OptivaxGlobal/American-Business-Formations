@@ -23,10 +23,11 @@ export default function AdminShell(){
   if (user.role !== 'admin') return <Navigate to="/dashboard" replace />
 
   return <><SEO title={`${labels[location.pathname]||'Admin'} Admin Portal`} description="American Business Formations operations portal." path={location.pathname} noindex />
+    <a href="#admin-main" className="skip-link">Skip to main content</a>
     <div className="admin-shell">
       <aside className={`admin-sidebar ${mobile?'is-open':''}`}>
-        <div className="admin-logo-row"><NavLink to="/admin" className="admin-logo"><img src="/logo.webp" alt="American Business Formations" className="brand-mini-light"/><strong>Operations<br/>Portal</strong></NavLink><button className="admin-close" onClick={()=>setMobile(false)} aria-label="Close navigation"><X/></button></div>
-        <nav className="admin-nav">
+        <div className="admin-logo-row"><NavLink to="/admin" className="admin-logo"><img src="/logo.webp" alt="American Business Formations" className="brand-mini-light" width="1500" height="486"/><strong>Operations<br/>Portal</strong></NavLink><button className="admin-close" onClick={()=>setMobile(false)} aria-label="Close navigation"><X/></button></div>
+        <nav className="admin-nav" aria-label="Primary">
           <NavLink end to="/admin" onClick={()=>setMobile(false)}><LayoutGrid/><span>Overview</span></NavLink>
           <NavLink to="/admin/leads" onClick={()=>setMobile(false)}><Megaphone/><span>Leads</span></NavLink>
           <NavLink to="/admin/applications" onClick={()=>setMobile(false)}><ClipboardList/><span>Applications</span></NavLink>
@@ -45,7 +46,7 @@ export default function AdminShell(){
         </div>
       </aside>
       {mobile && <button aria-label="Close navigation" className="admin-overlay" onClick={()=>setMobile(false)}/>}
-      <main className="admin-main">
+      <main className="admin-main" id="admin-main" tabIndex={-1}>
         <header className="admin-topbar">
           <button className="admin-menu-btn" onClick={()=>setMobile(true)} aria-label="Open navigation"><Menu/></button>
           <div className="admin-breadcrumb"><ShieldAlert size={17}/><span>{labels[location.pathname]||'Admin'}</span></div>

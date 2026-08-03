@@ -3,11 +3,15 @@ import { Link } from 'react-router-dom'
 import Reveal from './Reveal'
 import { serviceGroups, services } from '../data/services'
 
-export default function ServiceGrid({ limit }) {
-  const all = serviceGroups.flatMap(group => group.items)
+export default function ServiceGrid({ limit, group }) {
+  const groups = group ? serviceGroups.filter(g => g.title === group) : serviceGroups
+  const all = groups.flatMap(g => g.items)
   const items = typeof limit === 'number' ? all.slice(0, limit) : all
+  // Keeps a partial row (e.g. a 4- or 2-item group) from leaving a large
+  // empty column on the right instead of rendering a fixed 3-column grid.
+  const countClass = [1, 2, 3, 4].includes(items.length) ? ` service-grid--${items.length}` : ''
   return (
-    <div className="service-grid">
+    <div className={`service-grid${countClass}`}>
       {items.map(([slug, label], i) => {
         const item = services[slug]
         const Icon = item.icon

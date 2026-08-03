@@ -1,6 +1,8 @@
 import { FileText } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { useOrders } from '../../context/OrdersContext'
 import { useBusiness } from '../../context/BusinessContext'
+import EmptyState from '../../components/ui/EmptyState'
 
 export default function Orders(){
   const { orders } = useOrders()
@@ -9,7 +11,7 @@ export default function Orders(){
 
   return <div className="dash-card">
     <div className="dash-card-head"><div><span>Orders</span><h3>Order history</h3></div></div>
-    {orders.length===0 && <p className="dash-empty">No orders yet. Orders appear here after you complete the formation checkout.</p>}
+    {orders.length===0 && <EmptyState icon={FileText}>No orders yet. Orders appear here after you complete the formation checkout. <Link to="/start">Start a business</Link>.</EmptyState>}
     <div className="document-list">
       {orders.slice().reverse().map(order => <div key={order.id}>
         <div className="doc-icon"><FileText/></div>

@@ -20,6 +20,16 @@ async function request(path, options = {}) {
   } catch {
     throw new ApiError('We could not reach the server. Please try again.', { isNetworkError: true })
   }
+
+  // A hosting/CDN rewrite (or a misconfigured VITE_API_URL) can make a
+  // "successful" 200 response come back as the SPA's own index.html
+  // instead of real API JSON. Treat that exactly like an unreachable
+  // backend rather than trusting an empty/garbage body as real data.
+  const contentType = response.headers.get('content-type') || ''
+  if (!contentType.includes('application/json')) {
+    throw new ApiError('We could not reach the server. Please try again.', { isNetworkError: true })
+  }
+
   const data = await response.json().catch(() => ({}))
   if (!response.ok) {
     throw new ApiError(data.message || 'Request failed', { status: response.status, fieldErrors: data.field_errors || {} })

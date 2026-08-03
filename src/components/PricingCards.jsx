@@ -4,11 +4,44 @@ import Reveal from './Reveal'
 
 // Prices below are service-fee-only placeholders pending owner confirmation.
 // The state filing fee is never included in these numbers and is always
-// itemized separately during onboarding and at checkout.
+// itemized separately during onboarding and at checkout. Feature entries can
+// be a plain string or a { text, to } object the { to } ones render as an
+// internal link to the service page that actually delivers that feature.
 export const defaultPlans = [
-  { name: 'Foundation', theme: 'launch', price: '$0', note: 'service fee + state filing fee', description: 'A straightforward formation starting point.', features: ['LLC formation intake', 'Standard processing queue', 'Digital document center', 'Formation checklist'], missing: ['Compliance reminders', 'Operating agreement', 'Registered agent service'] },
-  { name: 'Accelerated', theme: 'essential', price: '$199', note: 'per year + state filing fee', popular: true, description: 'Formation plus core compliance support.', features: ['Everything in Foundation', 'Priority processing queue', 'Operating agreement request', 'Compliance reminders', 'Registered agent (1 year)'], missing: ['DBA / assumed name filing'] },
-  { name: 'Complete', theme: 'growth', price: '$249', note: 'per year + state filing fee', description: 'Our most complete formation and compliance package.', features: ['Everything in Accelerated', 'DBA / assumed name filing', 'EIN assistance included', 'Formation documents vault', 'Priority support'], missing: [] }
+  {
+    name: 'Foundation', theme: 'launch', price: '$150', note: 'one-time service fee + state filing fee',
+    description: 'A straightforward formation starting point.',
+    features: [
+      'Guided LLC formation questionnaire',
+      { text: 'Certificate of Formation preparation and filing', to: '/business-formation-filings' },
+      'Formation status tracking in your dashboard',
+      'Digital document center'
+    ],
+    missing: ['Registered agent service', 'Compliance reminders', 'EIN filing assistance']
+  },
+  {
+    name: 'Accelerated', theme: 'essential', price: '$200', note: 'one-time service fee + state filing fee', popular: true,
+    description: 'Formation plus the registered agent and compliance support most new LLCs need.',
+    features: [
+      'Everything in Foundation',
+      { text: 'One year of registered agent service included', to: '/registered-agent' },
+      { text: 'Compliance deadline reminders', to: '/texas-compliance' },
+      { text: 'Operating agreement draft', to: '/operating-agreement' }
+    ],
+    missing: ['EIN filing assistance', 'DBA / assumed name filing']
+  },
+  {
+    name: 'Complete', theme: 'growth', price: '$250', note: 'one-time service fee + state filing fee',
+    description: 'Our most complete package, covering formation, compliance, and your federal tax ID.',
+    features: [
+      'Everything in Accelerated',
+      { text: 'Domestic EIN filing included', to: '/ein' },
+      { text: 'DBA / assumed name filing', to: '/texas-dba' },
+      { text: 'Formation documents vault', to: '/formation-kit' },
+      'Priority support'
+    ],
+    missing: []
+  }
 ]
 
 // Admin-editable override, saved from /admin/plans. Falls back to the
@@ -35,7 +68,11 @@ export default function PricingCards() {
       <div className="price-card-body">
         <p>{plan.description}</p>
         <Link className={`btn ${plan.popular ? 'btn-primary' : 'btn-outline'} btn-block`} to="/start">Choose {plan.name}</Link>
-        <ul>{plan.features.map(item => <li key={item}><Check size={18}/>{item}</li>)}{plan.missing.map(item => <li className="muted" key={item}><Minus size={18}/>{item}</li>)}</ul>
+        <ul>{plan.features.map(item => {
+          const text = typeof item === 'string' ? item : item.text
+          const to = typeof item === 'string' ? null : item.to
+          return <li key={text}><Check size={18}/>{to ? <Link to={to}>{text}</Link> : text}</li>
+        })}{plan.missing.map(item => <li className="muted" key={item}><Minus size={18}/>{item}</li>)}</ul>
       </div>
     </Reveal>
   ))}</div>

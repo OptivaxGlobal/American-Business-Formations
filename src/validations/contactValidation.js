@@ -81,6 +81,23 @@ export function formatPhone(value) {
   return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
 }
 
+// E.164 shape: a leading '+', then 8-15 digits total (country code + national
+// number), no spaces/punctuation once normalized. Not wired into any wizard
+// step today no international-founder flow exists to call it from but kept
+// alongside validatePhone so a future international intake path has a
+// ready-made validator rather than inventing one under time pressure.
+const E164_RE = /^\+[1-9]\d{7,14}$/
+
+export function validateInternationalPhone(value, { required = true } = {}) {
+  const raw = String(value ?? '').trim()
+  if (!raw) return required ? invalid(MESSAGES.phoneRequired) : valid({ normalized: '' })
+  if (/[a-zA-Z]/.test(raw)) return invalid(MESSAGES.internationalPhoneInvalid)
+  if (!raw.startsWith('+')) return invalid(MESSAGES.internationalPhoneInvalid)
+  const normalized = '+' + digitsOnly(raw)
+  if (!E164_RE.test(normalized)) return invalid(MESSAGES.internationalPhoneInvalid)
+  return valid({ normalized })
+}
+
 export function validatePreferredContactMethod(value, allowedMethods) {
   if (!value || !allowedMethods.includes(value)) return invalid(MESSAGES.contactMethodRequired)
   return valid()

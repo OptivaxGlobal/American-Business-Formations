@@ -4,6 +4,7 @@ import { useBusiness } from '../../context/BusinessContext'
 import { sampleApplications, applicationStatuses } from '../../data/adminDemoData'
 import { logAudit } from '../../lib/auditLog'
 import { validateRequiredSelect } from '../../validations/commonValidation'
+import { Table } from '../../components/ui'
 
 export default function AdminApplications(){
   const { user, notify } = useApp()
@@ -24,7 +25,7 @@ export default function AdminApplications(){
 
   return <div className="dash-card">
     <div className="admin-toolbar"><h3>All applications</h3><span className="admin-badge">{businesses.length} real in this browser + {sampleApplications.length} sample</span></div>
-    <div style={{overflowX:'auto'}}><table className="admin-table">
+    <Table>
       <thead><tr><th>Business</th><th>State</th><th>Entity type</th><th>Created</th><th>Status</th></tr></thead>
       <tbody>
         {businesses.map(b => <tr key={b.id}>
@@ -36,6 +37,6 @@ export default function AdminApplications(){
           <td><select value={sampleStatuses[a.id]} onChange={e=>changeSample(a.id, e.target.value)}>{applicationStatuses.map(s=><option key={s} value={s}>{s}</option>)}</select></td>
         </tr>)}
       </tbody>
-    </table></div>
+    </Table>
   </div>
 }

@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import { useApp } from '../../context/AppContext'
 import { validateText } from '../../validations/commonValidation'
 import { fieldAria, focusFirstInvalid } from '../../lib/formErrors'
+import EmptyState from '../../components/ui/EmptyState'
 
 function load(){ try { return JSON.parse(localStorage.getItem('abf-tickets'))||[] } catch { return [] } }
 
@@ -46,7 +47,7 @@ export default function Support(){
   return <div className="dash-grid">
     <div className="dash-card">
       <div className="dash-card-head"><div><span>Support</span><h3>Your tickets</h3></div></div>
-      {tickets.length===0 && <p className="dash-empty">No support tickets yet.</p>}
+      {tickets.length===0 && <EmptyState icon={MessageSquare}>No support tickets yet. Use the form to submit one.</EmptyState>}
       <div className="document-list">
         {tickets.map(t => <div key={t.id}><div className="doc-icon"><MessageSquare/></div><span><strong>{t.subject}</strong><small>{t.priority} priority • {t.status} • {new Date(t.createdAt).toLocaleDateString()}</small></span></div>)}
       </div>

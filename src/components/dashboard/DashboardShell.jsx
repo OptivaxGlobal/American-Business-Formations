@@ -22,10 +22,11 @@ export default function DashboardShell(){
   const title = location.pathname.startsWith('/dashboard/businesses/') ? 'Business details' : (labels[location.pathname]||'Dashboard')
 
   return <><SEO title={title==='Dashboard'?'Dashboard':`${title} Dashboard`} description="Your American Business Formations client dashboard." path={location.pathname} noindex />
+    <a href="#dashboard-main" className="skip-link">Skip to main content</a>
     <section className="dashboard-page">
       <aside className={mobile?'open':''}>
-        <div className="dash-brand"><img src="/logo.webp" alt="American Business Formations" className="brand-mini-light"/><button onClick={()=>setMobile(false)} aria-label="Close navigation"><X/></button></div>
-        <nav>
+        <div className="dash-brand"><img src="/logo.webp" alt="American Business Formations" className="brand-mini-light" width="1500" height="486"/><button onClick={()=>setMobile(false)} aria-label="Close navigation"><X/></button></div>
+        <nav aria-label="Primary">
           <NavLink end to="/dashboard" onClick={()=>setMobile(false)}><LayoutDashboard/>Overview</NavLink>
           <NavLink to="/dashboard/businesses" onClick={()=>setMobile(false)}><FolderOpen/>My businesses</NavLink>
           <NavLink to="/dashboard/orders" onClick={()=>setMobile(false)}><FileText/>Orders & services</NavLink>
@@ -35,12 +36,12 @@ export default function DashboardShell(){
           <NavLink to="/dashboard/guide" onClick={()=>setMobile(false)}><Sparkles/>ABF Business Guide</NavLink>
         </nav>
         <div className="dash-help"><CircleHelp/><strong>Need help?</strong><p>Contact the support team or open the on-site guide.</p><Link to="/dashboard/support">Get support</Link></div>
-        <nav className="dash-bottom">
+        <nav className="dash-bottom" aria-label="Account">
           <NavLink to="/dashboard/settings" onClick={()=>setMobile(false)}><Settings/>Settings</NavLink>
           <button onClick={logout}><LogOut/>Log out</button>
         </nav>
       </aside>
-      <main>
+      <main id="dashboard-main" tabIndex={-1}>
         <header>
           <button className="dash-mobile-menu" onClick={()=>setMobile(true)} aria-label="Open navigation"><Menu/></button>
           <div><span>{selectedBusiness?.name || 'Client dashboard'}</span><h1>{title}</h1></div>

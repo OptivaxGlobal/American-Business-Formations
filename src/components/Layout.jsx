@@ -1,9 +1,10 @@
 import { Outlet, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import Header from './Header'
 import Footer from './Footer'
-import ChatWidget from './ChatWidget'
 import { organizationSchema } from '../data/seo'
+
+const ChatWidget = lazy(() => import('./ChatWidget'))
 
 export default function Layout() {
   const location = useLocation()
@@ -15,5 +16,9 @@ export default function Layout() {
     document.head.appendChild(script)
     return () => script.remove()
   }, [])
-  return <><Header/><main><Outlet/></main><Footer/><ChatWidget/></>
+  return <>
+    <a href="#main-content" className="skip-link">Skip to main content</a>
+    <Header/><main id="main-content" tabIndex={-1}><Outlet/></main><Footer/>
+    <Suspense fallback={null}><ChatWidget/></Suspense>
+  </>
 }

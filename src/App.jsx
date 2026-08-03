@@ -1,53 +1,56 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
-import Home from './pages/Home'
-import ServicePage from './pages/ServicePage'
-import Services from './pages/Services'
-import Pricing from './pages/Pricing'
-import About from './pages/About'
-import Reviews from './pages/Reviews'
-import Resources from './pages/Resources'
-import BlogPost from './pages/BlogPost'
-import Contact from './pages/Contact'
-import HowItWorks from './pages/HowItWorks'
-import Help from './pages/Help'
-import FAQPage from './pages/FAQPage'
-import Login from './pages/Login'
-import Signup from './pages/Signup'
-import VerifyEmail from './pages/VerifyEmail'
-import ForgotPassword from './pages/ForgotPassword'
-import ResetPassword from './pages/ResetPassword'
-import TwoFactor from './pages/TwoFactor'
-import Onboarding from './pages/Onboarding'
-import DashboardShell from './components/dashboard/DashboardShell'
-import DashboardHome from './pages/dashboard/DashboardHome'
-import Businesses from './pages/dashboard/Businesses'
-import BusinessDetail from './pages/dashboard/BusinessDetail'
-import Orders from './pages/dashboard/Orders'
-import Billing from './pages/dashboard/Billing'
-import Support from './pages/dashboard/Support'
-import Notifications from './pages/dashboard/Notifications'
-import Settings from './pages/dashboard/Settings'
-import Guide from './pages/dashboard/Guide'
-import AdminShell from './components/admin/AdminShell'
-import AdminOverview from './pages/admin/AdminOverview'
-import AdminApplications from './pages/admin/AdminApplications'
-import AdminCustomers from './pages/admin/AdminCustomers'
-import AdminOrders from './pages/admin/AdminOrders'
-import AdminLeads from './pages/admin/AdminLeads'
-import AdminSettings from './pages/admin/AdminSettings'
-import AdminPlans from './pages/admin/AdminPlans'
-import AdminSupport from './pages/admin/AdminSupport'
-import AdminContent from './pages/admin/AdminContent'
-import AdminAuditLog from './pages/admin/AdminAuditLog'
-import LegalPage from './pages/LegalPage'
-import NotFound from './pages/NotFound'
-import ServerError from './pages/ServerError'
+import RouteFallback from './components/RouteFallback'
 import { services } from './data/services'
 
+const Home = lazy(() => import('./pages/Home'))
+const ServicePage = lazy(() => import('./pages/ServicePage'))
+const Services = lazy(() => import('./pages/Services'))
+const Pricing = lazy(() => import('./pages/Pricing'))
+const About = lazy(() => import('./pages/About'))
+const Reviews = lazy(() => import('./pages/Reviews'))
+const Resources = lazy(() => import('./pages/Resources'))
+const BlogPost = lazy(() => import('./pages/BlogPost'))
+const Contact = lazy(() => import('./pages/Contact'))
+const HowItWorks = lazy(() => import('./pages/HowItWorks'))
+const Help = lazy(() => import('./pages/Help'))
+const FAQPage = lazy(() => import('./pages/FAQPage'))
+const Login = lazy(() => import('./pages/Login'))
+const Signup = lazy(() => import('./pages/Signup'))
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
+const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const TwoFactor = lazy(() => import('./pages/TwoFactor'))
+const Onboarding = lazy(() => import('./pages/Onboarding'))
+const DashboardShell = lazy(() => import('./components/dashboard/DashboardShell'))
+const DashboardHome = lazy(() => import('./pages/dashboard/DashboardHome'))
+const Businesses = lazy(() => import('./pages/dashboard/Businesses'))
+const BusinessDetail = lazy(() => import('./pages/dashboard/BusinessDetail'))
+const Orders = lazy(() => import('./pages/dashboard/Orders'))
+const Billing = lazy(() => import('./pages/dashboard/Billing'))
+const Support = lazy(() => import('./pages/dashboard/Support'))
+const Notifications = lazy(() => import('./pages/dashboard/Notifications'))
+const Settings = lazy(() => import('./pages/dashboard/Settings'))
+const Guide = lazy(() => import('./pages/dashboard/Guide'))
+const AdminShell = lazy(() => import('./components/admin/AdminShell'))
+const AdminOverview = lazy(() => import('./pages/admin/AdminOverview'))
+const AdminApplications = lazy(() => import('./pages/admin/AdminApplications'))
+const AdminCustomers = lazy(() => import('./pages/admin/AdminCustomers'))
+const AdminOrders = lazy(() => import('./pages/admin/AdminOrders'))
+const AdminLeads = lazy(() => import('./pages/admin/AdminLeads'))
+const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'))
+const AdminPlans = lazy(() => import('./pages/admin/AdminPlans'))
+const AdminSupport = lazy(() => import('./pages/admin/AdminSupport'))
+const AdminContent = lazy(() => import('./pages/admin/AdminContent'))
+const AdminAuditLog = lazy(() => import('./pages/admin/AdminAuditLog'))
+const LegalPage = lazy(() => import('./pages/LegalPage'))
+const NotFound = lazy(() => import('./pages/NotFound'))
+const ServerError = lazy(() => import('./pages/ServerError'))
+
 export default function App(){
-  return <Routes>
+  return <Suspense fallback={<RouteFallback/>}><Routes>
     <Route element={<Layout/>}>
       <Route index element={<Home/>}/>
       <Route path="services" element={<Services/>}/>
@@ -103,5 +106,5 @@ export default function App(){
       <Route path="audit-log" element={<AdminAuditLog/>}/>
       <Route path="settings" element={<AdminSettings/>}/>
     </Route>
-  </Routes>
+  </Routes></Suspense>
 }

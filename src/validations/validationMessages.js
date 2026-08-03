@@ -21,6 +21,7 @@ export const MESSAGES = {
   // Phone
   phoneRequired: 'Enter your phone number.',
   phoneInvalid: 'Enter a valid 10-digit U.S. phone number.',
+  internationalPhoneInvalid: 'Enter a valid international phone number, including the country code (e.g. +44 20 7946 0958).',
 
   // Preferred contact method
   contactMethodRequired: 'Select a preferred contact method.',

@@ -1,6 +1,6 @@
 import {
-  BadgeCheck, Building2, Calculator, CalendarClock, FileSignature, FileText,
-  Globe2, IdCard, Landmark, Link2, Mail, MapPinned, NotebookPen,
+  Award, BadgeCheck, Building2, Calculator, CalendarClock, ClipboardCheck, FileCheck2, FileSignature, FileText,
+  Globe, Globe2, IdCard, Inbox, Landmark, Layers, Link2, Mail, MapPinned, NotebookPen,
   PackageCheck, Palette, ReceiptText, Scale, ShieldCheck, Stamp, TrendingUp,
   Umbrella, Users, BriefcaseBusiness
 } from 'lucide-react'
@@ -14,17 +14,23 @@ export const serviceGroups = [
     title: 'Start your business',
     items: [
       ['llc-formation', 'LLC Formation'],
+      ['business-formation-filings', 'Business Formation Filings'],
       ['registered-agent', 'Registered Agent'],
-      ['ein', 'EIN Assistance'],
+      ['ein', 'EIN & S-Corp Elections'],
+      ['s-corp-election', 'S-Corp Election'],
       ['operating-agreement', 'Operating Agreement'],
-      ['texas-dba', 'DBA / Assumed Name']
+      ['texas-dba', 'DBA / Assumed Name'],
+      ['certificate-of-good-standing', 'Certificate of Good Standing'],
+      ['apostille-services', 'Apostille Services']
     ]
   },
   {
     title: 'Manage your business',
     items: [
       ['texas-compliance', 'Compliance Support'],
-      ['formation-kit', 'Formation Documents']
+      ['compliance-filings', 'Compliance Filings'],
+      ['formation-kit', 'Formation Documents'],
+      ['mail-forwarding', 'Mail Forwarding']
     ]
   }
 ]
@@ -80,6 +86,58 @@ export const services = {
     ],
     related: ['registered-agent', 'ein', 'operating-agreement']
   },
+  'business-formation-filings': {
+    icon: Layers,
+    category: 'Start your business',
+    eyebrow: 'Business Formation Filings',
+    automated: true,
+    isActive: true,
+    title: 'Business formation filings, prepared and filed the right way',
+    short: 'Formation paperwork for LLCs, corporations, and nonprofits prepared accurately and filed with the state.',
+    intro: 'Forming a business means filing a specific document with a state agency: Articles of Organization for an LLC, Articles of Incorporation for a corporation, formation paperwork for a nonprofit, or a Certificate of Authority if you’re expanding an existing entity into a new state through foreign qualification. Each filing has its own requirements, and a rejected or incomplete filing costs you time and money. We prepare and file these documents for $95 plus the applicable state filing fee. Texas LLC formation is available today through our fully guided, automated intake corporation, nonprofit, and foreign qualification filings are prepared by our formation team on a guided basis so every detail is confirmed before it’s submitted.',
+    image: '/illustrations/hero-business.svg',
+    features: [
+      'Guided intake covering entity type, structure, and formation state',
+      'Preparation of Articles of Organization, Articles of Incorporation, or nonprofit formation documents',
+      'Foreign qualification filings for entities expanding into a new state',
+      'Accuracy review before anything is submitted to the state',
+      'Status tracking and document delivery in your client dashboard'
+    ],
+    benefits: [
+      'One flat $95 service fee plus the state’s actual filing fee no bundled markups',
+      'Reduces the risk of a rejected filing from a missing or incorrect detail',
+      'Texas LLC formation is a fully guided, automated process available now',
+      'Corporation, nonprofit, and multi-state filings handled by our formation team'
+    ],
+    whoNeeds: 'Startups and entrepreneurs choosing between an LLC and a corporation, nonprofit founders preparing their formation paperwork, and existing businesses expanding into a new state through foreign qualification.',
+    included: [
+      'Entity-type and state intake to confirm exactly which filing you need',
+      'Preparation of your Articles of Organization, Articles of Incorporation, or nonprofit formation document',
+      'Submission to the correct state filing office',
+      'Confirmation and a copy of your filed document delivered to your dashboard'
+    ],
+    limitations: [
+      'The $95 service fee does not include the state’s filing fee, which varies by state and entity type the amount shown is the current Texas LLC filing fee',
+      'Texas LLC formation is processed through our automated guided flow corporation, nonprofit, and out-of-state filings are prepared by our team and may take longer to complete',
+      'We prepare and file formation documents we do not provide legal advice about which entity type or state is right for your business'
+    ],
+    steps: [
+      ['Tell us what you’re forming', 'Answer a short intake about your entity type, industry, and the state where you’re filing.'],
+      ['We prepare your filing', 'Your Articles of Organization, Articles of Incorporation, or nonprofit formation document is prepared and reviewed for accuracy.'],
+      ['Track approval from your dashboard', 'Follow your filing from submission through state approval, with your confirmed document delivered when it’s done.']
+    ],
+    faq: [
+      ['What’s the difference between this and your LLC Formation service?', 'LLC Formation is our fully automated, guided path for forming a Texas LLC specifically. Business Formation Filings covers that same Texas LLC path plus corporations, nonprofits, and foreign qualification filings for other entity types and states.'],
+      ['Is the $95 fee the total cost?', 'No. The $95 is our service fee for preparing and filing your documents. The state’s filing fee is separate and varies by state and entity type it is never bundled into our fee.'],
+      ['Can you form a corporation for me?', 'Yes. We prepare and file Articles of Incorporation for corporations. This path is handled on a guided basis by our formation team rather than the fully automated LLC intake.'],
+      ['Do you form nonprofits?', 'Yes, we prepare and file nonprofit formation documents. Recognition of tax-exempt status with the IRS is a separate, additional process handled after your entity is formed.'],
+      ['What is foreign qualification?', 'It’s the filing required when a business formed in one state wants to legally operate in another. We prepare and file the Certificate of Authority (or equivalent) your new state requires.'],
+      ['Which states do you file in?', 'Texas LLC formation is available today through our automated intake. Formation and qualification filings in other states are handled by our team contact us with your state and entity type and we’ll confirm timing and requirements.'],
+      ['How long does a formation filing take?', 'Texas LLC filings follow the standard or expedited processing time shown in your dashboard. Corporation, nonprofit, and out-of-state filings depend on that state’s current processing time we’ll give you a specific estimate after intake.'],
+      ['What happens after my filing is approved?', 'You’ll receive your confirmed formation document in your client dashboard, along with next steps like your EIN, registered agent, and any compliance filings your entity now needs.']
+    ],
+    related: ['llc-formation', 'registered-agent', 'compliance-filings']
+  },
   'registered-agent': {
     icon: ShieldCheck,
     category: 'Start your business',
@@ -87,8 +145,8 @@ export const services = {
     automated: true,
     isActive: true,
     title: 'A dependable registered agent for your LLC',
-    short: 'Choose a reliable registered agent and registered office for official business notices.',
-    intro: 'Texas law requires every LLC to maintain a registered agent with a physical street address in the state a P.O. box alone is not enough. Our registered agent service gives your business a reliable, monitored address for service of process and official notices, with scanned documents and deadline reminders delivered straight to your dashboard.',
+    short: 'Choose a reliable registered agent and registered office for official business notices — $80 per year, per entity.',
+    intro: 'Every LLC and corporation is legally required to maintain a registered agent — a designated recipient for lawsuits, subpoenas, and official state correspondence at a physical street address a P.O. box alone is not enough. Our registered agent service gives your business a reliable, monitored address for service of process and official notices, with scanned documents and compliance reminders delivered straight to your dashboard, for $80 per year, per entity.',
     image: '/illustrations/registered-agent.svg',
     features: [
       'Registered office address that meets state requirements',
@@ -100,19 +158,21 @@ export const services = {
     benefits: [
       'Keeps your home address off the public record',
       'Reduces the risk of missing a lawsuit notice or filing deadline',
+      'Professional representation instead of listing yourself personally',
       'One less thing to manage yourself as a first-time founder',
       'Works whether you’re forming a new LLC or already have one'
     ],
-    whoNeeds: 'Any LLC or corporation required by law, not optional. Especially useful for home-based businesses and owners who travel or don’t want a home address on public filings.',
+    whoNeeds: 'Any LLC or corporation required by law, not optional. Especially useful for home-based businesses, owners who travel, and founders who run more than one entity and want consistent representation across all of them.',
     included: [
       'A monitored registered office address',
       'Digital delivery of scanned documents to your dashboard',
-      'Renewal reminders before your service term ends',
+      'Renewal reminders before your annual service term ends',
       'Update filings if your registered agent information changes'
     ],
     limitations: [
       'We cannot act as your registered agent until you’ve reviewed and confirmed the consent agreement',
       'A P.O. box cannot be used as the registered office address under Texas law',
+      'Pricing is per entity, per state our Texas registered agent service is available today; coverage for entities registered in other states is arranged on request',
       'This service does not include legal representation or advice about any documents you receive'
     ],
     steps: [
@@ -121,58 +181,125 @@ export const services = {
       ['Manage notices online', 'View scanned documents and deadline reminders from your dashboard.']
     ],
     faq: [
-      ['Why does an LLC need a registered agent?', 'State law requires every LLC and corporation to maintain a designated recipient for legal notices and official correspondence at a physical street address.'],
-      ['Can I be my own registered agent?', 'Yes, if you have a physical street address in the state (not a P.O. box) and are available during normal business hours to receive documents.'],
-      ['What happens if I miss a notice?', 'Missing service of process or an official notice can result in default judgments or loss of good standing. That’s the core problem a registered agent service solves.']
+      ['Why does an LLC need a registered agent?', 'State law requires every LLC and corporation to maintain a designated recipient for legal notices and official correspondence at a physical street address. It’s a legal requirement, not an optional add-on.'],
+      ['Can I be my own registered agent?', 'Yes, if you have a physical street address in the state (not a P.O. box) and are available during normal business hours to receive documents. Many owners choose our service instead to keep that address off the public record.'],
+      ['What happens if I miss a notice?', 'Missing service of process or an official notice can result in default judgments or loss of good standing. That’s the core problem a registered agent service solves.'],
+      ['What does "$80 per year, per entity" mean?', 'The service is priced per business entity, per year. If you run more than one LLC or corporation, each one is billed separately at $80 per year.'],
+      ['Do you provide registered agent service in states other than Texas?', 'Our Texas registered agent service is available today through the standard intake. If you have an entity registered in another state, contact us we can arrange coverage on a case-by-case basis.'],
+      ['How do I switch to your registered agent service if I already have one?', 'Tell us your current registered agent information during intake. We handle the update filing with the state so the change is official, then take over from your renewal date.'],
+      ['Will my home address stay private?', 'Yes. Using our registered office address instead of your home address keeps your personal address off the state’s public business filings.'],
+      ['How and when do I renew?', 'The service renews annually. We send reminders before your term ends, and renewal is billed automatically unless you cancel from your dashboard.'],
+      ['What’s the difference between a registered agent and mail forwarding?', 'A registered agent is a legal requirement for receiving service of process and state notices. Mail forwarding is a general business mailing address for everyday correspondence. Many customers use both together — see our Mail Forwarding service.']
     ],
-    related: ['llc-formation', 'texas-compliance', 'formation-kit']
+    related: ['llc-formation', 'texas-compliance', 'mail-forwarding']
   },
   ein: {
     icon: IdCard,
     category: 'Start your business',
-    eyebrow: 'EIN Assistance',
+    eyebrow: 'EIN & S-Corp Elections',
     automated: true,
     isActive: true,
-    title: 'Get organized help requesting your EIN',
-    short: 'Get help preparing the information needed to request an Employer Identification Number.',
-    intro: 'An Employer Identification Number (EIN) is issued directly by the IRS, free of charge, and most businesses need one to open a bank account, hire employees, or file taxes. Our EIN assistance service organizes the responsible-party, entity, and business-activity information the IRS asks for so your request is accurate and ready.',
+    title: 'Get your EIN and S-Corp election handled correctly',
+    short: 'EIN filing for U.S. and foreign applicants, plus S-Corp election support for eligible businesses.',
+    intro: 'An Employer Identification Number (EIN) is your business’s federal tax ID, issued by the IRS. Most businesses need one to open a bank account, hire employees, or file taxes. We prepare and file your EIN application for $35 for U.S. applicants, or $130 for foreign applicants, who face additional IRS requirements and generally cannot apply through the standard online system. If your business is eligible and would benefit from being taxed as an S-Corporation, we also prepare and file IRS Form 2553 to make that election.',
     image: '/illustrations/compliance.svg',
     features: [
-      'Responsible-party and entity detail intake',
-      'Business activity questionnaire matched to IRS categories',
-      'Status tracking from request to delivery',
-      'Downloadable confirmation summary for your records',
-      'No requirement to purchase you can apply directly with the IRS at no cost'
+      'EIN application preparation and filing for U.S. applicants $35',
+      'EIN application preparation and filing for foreign applicants $130',
+      'Responsible-party and entity detail intake matched to IRS requirements',
+      'S-Corp election preparation and filing (IRS Form 2553) for eligible entities',
+      'Status tracking from request to confirmed EIN or election'
     ],
     benefits: [
-      'Avoids common application mistakes that cause delays',
-      'One place to store your EIN alongside your other formation documents',
-      'Useful if you’d rather not navigate the IRS system yourself',
-      'Clear, judgment-free guidance through the required questions'
+      'Avoids common application mistakes that delay your EIN',
+      'Foreign applicants get help navigating the IRS’s separate, non-online application process',
+      'S-Corp election can reduce self-employment tax for eligible profitable businesses',
+      'One place to track your EIN and S-Corp election alongside your other formation documents'
     ],
-    whoNeeds: 'New LLCs opening a business bank account, hiring employees, or filing federal taxes under the business rather than a personal SSN.',
+    whoNeeds: 'New LLCs and corporations needing a federal tax ID, foreign founders and non-U.S. residents forming a U.S. business, and profitable LLCs considering S-Corp tax treatment.',
     included: [
-      'Guided intake for responsible party, entity type, and activity details',
-      'Accuracy review before submission',
-      'Status updates in your dashboard',
-      'A summary document once your EIN is issued'
+      'Guided intake for responsible party, entity type, and business activity',
+      'EIN application preparation for U.S. or foreign applicants',
+      'S-Corp eligibility review and Form 2553 preparation, where applicable',
+      'Status updates and a confirmation summary delivered to your dashboard'
     ],
     limitations: [
-      'The IRS issues EINs directly and does not charge a government fee our fee covers preparation and assistance only, and is entirely optional',
-      'We do not collect Social Security Numbers or other sensitive tax identifiers through this website; that information is gathered through a secure, separate process',
-      'This is not tax advice about your entity’s classification or filing obligations'
+      'The IRS issues EINs directly at no cost our fee covers preparation and filing on your behalf, and is entirely optional for U.S. applicants who can apply themselves',
+      'Foreign applicants generally cannot use the IRS’s online EIN system our $130 fee reflects the additional process this requires',
+      'S-Corp election has specific IRS eligibility rules and deadlines whether it benefits your business depends on your specific tax situation, and we recommend confirming with a tax professional',
+      'We do not collect Social Security Numbers or ITINs through this website that information is gathered through a secure, separate process'
     ],
     steps: [
-      ['Complete the intake', 'Answer questions about ownership and business activity no sensitive ID numbers are collected here.'],
-      ['Review for accuracy', 'Confirm spelling, addresses, and entity classification before anything is submitted.'],
-      ['Track completion', 'Follow the request status and download your EIN confirmation once issued.']
+      ['Complete the intake', 'Tell us about your entity, responsible party, and business activity no sensitive ID numbers are collected here.'],
+      ['We prepare your filing', 'We prepare your EIN application, and Form 2553 if you’re electing S-Corp status, and confirm details with you before submission.'],
+      ['Receive your confirmation', 'Track status from your dashboard and receive your EIN or S-Corp election confirmation once issued.']
     ],
     faq: [
-      ['Do I have to pay for an EIN?', 'No. The IRS issues EINs for free. Our fee is an optional convenience charge for preparation and guidance you’re never required to purchase it.'],
-      ['Can I apply for an EIN myself?', 'Yes, directly through the IRS website at no cost. We recommend this service only if you’d prefer a guided process.'],
-      ['Is my Social Security Number collected on this site?', 'No. Sensitive identifiers like an SSN or ITIN are collected through a secure, separate process never stored in your browser or this website’s standard forms.']
+      ['Do I have to pay for an EIN?', 'No. The IRS issues EINs directly at no cost. Our fee is an optional charge for preparing and filing the application on your behalf.'],
+      ['Can I apply for an EIN myself?', 'Yes, U.S. applicants can generally apply directly through the IRS website at no cost. We recommend our service if you’d rather not navigate the process yourself, or if you’re a foreign applicant who cannot use the online system.'],
+      ['Is my Social Security Number collected on this site?', 'No. Sensitive identifiers like an SSN or ITIN are collected through a secure, separate process never stored in your browser or this website’s standard forms.'],
+      ['Why does a foreign EIN application cost more?', 'The IRS’s online EIN system generally requires a valid U.S. Social Security Number or ITIN. Foreign applicants without one must apply by phone, fax, or mail a longer process that our $130 fee reflects.'],
+      ['What is an S-Corp election, and is it different from forming a corporation?', 'An S-Corp is a tax election, not a separate entity type. An eligible LLC or corporation can elect to be taxed as an S-Corporation by filing IRS Form 2553, without changing its legal structure.'],
+      ['Is my business eligible to elect S-Corp status?', 'Eligibility depends on factors like number of owners, owner residency, and having only one class of stock. We review basic eligibility during intake final confirmation of tax benefit should come from a tax professional.'],
+      ['When do I need to file Form 2553?', 'Generally within two months and 15 days of the start of the tax year the election is to take effect, though relief for late elections is sometimes available. We’ll confirm your specific deadline during intake.'],
+      ['Will electing S-Corp status definitely lower my taxes?', 'Not automatically. It can reduce self-employment tax for some profitable businesses, but it also adds payroll and filing requirements. This is a tax decision we recommend confirming with a tax professional based on your numbers.'],
+      ['Can a foreign founder with no SSN still get an EIN?', 'Yes. Foreign applicants can obtain an EIN without an SSN or ITIN through the IRS’s alternate application process, which is what our foreign-applicant service is built around.']
     ],
-    related: ['llc-formation', 'operating-agreement', 'formation-kit']
+    related: ['llc-formation', 's-corp-election', 'business-formation-filings']
+  },
+  's-corp-election': {
+    icon: FileCheck2,
+    category: 'Start your business',
+    eyebrow: 'S-Corp Election',
+    automated: true,
+    isActive: true,
+    title: 'Elect S-Corp tax status for your existing business',
+    short: 'File IRS Form 2553 to elect S-Corporation tax treatment for an already-formed, eligible LLC or corporation — $130.',
+    intro: 'If your LLC or corporation already has an EIN and you have decided S-Corp tax treatment could reduce your self-employment tax, you do not need to redo your EIN filing you just need IRS Form 2553 prepared and filed correctly, within the right deadline. We handle the eligibility check, the paperwork, and the filing for $130, whether or not we handled your original EIN application.',
+    image: '/illustrations/compliance.svg',
+    features: [
+      'Eligibility review against IRS S-Corp requirements before you file',
+      'IRS Form 2553 preparation using your existing entity and EIN details',
+      'Deadline calculation based on your entity’s tax year',
+      'Filing submission and confirmation tracking',
+      'Works whether or not we prepared your original EIN'
+    ],
+    benefits: [
+      'Can reduce self-employment tax for eligible, profitable businesses',
+      'Confirms eligibility before you file, instead of finding out after a rejection',
+      'Keeps your election deadline from being missed',
+      'One clear flat fee no separate charge for using an EIN we did not originally file'
+    ],
+    whoNeeds: 'Existing LLCs and corporations with an EIN already in place, profitable businesses exploring ways to reduce self-employment tax, and any eligible entity that missed electing S-Corp status when it first formed.',
+    included: [
+      'Intake to confirm entity type, ownership, and current EIN',
+      'S-Corp eligibility review based on IRS requirements',
+      'Preparation and filing of IRS Form 2553',
+      'Confirmation and a copy of your filed election in your dashboard'
+    ],
+    limitations: [
+      'S-Corp election has specific IRS eligibility rules, including owner count, residency, and a single class of stock final confirmation should come from a tax professional',
+      'Election deadlines are generally tied to your tax year missing the window may require requesting late-election relief, which is not guaranteed',
+      'This service does not include ongoing payroll setup or tax filing required once S-Corp status is elected',
+      'We do not collect Social Security Numbers or ITINs through this website that information is gathered through a secure, separate process'
+    ],
+    steps: [
+      ['Confirm your entity details', 'Tell us your entity type, current EIN, and tax year no sensitive ID numbers are collected here.'],
+      ['We check eligibility and prepare Form 2553', 'We confirm you meet the IRS requirements and prepare your election for your review.'],
+      ['Track your confirmed election', 'Follow the filing from submission to confirmation in your dashboard.']
+    ],
+    faq: [
+      ['What is an S-Corp election?', 'It’s a tax status, not a new business entity. An eligible LLC or corporation can elect to be taxed as an S-Corporation by filing IRS Form 2553, without changing its legal structure.'],
+      ['Do I need a new EIN to elect S-Corp status?', 'No. If your entity already has an EIN, this service files the S-Corp election against that existing EIN you do not need to reapply.'],
+      ['How is this different from the S-Corp option on your EIN service?', 'Our EIN service covers electing S-Corp status at the same time as a brand-new EIN application. This service is for entities that already have an EIN and just need the election filed on its own.'],
+      ['Is my business eligible?', 'Eligibility generally depends on owner count, owner residency, and having only one class of stock. We review the basics during intake, and recommend confirming with a tax professional.'],
+      ['When is the deadline to file Form 2553?', 'Generally within two months and 15 days of the start of the tax year the election should take effect. We’ll calculate your specific deadline during intake.'],
+      ['What if I missed the deadline?', 'The IRS sometimes grants relief for a late S-Corp election under certain conditions. We can still prepare your filing and request relief, though approval is not guaranteed.'],
+      ['Will electing S-Corp status definitely lower my taxes?', 'Not automatically. It can reduce self-employment tax for some profitable businesses, but it also adds payroll and filing requirements. We recommend confirming the numbers with a tax professional before electing.'],
+      ['Does the IRS charge a fee to file Form 2553?', 'No. The IRS does not charge a filing fee for Form 2553. Our $130 fee covers eligibility review, preparation, and filing on your behalf.'],
+      ['Do you handle payroll or tax filing after I elect S-Corp status?', 'No. This service covers the election itself. Ongoing payroll and S-Corp tax filing are handled separately, typically with a bookkeeper or tax professional.']
+    ],
+    related: ['ein', 'business-formation-filings', 'compliance-filings']
   },
   'operating-agreement': {
     icon: FileSignature,
@@ -306,7 +433,60 @@ export const services = {
       ['Does every LLC owe franchise tax?', 'Many small entities owe no tax under the no-tax-due threshold, but most are still required to file a report. Confirm your specific situation with the Comptroller or a tax professional.'],
       ['What happens if I miss a compliance deadline?', 'Consequences range from penalties to loss of good standing or involuntary termination, depending on which requirement is missed. That’s exactly what this service is designed to help you avoid.']
     ],
-    related: ['registered-agent', 'formation-kit', 'llc-formation']
+    related: ['compliance-filings', 'registered-agent', 'llc-formation']
+  },
+  'compliance-filings': {
+    icon: ClipboardCheck,
+    category: 'Manage your business',
+    eyebrow: 'Compliance Filings',
+    automated: true,
+    isActive: true,
+    title: 'Compliance filings handled and submitted for you',
+    short: 'Annual reports, amendments, and state filings prepared and submitted accurately and on time.',
+    intro: 'Staying in good standing means more than remembering a due date it means actually filing the right paperwork correctly. We prepare and file annual reports, state renewals, business amendments, Certificates of Good Standing, and registered agent change filings for $95 plus any state filing fee. This is a hands-on filing service: you tell us what needs to be filed, and we prepare and submit it.',
+    image: '/illustrations/compliance.svg',
+    features: [
+      'Annual report and state renewal preparation and filing',
+      'Business amendment filings for changes to your entity',
+      'Certificate of Good Standing requests',
+      'Registered agent change filings',
+      'Status tracking from request to confirmed filing'
+    ],
+    benefits: [
+      'One flat $95 service fee per filing, plus any state fee never bundled or hidden',
+      'Avoids late fees and loss of good standing from a missed or incorrect filing',
+      'A single place to request any compliance filing your business needs',
+      'Works alongside our Compliance Support reminders you know what’s due, and we handle the filing itself'
+    ],
+    whoNeeds: 'Any active LLC or corporation that needs to file an annual report, update information on file with the state, request a Certificate of Good Standing, or change its registered agent.',
+    included: [
+      'Intake to confirm exactly which filing you need',
+      'Preparation of the filing using your current business information',
+      'Submission to the correct state office',
+      'Confirmation and a copy of the completed filing in your dashboard'
+    ],
+    limitations: [
+      'The $95 fee covers our filing service any state filing fee is separate and shown before you confirm',
+      'We prepare and submit filings based on the information you provide we do not independently verify your tax or legal standing',
+      'This service handles filings on request ongoing deadline tracking and reminders are provided separately through Compliance Support'
+    ],
+    steps: [
+      ['Tell us what needs filing', 'Select the filing you need annual report, amendment, Certificate of Good Standing, or registered agent change.'],
+      ['We prepare it', 'We draft the filing using your current business details and confirm everything with you before submission.'],
+      ['We file and confirm', 'Your filing is submitted to the state, and a confirmed copy is delivered to your dashboard.']
+    ],
+    faq: [
+      ['What’s the difference between this and Compliance Support?', 'Compliance Support tracks your deadlines and sends reminders. Compliance Filings is the filing service itself once you know something is due, we prepare and submit it for you.'],
+      ['What counts as a business amendment?', 'Changes to information on file with the state, such as your business name, management structure, or business purpose. We prepare the amendment filing for whichever detail changed.'],
+      ['What is a Certificate of Good Standing, and why would I need one?', 'It’s a state-issued document confirming your business is current on its filings and fees. Banks, lenders, and other states often require one before approving a loan, account, or foreign qualification.'],
+      ['Can you file my annual report for me?', 'Yes. Tell us your entity details and we’ll prepare and file your annual report in Texas, the Public Information Report filed with your franchise tax report before the deadline.'],
+      ['I need to change my registered agent is that a compliance filing?', 'Yes. Changing your registered agent requires a filing with the state, which we prepare and submit as part of this service.'],
+      ['Is the state filing fee included in the $95?', 'No. The $95 is our service fee for preparing and filing the paperwork. Any state fee is separate and confirmed with you before we submit.'],
+      ['How long does a compliance filing take?', 'Most filings are prepared within a few business days of your request. Processing time after submission depends on the state’s current workload we’ll show you a status update once it’s filed.'],
+      ['What happens if I miss a compliance deadline?', 'Consequences vary by state and filing type, and can include penalties or loss of good standing. If you’ve already missed a deadline, contact us we can still prepare and file most overdue filings.'],
+      ['I just need a single Certificate of Good Standing, not a full filing request is that still this service?', 'You can request one here, but our Certificate of Good Standing service is a faster, dedicated path for exactly that single request, priced separately at $70 plus the state’s own fee.']
+    ],
+    related: ['texas-compliance', 'certificate-of-good-standing', 'registered-agent']
   },
   'formation-kit': {
     icon: PackageCheck,
@@ -347,6 +527,164 @@ export const services = {
       ['Is this the same as the document center in my dashboard?', 'Formation Documents adds organization templates and an exportable company profile on top of the standard document center included with every account.']
     ],
     related: ['llc-formation', 'operating-agreement', 'registered-agent']
+  },
+  'mail-forwarding': {
+    icon: Inbox,
+    category: 'Manage your business',
+    eyebrow: 'Mail Forwarding',
+    automated: true,
+    isActive: true,
+    title: 'A professional business mailing address with suite-based mail forwarding',
+    short: 'Receive, scan, and forward your business mail from a professional suite address starting at $30 per month.',
+    intro: 'A home address on public business filings and correspondence can feel exposed, and a P.O. box doesn’t always look professional to banks, vendors, or customers. Our suite-based mail forwarding service gives your business a real street address with a dedicated suite number. We receive your mail, notify you, and forward or scan it based on your preference for $30 per month, per entity.',
+    image: '/illustrations/banking.svg',
+    features: [
+      'A real street address with a dedicated suite number not a P.O. box',
+      'Mail receiving for business correspondence, bank mail, and government letters',
+      'Choice of physical forwarding or digital scanning, per your preference',
+      'Notification when new mail arrives',
+      'Secure handling of sensitive correspondence'
+    ],
+    benefits: [
+      'Keeps your home address off public business listings and correspondence',
+      'Presents a professional business image to banks, vendors, and customers',
+      'One address for government letters, bank mail, and general business correspondence',
+      'Flexible per-entity pricing scales with the number of businesses you run'
+    ],
+    whoNeeds: 'Home-based founders, e-commerce and Amazon sellers, agencies and consultants working remotely, and any business that wants a professional address without a physical office.',
+    included: [
+      'A dedicated suite address for your business',
+      'Mail receiving and notification when new items arrive',
+      'Your choice of mail forwarding or scanned digital delivery',
+      'Secure handling for sensitive documents like bank and government mail'
+    ],
+    limitations: [
+      'This is a mail-handling service, not a registered agent it does not satisfy the state’s registered agent requirement on its own',
+      'Physical forwarding is subject to standard mail delivery times scanning is faster for time-sensitive documents',
+      'Pricing is per entity if you operate multiple businesses, each one is billed separately'
+    ],
+    steps: [
+      ['Choose your mail preference', 'Tell us whether you want physical forwarding, digital scanning, or both.'],
+      ['We receive your mail', 'Your business mail arrives at your dedicated suite address and we notify you when it’s ready.'],
+      ['Get it your way', 'Receive scanned mail digitally or have physical mail forwarded to your preferred address.']
+    ],
+    faq: [
+      ['Is this the same as a registered agent?', 'No. A registered agent is a legal requirement for receiving service of process and official state notices. Mail forwarding is a general business mailing address for everyday correspondence. Many customers use both together.'],
+      ['Can I use this address on my business filings?', 'You can use it as a mailing address where one is requested. Registered agent and registered office addresses have separate legal requirements see our Registered Agent service for that specific need.'],
+      ['How quickly will I know when mail arrives?', 'You’ll receive a notification as soon as your mail is received, so you can decide whether to have it scanned or forwarded.'],
+      ['Can I get my mail scanned instead of physically forwarded?', 'Yes. You can choose digital scanning for faster access, physical forwarding to an address of your choice, or a mix of both depending on the item.'],
+      ['What happens to sensitive mail like bank statements or IRS letters?', 'All mail is handled securely regardless of sender. Sensitive correspondence like bank and government mail is treated with the same careful handling as everything else.'],
+      ['Is the $30 per month price per business or per person?', 'It’s per entity. If you operate more than one business, each one is set up and billed as its own mail forwarding subscription.'],
+      ['Can I cancel or change my forwarding preference later?', 'Yes. You can update your forwarding or scanning preference, or cancel the service, from your dashboard at any time.'],
+      ['Do you accept packages, or only mail and letters?', 'This service is built around standard business mail and letters. Contact us before shipping large packages so we can confirm handling.']
+    ],
+    related: ['registered-agent', 'llc-formation', 'formation-kit']
+  },
+  'certificate-of-good-standing': {
+    icon: Award,
+    category: 'Start your business',
+    eyebrow: 'Certificate of Good Standing',
+    automated: true,
+    isActive: true,
+    title: 'Order a Certificate of Good Standing or certified copies',
+    short: 'Request an official, state-issued Certificate of Good Standing or certified copies of your formation documents state fees plus a $70 filing service fee.',
+    intro: 'A Certificate of Good Standing confirms your business is current on its state filings and fees often required by banks, lenders, other states, or a business you are acquiring. Certified copies give you an official, state-authenticated copy of your Certificate of Formation or other filed documents. We prepare and submit the request to the state for a flat $70 filing service fee, plus whatever the state itself charges for the certificate or copy.',
+    image: '/illustrations/compliance.svg',
+    features: [
+      'Request intake for Certificate of Good Standing or certified copies',
+      'Preparation and submission to the correct state office',
+      'Support for multiple states when your business is registered in more than one',
+      'Digital delivery of your certified document, plus a physical copy on request',
+      'Status tracking from request to delivery'
+    ],
+    benefits: [
+      'One flat $70 service fee per request, with the state’s own fee itemized separately',
+      'Faster turnaround than navigating the state’s ordering system yourself',
+      'Useful for banks, lenders, acquisitions, and foreign qualification in another state',
+      'Works alongside our Apostille service if the document needs international authentication'
+    ],
+    whoNeeds: 'Businesses applying for a loan or bank account that requires proof of good standing, companies expanding into another state through foreign qualification, businesses being acquired or entering a merger, and anyone who needs an official certified copy of their formation documents.',
+    included: [
+      'Intake to confirm which document and how many copies you need',
+      'Preparation and submission of your request to the state',
+      'Confirmation once your certificate or certified copy is issued',
+      'Delivery to your dashboard, with physical mailing available on request'
+    ],
+    limitations: [
+      'The $70 fee covers our filing service the state’s own certificate or copy fee is separate and confirmed before you submit your request',
+      'A Certificate of Good Standing reflects your status only at the moment it is issued it is not a guarantee of future compliance',
+      'Documents intended for use in another country may also need an apostille see our Apostille Services for that additional step',
+      'Processing time depends on the issuing state’s current workload, which is outside our control'
+    ],
+    steps: [
+      ['Tell us what you need', 'Choose a Certificate of Good Standing, a certified copy, or both, and the state involved.'],
+      ['We submit your request', 'We prepare and file your request with the correct state office.'],
+      ['Receive your document', 'Get your certified document in your dashboard, with physical mailing available on request.']
+    ],
+    faq: [
+      ['What is a Certificate of Good Standing?', 'A state-issued document confirming your business is current on its filings and fees. Banks, lenders, other states, and parties in a business transaction often require one.'],
+      ['What is a certified copy, and how is it different?', 'A certified copy is an official, state-authenticated copy of a document you already filed, like your Certificate of Formation. A Certificate of Good Standing is a separate document confirming your current compliance status.'],
+      ['Is the $70 fee the total cost?', 'No. The $70 is our filing service fee. The state charges its own fee for the certificate or copy itself, which we confirm with you before submitting your request.'],
+      ['How long does it take to get my certificate?', 'Turnaround depends on the issuing state’s current processing time. We’ll give you a specific estimate once we know your state and document type.'],
+      ['Can you request documents for a business registered in more than one state?', 'Yes. We can request a Certificate of Good Standing or certified copy from any state where your business is registered.'],
+      ['Do I need this if I am just opening a bank account?', 'Some banks ask for a Certificate of Good Standing as part of account opening, especially for older entities or larger accounts. Check with your bank, or ask us to confirm what they typically require.'],
+      ['I need this document to use in another country what else do I need?', 'You likely also need an apostille, which authenticates the document for international use. See our Apostille Services page, or ask us to bundle both requests together.'],
+      ['What’s the difference between this and your Compliance Filings service?', 'Compliance Filings covers a broader range of ongoing state filings, including this one. This page is a focused, single-purpose service specifically for ordering a Certificate of Good Standing or certified copies.']
+    ],
+    related: ['compliance-filings', 'apostille-services', 'registered-agent']
+  },
+  'apostille-services': {
+    icon: Globe,
+    category: 'Start your business',
+    eyebrow: 'Apostille Services',
+    automated: true,
+    isActive: true,
+    title: 'Get your business documents apostilled for international use',
+    short: 'Authenticate formation documents, certificates, and corporate paperwork for use in another country $450.',
+    intro: 'An apostille is an internationally recognized certification that authenticates a public document like your Certificate of Formation, Certificate of Good Standing, or a notarized corporate document so it can be legally recognized in another country that is a member of the Hague Apostille Convention. Foreign-owned businesses, international banking relationships, and cross-border contracts often require one. We handle the authentication process end to end for $450, plus any underlying government fees for the document itself.',
+    image: '/illustrations/hero-business.svg',
+    features: [
+      'Document review to confirm apostille eligibility',
+      'Coordination with the Texas Secretary of State and U.S. Department of State as required',
+      'Support for Certificates of Good Standing, formation documents, and notarized corporate paperwork',
+      'Status tracking from submission to your apostilled document',
+      'Secure return delivery of your original and authenticated documents'
+    ],
+    benefits: [
+      'Meets international document requirements without navigating multiple agencies yourself',
+      'Speeds up foreign bank account, contract, or registration processes that require authentication',
+      'One flat service fee, with any underlying government fees itemized separately',
+      'Works alongside our Certificate of Good Standing service for a complete international document package'
+    ],
+    whoNeeds: 'Foreign founders and non-U.S. residents, businesses opening international bank accounts, companies signing cross-border contracts, and any business expanding or registering in a Hague Convention member country.',
+    included: [
+      'Intake to confirm which document needs an apostille and its destination country',
+      'Preparation and submission of the apostille request to the appropriate authority',
+      'Status updates from submission through completion',
+      'Secure delivery of your apostilled document to your dashboard and by mail'
+    ],
+    limitations: [
+      'Apostilles apply only to countries that are members of the Hague Apostille Convention documents bound for non-member countries require a different authentication process, which we can advise on during intake',
+      'The $450 service fee does not include the underlying document’s own government or certification fees, which vary and are confirmed during intake',
+      'Processing time depends on the issuing state and federal offices involved, which are outside our control',
+      'This service authenticates existing documents it does not include translation, which can be arranged separately if your destination country requires it'
+    ],
+    steps: [
+      ['Tell us what needs authenticating', 'Identify the document and the country where it will be used.'],
+      ['We confirm eligibility and fees', 'We confirm apostille eligibility for that country and any underlying government fees.'],
+      ['Track your document', 'Follow your apostille from submission to secure delivery in your dashboard.']
+    ],
+    faq: [
+      ['What is an apostille?', 'It’s an internationally recognized certification that authenticates a public document, such as a Certificate of Formation or Certificate of Good Standing, so it’s legally recognized in another Hague Convention member country.'],
+      ['Which documents can be apostilled?', 'Common examples include Certificates of Formation, Certificates of Good Standing, notarized corporate resolutions, and other state-issued or notarized business documents.'],
+      ['Does every country accept an apostille?', 'No, only countries that are members of the Hague Apostille Convention. Documents bound for non-member countries typically require a different authentication or legalization process, which we can advise on.'],
+      ['Is the $450 fee the total cost?', 'The $450 is our service fee. Some documents carry their own government or certification fee, separate from the apostille itself, which we’ll confirm during intake.'],
+      ['How long does the apostille process take?', 'Timing depends on the issuing state office and, where applicable, federal offices involved. We’ll give you a specific estimate once we know which document and country are involved.'],
+      ['Do you also provide the underlying document, like a Certificate of Good Standing?', 'Yes. If you do not already have the document that needs apostille, we can prepare it through our Certificate of Good Standing service first, then apostille it.'],
+      ['Can you translate my document as well?', 'Translation is not included in this service, but we can point you toward that step if your destination country requires a certified translation alongside the apostille.'],
+      ['Who typically needs an apostille?', 'Foreign founders, businesses opening accounts or signing contracts abroad, and companies registering a U.S. entity’s standing with a foreign government or bank.']
+    ],
+    related: ['certificate-of-good-standing', 'compliance-filings', 'business-formation-filings']
   },
 
   // ---- Inactive services (hidden from public nav/footer/homepage/sitemap) ----

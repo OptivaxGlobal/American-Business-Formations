@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   validateFullName, validateEmail, validateEmailConfirmation,
-  validatePhone, formatPhone, normalizePhoneDigits, validatePreferredContactMethod
+  validatePhone, formatPhone, normalizePhoneDigits, validatePreferredContactMethod,
+  validateInternationalPhone
 } from './contactValidation'
 
 describe('validateFullName', () => {
@@ -119,6 +120,35 @@ describe('validatePhone / normalizePhoneDigits / formatPhone', () => {
   })
   it('strips formatting characters', () => {
     expect(normalizePhoneDigits('(234) 123-0900')).toBe('2341230900')
+  })
+})
+
+describe('validateInternationalPhone', () => {
+  it('accepts a UK number with country code', () => {
+    const result = validateInternationalPhone('+44 20 7946 0958')
+    expect(result.valid).toBe(true)
+    expect(result.normalized).toBe('+442079460958')
+  })
+  it('accepts a US number with country code', () => {
+    expect(validateInternationalPhone('+1 234 123 0900').valid).toBe(true)
+  })
+  it('rejects a number missing the leading +', () => {
+    expect(validateInternationalPhone('442079460958').valid).toBe(false)
+  })
+  it('rejects too few digits', () => {
+    expect(validateInternationalPhone('+123456').valid).toBe(false)
+  })
+  it('rejects too many digits', () => {
+    expect(validateInternationalPhone('+1234567890123456').valid).toBe(false)
+  })
+  it('rejects letters', () => {
+    expect(validateInternationalPhone('+44abc7946098').valid).toBe(false)
+  })
+  it('rejects an empty value when required', () => {
+    expect(validateInternationalPhone('').valid).toBe(false)
+  })
+  it('allows an empty value when not required', () => {
+    expect(validateInternationalPhone('', { required: false }).valid).toBe(true)
   })
 })
 

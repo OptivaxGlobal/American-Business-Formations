@@ -61,21 +61,29 @@ export default function Signup(){
     const emailResult = validateEmail(values.email, { required: true })
     const payload = { name: values.name.trim(), email: emailResult.normalized, password: values.password, marketing_consent: false }
     try {
+      // api.signup() resolves to the backend's real envelope { ok, data: {...user} }
+      // (the real endpoint always creates role: "customer" — there is no public
+      // way to self-signup as admin). The fallback below matches that shape so
+      // both paths hand `login()` the same thing.
       const result = await withLocalFallback(
         () => api.signup(payload),
-        () => ({ user: { name: payload.name, email: payload.email, role } })
+        () => ({ data: { name: payload.name, email: payload.email, role } })
       )
-      login(result.user)
+      const loggedInUser = result?.data
+      if (!loggedInUser) throw new Error('We could not create your account. Please try again.')
+      login(loggedInUser)
       notify('Account created successfully.')
-      navigate(role==='admin'?'/admin':'/start')
+      navigate(loggedInUser.role === 'admin' ? '/admin' : '/start')
     } catch (err) {
       if (err.fieldErrors && Object.keys(err.fieldErrors).length) setErrors(er => ({ ...er, ...err.fieldErrors }))
-      setFormError(err.message || 'We could not create your account. Please try again.')
+      // Never surface a raw technical error message only a real backend
+      // message (ApiError) or the generic fallback below.
+      setFormError(err.status ? err.message : 'We could not create your account. Please try again.')
     } finally {
       setLoading(false)
     }
   }
-  return <><SEO title="Create Account" description="Create your American Business Formations account." path="/signup" noindex /><section className="auth-page"><div className="auth-shell"><div className="auth-side signup-side"><div><span>Build with confidence</span><h1>Create one account for every business step.</h1><p>Save onboarding progress, store service requests, and return to your dashboard at any time.</p></div><img src="/illustrations/hero-business.svg" alt="Business formation illustration"/></div><div className="auth-form-wrap"><Link className="auth-back" to="/">← Back to website</Link><form className="auth-form" onSubmit={submit} noValidate><span>Get started</span><h2>Create your account</h2><p>This demo stores your session locally when Flask is not running.</p>
+  return <><SEO title="Create Account" description="Create your American Business Formations account." path="/signup" noindex /><section className="auth-page"><div className="auth-shell"><div className="auth-side signup-side"><div><span>Build with confidence</span><h1>Create one account for every business step.</h1><p>Save onboarding progress, store service requests, and return to your dashboard at any time.</p></div><img src="/illustrations/hero-business.svg" alt="Business formation illustration" width="720" height="560"/></div><div className="auth-form-wrap"><Link className="auth-back" to="/">← Back to website</Link><form className="auth-form" onSubmit={submit} noValidate><span>Get started</span><h2>Create your account</h2><p>This demo stores your session locally when Flask is not running.</p>
     {formError && <p className="form-error-summary" role="alert">{formError}</p>}
     <label>Full name<div className="input-icon"><User/><input required name="name" autoComplete="name" placeholder="Your full name" value={values.name} onChange={handleChange('name')} onBlur={handleBlur('name')} ref={el=>fieldRefs.current.name=el} {...fieldAria('signup-name-error', errors.name)}/></div>
       {errors.name && <p id="signup-name-error" className="field-error">{errors.name}</p>}
@@ -88,5 +96,5 @@ export default function Signup(){
     </label>
     <label className="check-control terms-check"><input required type="checkbox" checked={terms} onChange={e=>{setTerms(e.target.checked); if(errors.terms) setErrors(er=>({...er,terms:''}))}} ref={el=>fieldRefs.current.terms=el} {...fieldAria('signup-terms-error', errors.terms)}/> I agree to the Terms, Privacy Policy, and service disclaimer.</label>
     {errors.terms && <p id="signup-terms-error" className="field-error">{errors.terms}</p>}
-    <label className="check-control terms-check"><input type="checkbox" name="is_admin"/> This is a demo admin account (for testing the admin portal only)</label><button className="btn btn-primary btn-block" disabled={loading}>{loading&&<Loader2 className="spin" size={18}/>}{loading?'Creating account...':'Create account'}</button><p className="auth-switch">Already have an account? <Link to="/login">Log in</Link></p></form></div></div></section></>
+    <label className="check-control terms-check"><input type="checkbox" name="is_admin"/> This is a demo admin account (for testing the admin portal only)</label><button className="btn btn-primary btn-block" disabled={loading} aria-busy={loading}>{loading&&<Loader2 className="spin" size={18}/>}<span aria-live="polite">{loading?'Creating account...':'Create account'}</span></button><p className="auth-switch">Already have an account? <Link to="/login">Log in</Link></p></form></div></div></section></>
 }

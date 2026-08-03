@@ -10,7 +10,7 @@ import { breadcrumbSchema } from '../data/seo'
 
 const stages = [
   { icon: FileText, title: '1. Tell us about your business', body: 'Enter your proposed name and answer a guided questionnaire covering your business purpose, address, ownership, and registered agent.' },
-  { icon: CheckCircle2, title: '2. Choose your package', body: 'Compare formation packages and optional add-ons like registered agent service, EIN assistance, and an operating agreement. Your service fee and the state filing fee are always shown separately.' },
+  { icon: CheckCircle2, title: '2. Choose your package', body: 'Compare formation packages and optional add-ons like EIN assistance and an operating agreement. Your service fee and the state filing fee are always shown separately.' },
   { icon: ShieldCheck, title: '3. We prepare your filing', body: 'Your Certificate of Formation is prepared from your answers and reviewed internally before it’s submitted to the Texas Secretary of State.' },
   { icon: Timer, title: '4. Track state processing', body: 'Follow real status updates from submission through state review we never mark a filing as approved until the state confirms it.' },
   { icon: MessageSquare, title: '5. Manage your business going forward', body: 'Your dashboard keeps documents, compliance reminders, and support in one place as your LLC operates and grows.' }
@@ -33,8 +33,8 @@ export default function HowItWorks() {
       description="A guided, transparent process no confusing government forms, no hidden fees, and no false promises about how fast the state will move."
       actions={<Link className="btn btn-primary" to="/formation-details">Start My LLC <ArrowRight size={18}/></Link>}
     />
-    <section className="section"><div className="container">
-      <div className="steps-grid" style={{gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))'}}>
+    <section className="section"><div className="container how-it-works-steps">
+      <div className="steps-grid steps-grid-5">
         {stages.map((s, i) => {
           const Icon = s.icon
           return <Reveal as="article" delay={i%4} key={s.title}><div><Icon size={20}/></div><h3>{s.title}</h3><p>{s.body}</p></Reveal>

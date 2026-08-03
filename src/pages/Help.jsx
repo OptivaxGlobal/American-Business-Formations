@@ -23,7 +23,7 @@ export default function Help() {
       description="Browse a topic below, check our FAQ, or reach our support team directly."
     />
     <section className="section"><div className="container">
-      <div className="steps-grid" style={{gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))'}}>
+      <div className="steps-grid steps-grid-4">
         {topics.map((t, i) => {
           const Icon = t.icon
           return <Reveal as={Link} to={t.to} delay={i%4} key={t.title} className="service-card" style={{textDecoration:'none'}}>

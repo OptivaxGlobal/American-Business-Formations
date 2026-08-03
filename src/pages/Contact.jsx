@@ -111,7 +111,7 @@ export default function Contact(){
         <label>Message<textarea required rows="6" name="message" placeholder="Share the important details..." value={values.message} onChange={handleChange('message')} onBlur={handleBlur('message')} ref={el=>fieldRefs.current.message=el} {...fieldAria('contact-message-error', errors.message)}></textarea>
           {errors.message && <p id="contact-message-error" className="field-error">{errors.message}</p>}
         </label>
-        <button className="btn btn-primary" disabled={loading}>{loading?'Sending...':'Send message'} <Send size={18}/></button>
+        <button className="btn btn-primary" disabled={loading} aria-busy={loading}><span aria-live="polite">{loading?'Sending...':'Send message'}</span> <Send size={18}/></button>
       </Reveal>
     </div></section>
   </>}

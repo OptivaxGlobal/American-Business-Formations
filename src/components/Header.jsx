@@ -6,6 +6,7 @@ import { serviceGroups, services } from '../data/services'
 import { useApp } from '../context/AppContext'
 import { SUPPORT_EMAIL } from '../data/seo'
 import { loadAnnouncement } from '../data/announcement'
+import useFocusTrap from '../hooks/useFocusTrap'
 
 export default function Header() {
   const [open, setOpen] = useState(false)
@@ -14,6 +15,8 @@ export default function Header() {
   const [openGroups, setOpenGroups] = useState(() => Object.fromEntries(serviceGroups.map(g => [g.title, true])))
   const { user } = useApp()
   const dropdownRef = useRef(null)
+  const navRef = useRef(null)
+  const mobileToggleRef = useRef(null)
   const announcement = loadAnnouncement()
 
   const toggleGroup = (title) => setOpenGroups(prev => ({ ...prev, [title]: !prev[title] }))
@@ -27,9 +30,22 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  // Escape-to-close, Tab focus-trap while the mobile nav panel is open, and
+  // focus restoration back to the toggle button on close. The toggle button
+  // itself only renders/is clickable under the 900px breakpoint (styles.css),
+  // so `open` can only become true from a real mobile-nav interaction.
+  const closeNav = () => setOpen(false)
+  useFocusTrap(navRef, open, closeNav)
+
   useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
+    if (!open) return
+    const onClickOutside = e => {
+      if (navRef.current && !navRef.current.contains(e.target) && mobileToggleRef.current && !mobileToggleRef.current.contains(e.target)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
   }, [open])
 
   useEffect(() => {
@@ -56,10 +72,10 @@ export default function Header() {
       )}
       <div className="container nav-wrap">
         <Logo />
-        <button className="mobile-menu-btn" onClick={() => setOpen(!open)} aria-label="Toggle navigation" aria-expanded={open}>
+        <button ref={mobileToggleRef} className="mobile-menu-btn" onClick={() => setOpen(!open)} aria-label="Toggle navigation" aria-expanded={open}>
           {open ? <X /> : <Menu />}
         </button>
-        <nav className={`main-nav ${open ? 'nav-open' : ''}`}>
+        <nav ref={navRef} className={`main-nav ${open ? 'nav-open' : ''}`}>
           <NavLink to="/llc-formation" onClick={closeAll}>Form an LLC</NavLink>
           <div
             className={`nav-dropdown ${servicesOpen ? 'is-open' : ''}`}

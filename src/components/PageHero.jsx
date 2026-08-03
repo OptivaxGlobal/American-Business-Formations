@@ -8,7 +8,7 @@ export default function PageHero({ crumbs, eyebrow, title, description, visual, 
           {crumbs}
           {eyebrow && <div className="eyebrow">{eyebrow}</div>}
           <h1>{title}</h1>
-          {description && <p>{description}</p>}
+          {description && <p style={{ paddingBottom: '20px' }}>{description}</p>}
           {actions}
         </Reveal>
         {visual && <Reveal as="div" delay={1} className="service-visual">{visual}</Reveal>}

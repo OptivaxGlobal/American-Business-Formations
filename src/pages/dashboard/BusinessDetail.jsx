@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router-dom'
 import { CheckCircle2, FileText, ShieldCheck, Upload } from 'lucide-react'
 import { useBusiness } from '../../context/BusinessContext'
 import { getTexasConfig } from '../../config/texas'
@@ -60,6 +60,6 @@ export default function BusinessDetail(){
       {business.complianceTasks.map(task => <label key={task.id} className={task.done?'done':''}><input type="checkbox" checked={task.done} onChange={()=>toggleComplianceTask(business.id,task.id)}/><i>{task.done&&<CheckCircle2/>}</i><span><strong>{task.label}</strong><small>{task.dueDate||'No due date set'}</small></span></label>)}
     </div>}
 
-    {tab==='Services' && <div className="tag-row">{business.services?.length ? business.services.map(s=><span key={s}>{s}</span>) : <p className="dash-empty">No services on this business yet.</p>}</div>}
+    {tab==='Services' && <div className="tag-row">{business.services?.length ? business.services.map(s=><span key={s}>{s}</span>) : <p className="dash-empty">No services on this business yet. <Link to="/services">Browse services</Link>.</p>}</div>}
   </div>
 }

@@ -1,14 +1,26 @@
-import { ArrowRight, CheckCircle2, Info, ShieldAlert } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Info, ShieldAlert, ShieldCheck } from 'lucide-react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { services, getRelatedServices, serviceDisclaimer } from '../data/services'
+import { getServicePricing } from '../data/pricing'
 import FAQ from '../components/FAQ'
-import ServiceGrid from '../components/ServiceGrid'
 import PageHero from '../components/PageHero'
 import Breadcrumbs from '../components/Breadcrumbs'
 import Reveal from '../components/Reveal'
 import SEO from '../components/SEO'
 import BusinessNameStartForm from '../components/BusinessNameStartForm'
+import PricingCards from '../components/PricingCards'
+import { Card, SectionHeading } from '../components/ui'
 import { serviceSchema, breadcrumbSchema, faqSchema } from '../data/seo'
+
+// Intrinsic SVG canvas sizes (from each file's viewBox) so the <img> can
+// declare width/height and avoid a layout shift while it loads.
+const ILLUSTRATION_DIMENSIONS = {
+  '/illustrations/hero-business.svg': [720, 560],
+  '/illustrations/dashboard-preview.svg': [760, 520],
+  '/illustrations/compliance.svg': [640, 500],
+  '/illustrations/registered-agent.svg': [620, 500],
+  '/illustrations/banking.svg': [640, 500]
+}
 
 export default function ServicePage({ forcedSlug }) {
   const params = useParams()
@@ -18,6 +30,8 @@ export default function ServicePage({ forcedSlug }) {
   const Icon = service.icon
   const path = `/${slug}`
   const related = getRelatedServices(slug)
+  const pricing = getServicePricing(slug)
+  const hasPricingFacts = Boolean(pricing.addOn) || pricing.governmentFee !== null
 
   return <>
     <SEO
@@ -49,12 +63,49 @@ export default function ServicePage({ forcedSlug }) {
           <span><CheckCircle2/> {service.automated ? 'Guided workflow' : 'Human-reviewed request'}</span>
         </div>
       </>}
-      visual={<><img src={service.image} alt=""/><div className="service-visual-card"><Icon/><span><small>Service</small><strong>{service.eyebrow}</strong></span></div></>}
+      visual={<><img src={service.image} alt="" width={ILLUSTRATION_DIMENSIONS[service.image]?.[0]} height={ILLUSTRATION_DIMENSIONS[service.image]?.[1]}/><div className="service-visual-card"><Icon/><span><small>Service</small><strong>{service.eyebrow}</strong></span></div></>}
     />
+
+    {/* Price, government fee, and recurring-cost breakdown always sourced
+        from src/data/pricing.js so this can never drift from the numbers
+        shown during onboarding checkout. */}
+    <section className="section"><div className="container narrow">
+      <Card>
+        <div className="service-pricing-head"><span>Pricing</span><h3>What this service costs</h3></div>
+        {hasPricingFacts ? (
+          <div className="order-breakdown">
+            <div>
+              <span>Service price</span>
+              {pricing.addOn
+                ? <strong>${pricing.addOn.price}{pricing.addOn.recurring ? ` (${pricing.addOn.recurring})` : ''}</strong>
+                : <strong>Included in your formation package <Link to="/pricing">See plans</Link></strong>}
+            </div>
+            {pricing.secondaryAddOn && (
+              <div>
+                <span>{pricing.secondaryAddOnLabel || pricing.secondaryAddOn.name}</span>
+                <strong>${pricing.secondaryAddOn.price}{pricing.secondaryAddOn.recurring ? ` (${pricing.secondaryAddOn.recurring})` : ''}</strong>
+              </div>
+            )}
+            {pricing.governmentFee !== null && (
+              <div>
+                <span>Government filing fee</span>
+                <strong>{pricing.governmentFee === 0 ? 'No cost (paid directly to the IRS)' : `$${pricing.governmentFee}`}</strong>
+              </div>
+            )}
+          </div>
+        ) : (
+          <p>Priced as part of your formation package. <Link to="/pricing">See plan pricing</Link> the Texas state filing fee is always itemized separately at checkout.</p>
+        )}
+        {pricing.governmentFeeNote && <p className="onboarding-note"><Info size={15}/> {pricing.governmentFeeNote}</p>}
+        {slug === 'llc-formation' && !pricing.filingFeeVerified && (
+          <p className="onboarding-note"><ShieldCheck size={15}/> The filing fee shown is an owner-configured estimate pending confirmation against the Texas Secretary of State. It will be verified before your order is finalized.</p>
+        )}
+      </Card>
+    </div></section>
 
     <section className="section"><div className="container split-grid">
       <Reveal as="div" delay={0} className="content-panel">
-        <div className="section-heading"><span>What is included</span><h2>A practical workflow from intake to completion</h2></div>
+        <SectionHeading eyebrow="What is included" title="A practical workflow from intake to completion" />
         <p>{service.short}</p>
         <ul className="check-list">{service.features.map(item => <li key={item}><CheckCircle2/>{item}</li>)}</ul>
       </Reveal>
@@ -66,20 +117,20 @@ export default function ServicePage({ forcedSlug }) {
     </div></section>
 
     <section className="section soft-section"><div className="container">
-      <div className="section-heading centered"><span>Why it matters</span><h2>Benefits of getting this right</h2></div>
-      <div className="values-grid">
+      <SectionHeading centered eyebrow="Why it matters" title="Benefits of getting this right" />
+      <div className={`values-grid${service.benefits.length <= 3 ? ' values-grid-3' : ''}`}>
         {service.benefits.map(item => <article key={item}><CheckCircle2/><p>{item}</p></article>)}
       </div>
     </div></section>
 
     <section className="section"><div className="container">
-      <div className="section-heading centered"><span>How it works</span><h2>Three clear steps</h2></div>
+      <SectionHeading centered eyebrow="How it works" title="Three clear steps" />
       <div className="steps-grid">{service.steps.map(([title, body], index) => <Reveal as="article" delay={index} key={title}><div>{String(index + 1).padStart(2,'0')}</div><h3>{title}</h3><p>{body}</p></Reveal>)}</div>
     </div></section>
 
     <section className="section soft-section"><div className="container split-grid">
       <Reveal as="div" delay={0}>
-        <div className="section-heading"><span>What's included</span><h2>Covered in this service</h2></div>
+        <SectionHeading eyebrow="What's included" title="Covered in this service" />
         <ul className="check-list">{service.included.map(item => <li key={item}><CheckCircle2/>{item}</li>)}</ul>
       </Reveal>
       <Reveal as="div" delay={1} className="alert-banner warning" style={{ alignSelf: 'start' }}>
@@ -93,11 +144,16 @@ export default function ServicePage({ forcedSlug }) {
       </Reveal>
     </div></section>
 
+    {slug === 'business-formation-filings' && <section className="section soft-section"><div className="container">
+      <SectionHeading centered eyebrow="Formation packages" title="Prefer a complete package instead?" description="These packages bundle formation with the registered agent, compliance, and EIN services most new businesses need in year one." />
+      <PricingCards/>
+    </div></section>}
+
     <FAQ items={service.faq}/>
 
     {related.length > 0 && <section className="section"><div className="container">
-      <div className="section-heading centered"><span>Related services</span><h2>Often used together</h2></div>
-      <div className="service-grid">
+      <SectionHeading centered eyebrow="Related services" title="Often used together" />
+      <div className={`service-grid service-grid--${related.length}`}>
         {related.map(item => {
           const RelIcon = item.icon
           return <Link key={item.slug} to={`/${item.slug}`} className="service-card">

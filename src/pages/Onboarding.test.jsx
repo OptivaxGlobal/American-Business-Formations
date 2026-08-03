@@ -91,6 +91,77 @@ describe('Onboarding wizard - ownership step', () => {
   })
 })
 
+async function fillThroughReview(user) {
+  await fillStep0(user)
+  await fillStep1(user)
+  await user.type(screen.getByLabelText(/full name/i), 'Jordan Lee')
+  await user.type(screen.getByLabelText(/^email/i), 'jordan@example.com')
+  await user.type(screen.getByLabelText(/^phone/i), '2341230900')
+  await user.click(screen.getByRole('button', { name: /continue/i }))
+  // Step 3: address
+  await user.type(screen.getByLabelText(/principal office address/i), '123 Main St, Austin, TX 78701')
+  await user.click(screen.getByRole('button', { name: /continue/i }))
+  // Step 4: ownership (single default owner at 100%)
+  await user.type(screen.getByPlaceholderText(/owner 1 name/i), 'Jordan Lee')
+  await user.click(screen.getByRole('button', { name: /continue/i }))
+  // Step 5: registered agent (default ABF, just consent)
+  await user.click(screen.getByLabelText(/i authorize american business formations/i))
+  await user.click(screen.getByRole('button', { name: /continue/i }))
+  // Step 6: organizer (default self)
+  await user.click(screen.getByRole('button', { name: /continue/i }))
+  // Step 7: effective date (default upon filing)
+  await user.click(screen.getByRole('button', { name: /continue/i }))
+  // Step 8: EIN assistance - needsEIN defaults on, requires responsible party
+  await user.type(screen.getByLabelText(/responsible party full name/i), 'Jordan Lee')
+  await user.click(screen.getByRole('button', { name: /continue/i }))
+  // Step 9: additional services (none required)
+  await user.click(screen.getByRole('button', { name: /continue/i }))
+  // Step 10: package (default plan already selected)
+  await user.click(screen.getByRole('button', { name: /continue/i }))
+  // Step 11: account (no user signed in)
+  await user.type(screen.getByLabelText(/^email/i), 'jordan@example.com')
+  await user.type(screen.getByLabelText(/^password/i), 'Str0ng!Pass')
+  await user.type(screen.getByLabelText(/confirm password/i), 'Str0ng!Pass')
+  await user.click(screen.getByLabelText(/i agree to the terms of service and privacy policy/i))
+  await user.click(screen.getByRole('button', { name: /continue/i }))
+  // Step 12: review - final consent
+  await user.click(screen.getByLabelText(/recurring billing terms/i))
+  await user.click(screen.getByRole('button', { name: /continue/i }))
+}
+
+describe('Onboarding wizard - payment step', () => {
+  it('blocks checkout with invalid mock card fields', async () => {
+    const user = userEvent.setup()
+    render(<AllProviders initialEntries={['/formation-details']}><Onboarding/></AllProviders>)
+
+    await fillThroughReview(user)
+    expect(await screen.findByText(/secure checkout/i)).toBeInTheDocument()
+
+    await user.type(screen.getByLabelText(/card number/i), '1234')
+    await user.click(screen.getByRole('button', { name: /complete purchase/i }))
+
+    expect(await screen.findByText(/enter your card security code/i)).toBeInTheDocument()
+    expect(screen.getByText(/enter a valid card number/i)).toBeInTheDocument()
+    expect(screen.getByText(/secure checkout/i)).toBeInTheDocument()
+  })
+
+  it('allows checkout with a valid mock card', async () => {
+    const user = userEvent.setup()
+    render(<AllProviders initialEntries={['/formation-details']}><Onboarding/></AllProviders>)
+
+    await fillThroughReview(user)
+    expect(await screen.findByText(/secure checkout/i)).toBeInTheDocument()
+
+    await user.type(screen.getByLabelText(/name on card/i), 'Jordan Lee')
+    await user.type(screen.getByLabelText(/card number/i), '4242 4242 4242 4242')
+    await user.type(screen.getByLabelText(/expiration/i), '12/30')
+    await user.type(screen.getByLabelText(/cvc/i), '123')
+    await user.click(screen.getByRole('button', { name: /complete purchase/i }))
+
+    expect(await screen.findByText(/you.re all set/i)).toBeInTheDocument()
+  }, 20000)
+})
+
 describe('Onboarding wizard - registered agent step', () => {
   it('rejects a PO Box registered office address', async () => {
     const user = userEvent.setup()

@@ -1,14 +1,25 @@
-import { Linkedin, Mail } from 'lucide-react'
+import { Mail } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Logo from './Logo'
 import { SUPPORT_EMAIL } from '../data/seo'
 
+// Real, verified social profile URLs go here once they exist (e.g.
+// { label: 'LinkedIn', href: 'https://www.linkedin.com/company/...', icon: Linkedin }).
+// Intentionally empty for now rather than linking a generic, non-company URL.
+const socialLinks = []
+
 const formationLinks = [
   ['llc-formation', 'LLC Formation'],
+  ['business-formation-filings', 'Business Formation Filings'],
   ['registered-agent', 'Registered Agent'],
-  ['ein', 'EIN Assistance'],
+  ['ein', 'EIN & S-Corp Elections'],
+  ['s-corp-election', 'S-Corp Election'],
   ['operating-agreement', 'Operating Agreement'],
-  ['texas-dba', 'DBA / Assumed Name']
+  ['texas-dba', 'DBA / Assumed Name'],
+  ['compliance-filings', 'Compliance Filings'],
+  ['certificate-of-good-standing', 'Certificate of Good Standing'],
+  ['apostille-services', 'Apostille Services'],
+  ['mail-forwarding', 'Mail Forwarding']
 ]
 
 export default function Footer() {
@@ -18,7 +29,13 @@ export default function Footer() {
         <div className="footer-brand">
           <Logo light />
           <p>A guided platform for forming and maintaining your LLC currently available for businesses forming in Texas.</p>
-          <div className="social-row"><a href="https://www.linkedin.com" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin /></a></div>
+          {socialLinks.length > 0 && (
+            <div className="social-row">
+              {socialLinks.map(({ label, href, icon: Icon }) => (
+                <a key={label} href={href} target="_blank" rel="noreferrer" aria-label={label}><Icon /></a>
+              ))}
+            </div>
+          )}
         </div>
         <div>
           <h4>Formation</h4>

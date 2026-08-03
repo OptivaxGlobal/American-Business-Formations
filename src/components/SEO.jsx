@@ -36,7 +36,10 @@ export default function SEO({ title, description, path = '', image, type = 'webs
     const prevTitle = document.title
     document.title = fullTitle
 
-    const canonical = `${SITE_URL}${path}`
+    // Normalize so a page passing a trailing slash (or none) always produces
+    // the same canonical URL — prevents duplicate-content ambiguity.
+    const normalizedPath = path === '/' ? '' : path.replace(/\/+$/, '')
+    const canonical = `${SITE_URL}${normalizedPath}` || SITE_URL
     const ogImage = image || DEFAULT_IMAGE
     const created = []
 
