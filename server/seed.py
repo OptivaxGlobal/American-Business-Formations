@@ -29,34 +29,44 @@ with app.app_context():
         db.session.add(admin)
         print(f"Created admin account: {admin_email}")
 
+    # Kept in sync by hand with src/components/PricingCards.jsx (packages)
+    # and src/data/pricing.js (add-ons) the frontend catalog is what
+    # customers actually see, so these rows must match it exactly. Since
+    # this block only runs once (skipped when the table already has rows),
+    # an already-seeded server/data/dev.db needs deleting and re-seeding to
+    # pick up a correction like this one.
     if not Package.query.first():
         db.session.add_all([
-            Package(name="Foundation", price_cents=0, billing_note="service fee + TX state filing fee",
+            Package(name="Foundation", price_cents=15000, billing_note="one-time service fee + state filing fee",
                     description="A straightforward formation starting point.",
-                    features=["Texas LLC formation intake", "Standard processing queue", "Digital document center", "Formation checklist"],
+                    features=["Guided LLC formation questionnaire", "Certificate of Formation preparation and filing", "Formation status tracking in your dashboard", "Digital document center"],
                     sort_order=1),
-            Package(name="Accelerated", price_cents=19900, billing_note="per year + TX state filing fee",
-                    description="Formation plus core Texas compliance support.", is_popular=True,
-                    features=["Everything in Foundation", "Priority processing queue", "Operating agreement request", "Texas compliance reminders"],
+            Package(name="Accelerated", price_cents=20000, billing_note="one-time service fee + state filing fee",
+                    description="Formation plus the registered agent and compliance support most new LLCs need.", is_popular=True,
+                    features=["Everything in Foundation", "One year of registered agent service included", "Compliance deadline reminders", "Operating agreement draft"],
                     sort_order=2),
-            Package(name="Complete", price_cents=24900, billing_note="per year + TX state filing fee",
-                    description="A broader toolkit for launching and growing.",
-                    features=["Everything in Accelerated", "Domain planning tools", "Website project intake", "Logo brief builder"],
+            Package(name="Complete", price_cents=25000, billing_note="one-time service fee + state filing fee",
+                    description="Our most complete package, covering formation, compliance, and your federal tax ID.",
+                    features=["Everything in Accelerated", "Domestic EIN filing included", "DBA / assumed name filing", "Formation documents vault", "Priority support"],
                     sort_order=3),
         ])
         print("Seeded starter packages.")
 
     if not AddOn.query.first():
         db.session.add_all([
-            AddOn(slug="registered-agent", name="Registered agent (1 year)", price_cents=12500, recurring=True),
-            AddOn(slug="ein-assist", name="EIN application assistance", price_cents=7500),
+            AddOn(slug="registered-agent", name="Registered agent (1 year)", price_cents=8000, recurring=True),
+            AddOn(slug="business-formation-filing", name="Business formation filing service", price_cents=9500),
+            AddOn(slug="compliance-filing", name="Compliance filing service", price_cents=9500),
+            AddOn(slug="ein-domestic", name="EIN application (U.S. applicants)", price_cents=3500),
+            AddOn(slug="ein-foreign", name="EIN application (foreign applicants)", price_cents=13000),
             AddOn(slug="operating-agreement", name="Operating agreement", price_cents=6000),
+            AddOn(slug="texas-dba", name="Assumed name (DBA) filing", price_cents=8500),
+            AddOn(slug="compliance", name="Compliance reminders", price_cents=9000, recurring=True),
+            AddOn(slug="s-corp-election", name="S-Corp election (IRS Form 2553)", price_cents=13000),
+            AddOn(slug="apostille", name="Apostille service", price_cents=45000),
+            AddOn(slug="certificate-good-standing", name="Certificate of Good Standing / certified copy filing service", price_cents=7000),
+            AddOn(slug="mail-forwarding", name="Suite-based mail forwarding", price_cents=3000, recurring=True),
             AddOn(slug="expedited", name="Expedited processing", price_cents=2500),
-            AddOn(slug="compliance", name="Texas compliance reminders", price_cents=9000, recurring=True),
-            AddOn(slug="texas-dba", name="Texas assumed name (DBA) filing", price_cents=8500),
-            AddOn(slug="licenses", name="Licenses & permits research", price_cents=8500),
-            AddOn(slug="virtual-address", name="Virtual business address", price_cents=15000, recurring=True),
-            AddOn(slug="trademark", name="Trademark intake assistance", price_cents=19900),
         ])
         print("Seeded starter add-ons.")
 

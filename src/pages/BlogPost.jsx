@@ -9,19 +9,43 @@ import { articleSchema, breadcrumbSchema } from '../data/seo'
 export default function BlogPost(){
   const {slug}=useParams(); const post=posts.find(p=>p.slug===slug); if(!post)return <Navigate to="/404" replace/>
   const path = `/resources/${slug}`
+  // Real, unique per-slug articles have not been written yet (see the
+  // comment above `posts` in Resources.jsx). Until `post.published` is
+  // true, this route is intentionally excluded from sitemap.xml and marked
+  // noindex so six identical bodies are never treated as six unique pages —
+  // `follow` is kept so crawlers can still reach real pages linked from it.
   return <>
     <SEO
       title={post.title}
       description={post.excerpt}
       path={path}
       type="article"
+      noindex={!post.published}
+      follow
       jsonLd={{
         '@context': 'https://schema.org',
+        // Article schema is only emitted once there's a real article behind
+        // it (per-slug body, real author/reviewer, real dates) not for
+        // the shared placeholder template, so no schema ever claims a
+        // generic filler paragraph is a reviewed, dated article.
         '@graph': [
-          articleSchema({ title: post.title, description: post.excerpt, path }),
+          ...(post.published ? [articleSchema({
+            title: post.title,
+            description: post.excerpt,
+            path,
+            datePublished: post.datePublished || undefined,
+            dateModified: post.dateModified || undefined,
+            author: post.author || undefined,
+            reviewer: post.reviewer || undefined
+          })] : []),
           breadcrumbSchema([{ name: 'Home', path: '/' }, { name: 'Resources', path: '/resources' }, { name: post.title }])
         ].map(({ '@context': _drop, ...rest }) => rest)
       }}
     />
-    <section className="article-hero"><Reveal as="div" className="container article-container"><Breadcrumbs items={[{ label: 'Resources', to: '/resources' }, { label: post.title }]} /><span>{post.category} • {post.read}</span><h1>{post.title}</h1><p>{post.excerpt}</p></Reveal></section><article className="article-body container article-container"><p className="lead">Starting a business becomes easier when information is organized before forms, calls, or filings begin. This sample article demonstrates the long-form content layout included in the project.</p><h2>Begin with the purpose of the task</h2><p>Write down what you are trying to accomplish, where the business will operate, who owns it, and which decisions still need professional guidance. A clear business profile reduces repeated questions and makes later steps easier to review.</p><div className="article-callout"><CheckCircle2/><div><strong>Founder tip</strong><p>Keep legal names, addresses, ownership percentages, and identification details consistent across every application.</p></div></div><h2>Create one source of truth</h2><p>Store your selected business name, state, addresses, contacts, service choices, and supporting documents in a central workspace. The American Business Formations dashboard in this project is designed around that principle.</p><h3>Information worth organizing</h3><ul><li>Preferred legal business name and alternatives</li><li>Formation state and operating locations</li><li>Owner and manager details</li><li>Business activity and industry description</li><li>Registered agent and mailing preferences</li><li>Tax, banking, permit, and insurance tasks</li></ul><h2>Use professional advice when required</h2><p>General educational content cannot account for every legal, tax, licensing, or financial situation. Consult a qualified professional before relying on a structure, election, filing, or compliance decision.</p></article></>
+    <section className="article-hero"><Reveal as="div" className="container article-container"><Breadcrumbs items={[{ label: 'Resources', to: '/resources' }, { label: post.title }]} /><span>{post.category} • {post.read}</span><h1>{post.title}</h1><p>{post.excerpt}</p>{post.published && (post.author || post.reviewer) && <p className="article-byline">{post.author ? `By ${post.author}` : null}{post.author && post.reviewer ? ' · ' : ''}{post.reviewer ? `Reviewed by ${post.reviewer}` : null}</p>}</Reveal></section>
+    <article className="article-body container article-container">
+      {!post.published && <div className="alert-banner info"><CheckCircle2/><p style={{margin:0}}>We&rsquo;re preparing a complete, fact-checked article on this topic. Until it&rsquo;s published, here is general guidance covering the same subject area.</p></div>}
+      <p className="lead">Starting a business becomes easier when information is organized before forms, calls, or filings begin.</p><h2>Begin with the purpose of the task</h2><p>Write down what you are trying to accomplish, where the business will operate, who owns it, and which decisions still need professional guidance. A clear business profile reduces repeated questions and makes later steps easier to review.</p><div className="article-callout"><CheckCircle2/><div><strong>Founder tip</strong><p>Keep legal names, addresses, ownership percentages, and identification details consistent across every application.</p></div></div><h2>Create one source of truth</h2><p>Store your selected business name, state, addresses, contacts, service choices, and supporting documents in a central workspace your American Business Formations dashboard is designed around that principle.</p><h3>Information worth organizing</h3><ul><li>Preferred legal business name and alternatives</li><li>Formation state and operating locations</li><li>Owner and manager details</li><li>Business activity and industry description</li><li>Registered agent and mailing preferences</li><li>Tax, banking, permit, and insurance tasks</li></ul><h2>Use professional advice when required</h2><p>General educational content cannot account for every legal, tax, licensing, or financial situation. Consult a qualified professional before relying on a structure, election, filing, or compliance decision.</p>
+    </article>
+  </>
 }

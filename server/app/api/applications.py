@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 
 from flask import Blueprint, request, current_app
 from flask_jwt_extended import get_jwt_identity, jwt_required
@@ -6,10 +5,11 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from ..extensions import db, limiter
 from ..models import (
     Business, FormationApplication, Address, RegisteredAgent, Organizer,
-    GoverningPerson, AuditLog,
+    GoverningPerson, AuditLog, StatusHistory,
 )
 from ..services.email import send_email
-from ..utils import ok, error, sanitize_text
+from .notifications import notify_user
+from ..utils import ok, error, sanitize_text, utcnow
 from ..validations.address import validate_city, validate_street_address, validate_zip
 from ..validations.business import validate_business_name
 from ..validations.common import validate_choice
@@ -110,6 +110,13 @@ def create_application():
         if org_type_err:
             errors["organizer_type"] = org_type_err
 
+    (organizer_line1, organizer_city, organizer_zip), organizer_errors = ((None, None, None), {})
+    if org_type == "other" and data.get("organizer_line1"):
+        (organizer_line1, organizer_city, organizer_zip), organizer_errors = _address_errors(
+            data, "organizer", required=True
+        )
+        errors.update(organizer_errors)
+
     effective_date_option = data.get("effective_date_option")
     if effective_date_option:
         _, eff_opt_err = validate_choice(effective_date_option, EFFECTIVE_DATE_OPTIONS, "Select a valid effective date option.")
@@ -177,13 +184,21 @@ def create_application():
             agent.registered_office_address_id = office.id
         agent.consent_given = bool(data.get("registered_agent_consent"))
         if agent.consent_given and not agent.consent_given_at:
-            agent.consent_given_at = datetime.now(timezone.utc)
+            agent.consent_given_at = utcnow()
         db.session.add(agent)
 
-    # Organizer
+    # Organizer upsert-by-business (not a plain insert): without this, every
+    # autosave call that includes organizer_type would add another Organizer
+    # row for the same business.
     if org_type:
-        organizer = Organizer(business_id=business.id, organizer_type=org_type,
-                               name=sanitize_text(data.get("organizer_name"), 200))
+        organizer = Organizer.query.filter_by(business_id=business.id).first() or Organizer(business_id=business.id)
+        organizer.organizer_type = org_type
+        organizer.name = sanitize_text(data.get("organizer_name"), 200) or organizer.name
+        organizer_address = _build_address(data, "organizer", organizer_line1, organizer_city, organizer_zip)
+        if organizer_address:
+            db.session.add(organizer_address)
+            db.session.flush()
+            organizer.address_id = organizer_address.id
         db.session.add(organizer)
 
     # Governing persons (owners)
@@ -199,6 +214,21 @@ def create_application():
 
     db.session.commit()
     return ok({"business": business.to_dict(), "application": application.to_dict()}, 201)
+
+
+@bp.get("")
+@jwt_required()
+def list_applications():
+    """Every business the current user owns, with its latest application —
+    the customer dashboard's Businesses list. Ownership is enforced by the
+    owner_id filter itself; there is no way to pass another user's id in."""
+    user_id = get_jwt_identity()
+    businesses = Business.query.filter_by(owner_id=user_id).order_by(Business.created_at.desc()).all()
+    results = []
+    for business in businesses:
+        application = business.applications.order_by(FormationApplication.created_at.desc()).first()
+        results.append({"business": business.to_dict(), "application": application.to_dict() if application else None})
+    return ok(results)
 
 
 @bp.get("/<business_id>")
@@ -225,12 +255,20 @@ def submit_application(business_id):
     if not application:
         return error("No draft application found to submit.", 400)
 
+    if application.status != "draft":
+        return error("This application has already been submitted.", 409)
+
     if not business.registered_agent or not business.registered_agent.consent_given:
         return error("Registered agent consent is required before submitting.", 422)
 
+    previous_status = application.status
     application.status = "submitted"
-    application.submitted_at = datetime.now(timezone.utc)
+    application.submitted_at = utcnow()
     business.status = "submitted"
+    db.session.add(StatusHistory(
+        entity_type="application", entity_id=application.id,
+        from_status=previous_status, to_status="submitted", changed_by=user_id,
+    ))
     db.session.commit()
 
     db.session.add(AuditLog(actor_id=user_id, action="Submitted formation application", details=business.id))
@@ -243,5 +281,7 @@ def submit_application(business_id):
         "dashboard_url": f"{current_app.config['FRONTEND_ORIGIN']}/dashboard/businesses/{business.id}",
         "support_email": current_app.config["SUPPORT_EMAIL"],
     })
+    notify_user(user_id, "Formation application submitted", f"{business.name} is now under review.", link=f"/dashboard/businesses/{business.id}")
+    db.session.commit()
 
     return ok({"business": business.to_dict(), "application": application.to_dict()})

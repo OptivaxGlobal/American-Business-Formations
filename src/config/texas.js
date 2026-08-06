@@ -10,15 +10,13 @@
 // owner-configurable placeholders, not verified figures. Confirm current
 // amounts and requirements against the Texas Secretary of State and Texas
 // Comptroller before relying on them for customer-facing pricing or filings.
-
-function loadOverrides() {
-  try {
-    const raw = localStorage.getItem('abf-admin-texas-config')
-    return raw ? JSON.parse(raw) : null
-  } catch {
-    return null
-  }
-}
+//
+// This is a *display* config only it never determines what a customer is
+// actually charged. `server/app/services/texas.py` (env-var-controlled:
+// TEXAS_FILING_FEE/TEXAS_FILING_FEE_VERIFIED) is the source of truth
+// checkout.py always computes the real total server-side, so a value here
+// being stale or wrong could mislead a marketing-page reader but can never
+// change an actual order's price.
 
 const base = {
   name: 'Texas',
@@ -29,8 +27,8 @@ const base = {
   filingFee: Number(import.meta.env.VITE_TX_FILING_FEE) || 300,
   filingFeeVerified: false,
   expeditedFee: 25,
-  processingTimeStandard: '3–5 business days (standard processing, sample estimate)',
-  processingTimeExpedited: '1–2 business days (expedited processing, sample estimate)',
+  processingTimeStandard: '3–5 business days (standard processing, estimate pending confirmation)',
+  processingTimeExpedited: '1–2 business days (expedited processing, estimate pending confirmation)',
   processingTimeVerified: false,
   franchiseTaxNoTaxDueThreshold: null, // owner to confirm current Comptroller threshold before display
   registeredAgent: {
@@ -89,15 +87,14 @@ const base = {
   ]
 }
 
+// Previously supported a localStorage-based admin override
+// (`abf-admin-texas-config`) with no real writer left calling it once
+// AdminSettings.jsx moved to the real, read-only backend config (Part 3) —
+// removed rather than left as a dead path that could silently make a
+// marketing-page price display diverge from the server's real value based
+// on whatever happened to be sitting in a given browser's localStorage.
 export function getTexasConfig() {
-  const overrides = loadOverrides()
-  return overrides ? { ...base, ...overrides } : base
-}
-
-export function saveTexasConfigOverrides(patch) {
-  const next = { ...getTexasConfig(), ...patch }
-  try { localStorage.setItem('abf-admin-texas-config', JSON.stringify(next)) } catch { /* storage unavailable */ }
-  return next
+  return base
 }
 
 export const TEXAS = base

@@ -1,20 +1,34 @@
-import { useApp } from '../../context/AppContext'
-import { useBusiness } from '../../context/BusinessContext'
-import { sampleCustomers } from '../../data/adminDemoData'
+import { useEffect, useState } from 'react'
+import { api } from '../../lib/api'
 import { Table } from '../../components/ui'
+import AsyncState from '../../components/dashboard/AsyncState'
 
 export default function AdminCustomers(){
-  const { user } = useApp()
-  const { businesses } = useBusiness()
+  const [customers, setCustomers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  const load = () => {
+    setLoading(true)
+    setError('')
+    api.adminListCustomers()
+      .then(res => setCustomers(res.data))
+      .catch(err => setError(err?.message || 'We could not load customers. Please try again.'))
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => { load() }, [])
 
   return <div className="dash-card">
-    <div className="admin-toolbar"><h3>Customers</h3></div>
-    <Table>
-      <thead><tr><th>Name</th><th>Email</th><th>Businesses</th><th>Joined</th></tr></thead>
-      <tbody>
-        {user && <tr><td>{user.name} <span className="admin-badge">You (current session)</span></td><td>{user.email}</td><td>{businesses.length}</td><td>—</td></tr>}
-        {sampleCustomers.map(c => <tr key={c.id}><td>{c.name}</td><td>{c.email}</td><td>{c.businesses}</td><td>{new Date(c.joinedAt).toLocaleDateString()}</td></tr>)}
-      </tbody>
-    </Table>
+    <div className="admin-toolbar"><h3>Customers</h3><span className="admin-badge">{customers.length} total</span></div>
+    <AsyncState loading={loading} error={error} onRetry={load} loadingLabel="Loading customers…">
+      {customers.length === 0 && <p className="dash-empty">No customers yet.</p>}
+      {customers.length > 0 && <Table>
+        <thead><tr><th>Name</th><th>Email</th><th>Joined</th></tr></thead>
+        <tbody>
+          {customers.map(c => <tr key={c.id}><td>{c.name}</td><td>{c.email}</td><td>{new Date(c.created_at).toLocaleDateString()}</td></tr>)}
+        </tbody>
+      </Table>}
+    </AsyncState>
   </div>
 }

@@ -12,7 +12,12 @@ bp = Blueprint("orders", __name__, url_prefix="/api/orders")
 def list_orders():
     user_id = get_jwt_identity()
     orders = Order.query.filter_by(user_id=user_id).order_by(Order.created_at.desc()).all()
-    return ok([o.to_dict() for o in orders])
+    results = []
+    for o in orders:
+        data = o.to_dict()
+        data["items"] = [i.to_dict() for i in o.items]
+        results.append(data)
+    return ok(results)
 
 
 @bp.get("/<order_id>")

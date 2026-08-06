@@ -6,7 +6,7 @@ from .business import (
 )
 from .commerce import (
     Package, AddOn, Order, OrderItem, Payment, Subscription,
-    ORDER_STATUSES, PAYMENT_STATUSES,
+    ORDER_STATUSES, PAYMENT_STATUSES, ORDER_STATUSES_PAYABLE_FROM,
 )
 from .support import (
     Document, ComplianceTask, Notification, SupportThread, SupportMessage,
@@ -21,7 +21,7 @@ __all__ = [
     "Address", "Business", "RegisteredAgent", "Organizer", "GoverningPerson",
     "FormationApplication", "APPLICATION_STATUSES",
     "Package", "AddOn", "Order", "OrderItem", "Payment", "Subscription",
-    "ORDER_STATUSES", "PAYMENT_STATUSES",
+    "ORDER_STATUSES", "PAYMENT_STATUSES", "ORDER_STATUSES_PAYABLE_FROM",
     "Document", "ComplianceTask", "Notification", "SupportThread", "SupportMessage",
     "DOCUMENT_TYPES",
     "Lead", "ContactSubmission", "BlogPost", "FAQ", "Testimonial", "SiteSetting", "LEAD_STATUSES",

@@ -1,5 +1,5 @@
 // Wraps the existing .dash-empty class (styles.css), already used as a plain
-// muted <p> across 10 dashboard/admin locations — keeps that exact visual
+// muted <p> across 10 dashboard/admin locations keeps that exact visual
 // weight while allowing an optional leading icon and trailing action node.
 export default function EmptyState({ icon: Icon, children, action, className = '' }) {
   return (

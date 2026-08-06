@@ -5,17 +5,26 @@ import PageHero from '../components/PageHero'
 import Reveal from '../components/Reveal'
 import SEO from '../components/SEO'
 import { useApp } from '../context/AppContext'
-import { recordLead } from '../lib/leads'
+import { api } from '../lib/api'
 import { validateEmail } from '../validations/contactValidation'
 import { fieldAria } from '../lib/formErrors'
 
+// Every entry below is editorial metadata for a future, fully-written
+// article. `published: false` means the body rendered on /resources/:slug
+// is still the shared placeholder template (see BlogPost.jsx) those pages
+// are intentionally excluded from sitemap.xml and marked `noindex` so search
+// engines never treat six identical bodies as six unique pages. When a real,
+// fact-checked article is written for a slug: fill in `author`, `reviewer`,
+// `datePublished` (ISO date, real date it went live never backfilled),
+// replace the body in BlogPost.jsx's content map, then flip `published` to
+// true. Do not fill author/reviewer/dates with invented names or dates.
 export const posts=[
-  {slug:'how-to-start-an-llc',category:'LLC Basics',title:'How to prepare for starting an LLC',excerpt:'A practical checklist of the decisions and information founders commonly organize first.',read:'7 min read'},
-  {slug:'registered-agent-basics',category:'Compliance',title:'What a registered agent does for a business',excerpt:'Understand the role, common requirements, privacy considerations, and document workflows.',read:'6 min read'},
-  {slug:'ein-business-tax-id',category:'Taxes',title:'EIN basics for new business owners',excerpt:'A plain-language overview of the federal tax ID and the details often collected for an application.',read:'5 min read'},
-  {slug:'business-bank-readiness',category:'Finance',title:'Business bank account readiness checklist',excerpt:'Prepare formation records, tax ID details, ownership information, and address documentation.',read:'4 min read'},
-  {slug:'licenses-permits-checklist',category:'Compliance',title:'How to organize license and permit research',excerpt:'Build a location and activity profile before checking federal, state, county, and city requirements.',read:'8 min read'},
-  {slug:'brand-launch-checklist',category:'Branding',title:'A simple brand launch checklist for new businesses',excerpt:'Name, domain, email, logo, website, and communication basics for a credible launch.',read:'6 min read'}
+  {slug:'how-to-start-an-llc',category:'LLC Basics',title:'How to prepare for starting an LLC',excerpt:'A practical checklist of the decisions and information founders commonly organize first.',read:'7 min read',published:false,author:null,reviewer:null,datePublished:null,dateModified:null},
+  {slug:'registered-agent-basics',category:'Compliance',title:'What a registered agent does for a business',excerpt:'Understand the role, common requirements, privacy considerations, and document workflows.',read:'6 min read',published:false,author:null,reviewer:null,datePublished:null,dateModified:null},
+  {slug:'ein-business-tax-id',category:'Taxes',title:'EIN basics for new business owners',excerpt:'A plain-language overview of the federal tax ID and the details often collected for an application.',read:'5 min read',published:false,author:null,reviewer:null,datePublished:null,dateModified:null},
+  {slug:'business-bank-readiness',category:'Finance',title:'Business bank account readiness checklist',excerpt:'Prepare formation records, tax ID details, ownership information, and address documentation.',read:'4 min read',published:false,author:null,reviewer:null,datePublished:null,dateModified:null},
+  {slug:'licenses-permits-checklist',category:'Compliance',title:'How to organize license and permit research',excerpt:'Build a location and activity profile before checking federal, state, county, and city requirements.',read:'8 min read',published:false,author:null,reviewer:null,datePublished:null,dateModified:null},
+  {slug:'brand-launch-checklist',category:'Branding',title:'A simple brand launch checklist for new businesses',excerpt:'Name, domain, email, logo, website, and communication basics for a credible launch.',read:'6 min read',published:false,author:null,reviewer:null,datePublished:null,dateModified:null}
 ]
 
 const TOPICS = ['LLC Basics','Compliance','Taxes','Finance','Branding']
@@ -27,6 +36,7 @@ export default function Resources(){
   const [checklistEmail, setChecklistEmail] = useState('')
   const [checklistError, setChecklistError] = useState('')
   const [checklistSent, setChecklistSent] = useState(false)
+  const [checklistSubmitting, setChecklistSubmitting] = useState(false)
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -37,14 +47,23 @@ export default function Resources(){
     })
   }, [query, topic])
 
-  const submitChecklist = e => {
+  const submitChecklist = async e => {
     e.preventDefault()
     const result = validateEmail(checklistEmail, { required: true })
     if (!result.valid) { setChecklistError(result.message); return }
     setChecklistError('')
-    recordLead('resource_checklist', { email: result.normalized })
-    setChecklistSent(true)
-    notify('Request received — we’ve saved your email for the founder launch checklist.')
+    setChecklistSubmitting(true)
+    try {
+      // No checklist asset exists yet to actually deliver this only ever
+      // claims the interest was recorded, never that a file was sent.
+      await api.submitLead({ source: 'resource_checklist', email: result.normalized, funnel_step: 'resources_page' })
+      setChecklistSent(true)
+      notify('Thanks we’ve saved your interest and will follow up when the checklist is ready.')
+    } catch (err) {
+      setChecklistError(err.message || 'We could not save your request. Please try again.')
+    } finally {
+      setChecklistSubmitting(false)
+    }
   }
 
   return <>
@@ -71,14 +90,14 @@ export default function Resources(){
       <div className="resource-download">
         <FileText aria-hidden="true"/>
         <h4>Founder launch checklist</h4>
-        <p>Enter your email and we&rsquo;ll save your request for the founder launch checklist.</p>
+        <p>Enter your email and we&rsquo;ll let you know as soon as the founder launch checklist is ready.</p>
         {checklistSent
-          ? <p role="status">Thanks — your request has been recorded.</p>
+          ? <p role="status">Thanks we&rsquo;ve saved your interest and will follow up when it&rsquo;s ready.</p>
           : <form onSubmit={submitChecklist} noValidate>
               <label className="sr-only" htmlFor="checklist-email">Email address</label>
-              <input id="checklist-email" type="email" placeholder="you@example.com" value={checklistEmail} onChange={e => { setChecklistEmail(e.target.value); if (checklistError) setChecklistError('') }} {...fieldAria('checklist-email-error', checklistError)}/>
+              <input id="checklist-email" type="email" placeholder="you@example.com" value={checklistEmail} onChange={e => { setChecklistEmail(e.target.value); if (checklistError) setChecklistError('') }} disabled={checklistSubmitting} {...fieldAria('checklist-email-error', checklistError)}/>
               {checklistError && <p id="checklist-email-error" className="field-error">{checklistError}</p>}
-              <button type="submit" className="btn btn-primary btn-block">Get the checklist</button>
+              <button type="submit" className="btn btn-primary btn-block" disabled={checklistSubmitting} aria-busy={checklistSubmitting}>{checklistSubmitting ? 'Submitting…' : 'Notify me'}</button>
             </form>}
       </div>
     </aside>

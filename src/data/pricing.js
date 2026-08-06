@@ -1,6 +1,6 @@
 // Single source of truth for the add-on/government-fee numbers that need to
 // appear in more than one place (the onboarding checkout AND a service
-// page). Values are unchanged from where they previously lived — this file
+// page). Values are unchanged from where they previously lived this file
 // only consolidates where they're *defined* so the two call sites can never
 // drift apart. Plan-tier pricing (Foundation/Accelerated/Complete) still
 // lives in src/components/PricingCards.jsx, since llc-formation/formation-kit
@@ -29,7 +29,7 @@ export const addOnCatalog = [
 // Add-ons a customer can currently select. Kept as its own function (rather
 // than exporting addOnCatalog directly for this purpose) so a future
 // temporarily-disabled entry can be filtered out here without touching every
-// call site — see git history for the pattern this replaced.
+// call site see git history for the pattern this replaced.
 export function getActiveAddOns() {
   return addOnCatalog.filter(a => !a.disabled)
 }
@@ -62,7 +62,7 @@ export function getAddOn(id) {
 
 // Returns the price/fee facts a service page should display for `slug`, or
 // { addOn: null, ... } when the service is bundled into a formation package
-// rather than sold standalone (llc-formation, formation-kit) — those pages
+// rather than sold standalone (llc-formation, formation-kit) those pages
 // should link to /pricing instead of stating a flat number.
 export function getServicePricing(slug) {
   const addOnId = SERVICE_TO_ADDON[slug]
@@ -73,7 +73,7 @@ export function getServicePricing(slug) {
     secondaryAddOnLabel: slug === 'ein' ? 'Foreign applicants' : null,
     governmentFee: (slug === 'llc-formation' || slug === 'business-formation-filings') ? texas.filingFee : (slug === 'ein' || slug === 's-corp-election') ? 0 : null,
     governmentFeeNote: slug === 'texas-dba'
-      ? "Some counties charge an additional filing fee — we'll flag this during intake if it applies to you."
+      ? "Some counties charge an additional filing fee we'll flag this during intake if it applies to you."
       : slug === 'ein'
         ? 'The IRS issues EINs directly at no cost.'
         : slug === 's-corp-election'

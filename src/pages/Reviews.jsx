@@ -1,11 +1,19 @@
 import { MessageSquareText } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import PageHero from '../components/PageHero'
 import Reveal from '../components/Reveal'
 import SEO from '../components/SEO'
-import { loadTestimonials } from '../data/testimonials'
+import { api } from '../lib/api'
 
 export default function Reviews(){
-  const reviews = loadTestimonials().filter(r => !r.placeholder)
+  const [reviews, setReviews] = useState([])
+
+  useEffect(() => {
+    let cancelled = false
+    api.getTestimonials().then(res => { if (!cancelled) setReviews(res.data || []) }).catch(() => {})
+    return () => { cancelled = true }
+  }, [])
+
   return <>
     <SEO title="Customer Stories" description="Verified customer stories from Texas founders who formed their LLC with American Business Formations." path="/reviews" />
     <PageHero
@@ -16,9 +24,9 @@ export default function Reviews(){
     <section className="section"><div className="container">
       {reviews.length > 0
         ? <div className="review-grid">{reviews.map((r,i)=>(
-            <Reveal as="article" delay={i%6} key={r.id || r.name}>
+            <Reveal as="article" delay={i%6} key={r.id}>
               <p>&ldquo;{r.quote}&rdquo;</p>
-              <div className="person"><div>{r.name?.[0] || '?'}</div><span><strong>{r.name}</strong><small>{r.role}</small></span></div>
+              <div className="person"><div>{r.customer_name?.[0] || '?'}</div><span><strong>{r.customer_name}</strong><small>{r.customer_role}</small></span></div>
             </Reveal>
           ))}</div>
         : <div className="alert-banner info" style={{ maxWidth: 640, margin: '0 auto' }}>

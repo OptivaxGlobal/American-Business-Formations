@@ -1,10 +1,12 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Contact from './Contact'
 import { AllProviders } from '../test/testUtils'
 
 describe('Contact page', () => {
+  afterEach(() => { vi.unstubAllGlobals() })
+
   it('blocks submission and shows errors when required fields are invalid', async () => {
     const user = userEvent.setup()
     render(<AllProviders><Contact/></AllProviders>)
@@ -35,7 +37,15 @@ describe('Contact page', () => {
     expect(await screen.findByText(/valid 10-digit u\.s\. phone number/i)).toBeInTheDocument()
   })
 
-  it('allows progression with all valid values', async () => {
+  it('shows success only after the real API call succeeds no local fallback', async () => {
+    const fetchMock = vi.fn(async (url) => {
+      if (String(url).includes('/contact')) {
+        return { ok: true, status: 201, headers: { get: () => 'application/json' }, json: async () => ({ ok: true, data: { submitted: true } }) }
+      }
+      return { ok: false, status: 401, headers: { get: () => 'application/json' }, json: async () => ({ ok: false, message: 'Not authenticated' }) }
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
     const user = userEvent.setup()
     render(<AllProviders><Contact/></AllProviders>)
 
@@ -46,5 +56,44 @@ describe('Contact page', () => {
     await user.click(screen.getByRole('button', { name: /send message/i }))
 
     expect(await screen.findByText(/message has been received/i)).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('/contact'), expect.objectContaining({ method: 'POST' }))
+  })
+
+  it('shows a real error, not a fake success, when the backend rejects the submission', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (url) => {
+      if (String(url).includes('/contact')) {
+        return { ok: false, status: 500, headers: { get: () => 'application/json' }, json: async () => ({ ok: false, message: 'Something went wrong on our end. Please try again.' }) }
+      }
+      return { ok: false, status: 401, headers: { get: () => 'application/json' }, json: async () => ({ ok: false, message: 'Not authenticated' }) }
+    }))
+
+    const user = userEvent.setup()
+    render(<AllProviders><Contact/></AllProviders>)
+
+    await user.type(screen.getByLabelText(/first name/i), 'Jamie')
+    await user.type(screen.getByLabelText(/last name/i), 'Rivera')
+    await user.type(screen.getByLabelText(/^email/i), 'jamie@example.com')
+    await user.type(screen.getByLabelText(/message/i), 'I have a question about registered agents.')
+    await user.click(screen.getByRole('button', { name: /send message/i }))
+
+    expect(await screen.findByText(/something went wrong/i)).toBeInTheDocument()
+    expect(screen.queryByText(/message has been received/i)).not.toBeInTheDocument()
+  })
+
+  it('never calls the API when the honeypot field is filled (spam bot behavior)', async () => {
+    const fetchMock = vi.fn(async () => ({ ok: true, status: 201, headers: { get: () => 'application/json' }, json: async () => ({ ok: true, data: {} }) }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const user = userEvent.setup()
+    render(<AllProviders><Contact/></AllProviders>)
+
+    await user.type(screen.getByLabelText(/first name/i), 'Jamie')
+    await user.type(screen.getByLabelText(/last name/i), 'Rivera')
+    await user.type(screen.getByLabelText(/^email/i), 'jamie@example.com')
+    await user.type(screen.getByLabelText(/message/i), 'I have a question about registered agents.')
+    await user.type(screen.getByLabelText(/leave this field blank/i), 'http://spam.example.com')
+    await user.click(screen.getByRole('button', { name: /send message/i }))
+
+    expect(fetchMock).not.toHaveBeenCalledWith(expect.stringContaining('/contact'), expect.anything())
   })
 })

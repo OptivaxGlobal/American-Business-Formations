@@ -5,7 +5,7 @@ import Logo from './Logo'
 import { serviceGroups, services } from '../data/services'
 import { useApp } from '../context/AppContext'
 import { SUPPORT_EMAIL } from '../data/seo'
-import { loadAnnouncement } from '../data/announcement'
+import { api } from '../lib/api'
 import useFocusTrap from '../hooks/useFocusTrap'
 
 export default function Header() {
@@ -17,7 +17,13 @@ export default function Header() {
   const dropdownRef = useRef(null)
   const navRef = useRef(null)
   const mobileToggleRef = useRef(null)
-  const announcement = loadAnnouncement()
+  const [announcement, setAnnouncement] = useState({ enabled: false, message: '' })
+
+  useEffect(() => {
+    let cancelled = false
+    api.getAnnouncement().then(res => { if (!cancelled) setAnnouncement(res.data) }).catch(() => {})
+    return () => { cancelled = true }
+  }, [])
 
   const toggleGroup = (title) => setOpenGroups(prev => ({ ...prev, [title]: !prev[title] }))
 

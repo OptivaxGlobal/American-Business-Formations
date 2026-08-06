@@ -3,7 +3,7 @@ import { fieldAria } from '../../lib/formErrors'
 // Thin wrapper standardizing the label+input+error markup already used
 // throughout the app's validated forms (see src/validations/*, src/lib/formErrors.js).
 // Existing forms (Login/Signup/Contact/Onboarding/etc.) already implement this
-// pattern correctly and are NOT migrated onto this component — it's here for
+// pattern correctly and are NOT migrated onto this component it's here for
 // any new form so the aria-invalid/aria-describedby wiring is never hand-rolled
 // incorrectly again.
 export default function Input({ label, id, error, hint, className = '', ...rest }) {

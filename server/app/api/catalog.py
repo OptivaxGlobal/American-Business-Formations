@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from ..models import Package, AddOn
+from ..models import Package, AddOn, Testimonial, SiteSetting
 from ..services.texas import get_texas_config
 from ..utils import ok
 
@@ -22,3 +22,21 @@ def list_add_ons():
 @bp.get("/texas-config")
 def texas_config():
     return ok(get_texas_config())
+
+
+@bp.get("/testimonials")
+def list_public_testimonials():
+    """Public read of admin-managed testimonials. Never returns anything
+    that isn't both verified AND published the same rule the admin
+    create/update routes already enforce when writing these rows, checked
+    again here so this endpoint can't be the one place that rule is missed."""
+    testimonials = Testimonial.query.filter_by(verified=True, published=True).all()
+    return ok([{"id": t.id, "customer_name": t.customer_name, "customer_role": t.customer_role, "quote": t.quote} for t in testimonials])
+
+
+@bp.get("/announcement")
+def announcement():
+    setting = SiteSetting.query.filter_by(key="announcement").first()
+    if not setting or not isinstance(setting.value, dict):
+        return ok({"enabled": False, "message": ""})
+    return ok({"enabled": bool(setting.value.get("enabled")), "message": setting.value.get("message") or ""})

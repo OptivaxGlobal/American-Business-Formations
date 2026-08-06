@@ -15,7 +15,13 @@ class User(BaseModel):
     phone = db.Column(db.String(40))
     role = db.Column(db.String(20), nullable=False, default="customer")
     email_verified = db.Column(db.Boolean, default=False, nullable=False)
+    # Set when a profile email change is requested (PATCH /api/account/email)
+    # the real `email` column is never updated until the link sent to
+    # THIS address is confirmed via the same token flow signup uses.
+    pending_email = db.Column(db.String(255), nullable=True)
     marketing_consent = db.Column(db.Boolean, default=False, nullable=False)
+    email_reminders_enabled = db.Column(db.Boolean, default=True, nullable=False)
+    sms_reminders_enabled = db.Column(db.Boolean, default=False, nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     failed_login_count = db.Column(db.Integer, default=0, nullable=False)
     locked_until = db.Column(db.DateTime, nullable=True)
@@ -35,10 +41,15 @@ class User(BaseModel):
             "name": self.name,
             "role": self.role,
             "email_verified": self.email_verified,
+            "phone": self.phone,
+            "marketing_consent": self.marketing_consent,
+            "email_reminders_enabled": self.email_reminders_enabled,
+            "sms_reminders_enabled": self.sms_reminders_enabled,
             "created_at": self.created_at.isoformat(),
         }
         if include_email:
             data["email"] = self.email
+            data["pending_email"] = self.pending_email
         return data
 
 

@@ -1004,6 +1004,8 @@ export default function ChatWidget() {
 
   const chatBodyRef = useRef(null)
   const replyTimeoutRef = useRef(null)
+  const closeButtonRef = useRef(null)
+  const toggleButtonRef = useRef(null)
 
   useEffect(() => {
     if (chatBodyRef.current) {
@@ -1013,6 +1015,26 @@ export default function ChatWidget() {
       })
     }
   }, [messages, typing, open])
+
+  // Keyboard-open the panel and Tab, without this, would skip straight past
+  // it to whatever follows .chat-widget in the DOM (the panel is a sibling
+  // rendered before the toggle button, not a descendant). Move focus in on
+  // open, and support Escape-to-close with focus restored to the toggle —
+  // matching the focus-trap/restoration pattern already used by
+  // Modal.jsx/Drawer.jsx, without full focus-trapping since this is a
+  // non-blocking widget and the rest of the page should stay reachable.
+  useEffect(() => {
+    if (!open) return
+    closeButtonRef.current?.focus()
+    const onKeyDown = e => {
+      if (e.key === 'Escape') {
+        setOpen(false)
+        toggleButtonRef.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [open])
 
   useEffect(() => {
     return () => {
@@ -1059,10 +1081,10 @@ export default function ChatWidget() {
   return (
     <div className="chat-widget">
       {open && (
-        <div className="chat-panel">
+        <div className="chat-panel" role="dialog" aria-modal="false" aria-label="ABF Business Guide chat">
           <div className="chat-head">
             <div>
-              <Bot />
+              <Bot aria-hidden="true" />
 
               <span>
                 <strong>ABF Business Guide</strong>
@@ -1072,14 +1094,15 @@ export default function ChatWidget() {
 
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              ref={closeButtonRef}
+              onClick={() => { setOpen(false); toggleButtonRef.current?.focus() }}
               aria-label="Close chat"
             >
               <X />
             </button>
           </div>
 
-          <div className="chat-body" ref={chatBodyRef}>
+          <div className="chat-body" ref={chatBodyRef} role="log" aria-live="polite" aria-label="Conversation">
             {messages.map((message, index) => (
               <div
                 key={`${message.from}-${index}`}
@@ -1090,10 +1113,10 @@ export default function ChatWidget() {
             ))}
 
             {typing && (
-              <div className="chat-message bot chat-typing">
-                <span />
-                <span />
-                <span />
+              <div className="chat-message bot chat-typing" aria-label="ABF Business Guide is typing">
+                <span aria-hidden="true" />
+                <span aria-hidden="true" />
+                <span aria-hidden="true" />
               </div>
             )}
 
@@ -1134,9 +1157,11 @@ export default function ChatWidget() {
 
       <button
         type="button"
+        ref={toggleButtonRef}
         className="chat-toggle"
         onClick={() => setOpen(current => !current)}
         aria-label={open ? 'Close help chat' : 'Open help chat'}
+        aria-expanded={open}
       >
         {open ? <X /> : <MessageCircle />}
       </button>

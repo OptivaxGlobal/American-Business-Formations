@@ -14,7 +14,23 @@ bp = Blueprint("support", __name__, url_prefix="/api/support")
 def list_threads():
     user_id = get_jwt_identity()
     threads = SupportThread.query.filter_by(user_id=user_id).order_by(SupportThread.updated_at.desc()).all()
-    return ok([{"id": t.id, "subject": t.subject, "status": t.status, "priority": t.priority} for t in threads])
+    return ok([{"id": t.id, "subject": t.subject, "status": t.status, "priority": t.priority, "created_at": t.created_at.isoformat()} for t in threads])
+
+
+@bp.get("/threads/<thread_id>")
+@jwt_required()
+def get_thread(thread_id):
+    user_id = get_jwt_identity()
+    thread = SupportThread.query.filter_by(id=thread_id, user_id=user_id).first()
+    if not thread:
+        return error("Not found", 404)
+    messages = thread.messages.order_by(SupportMessage.created_at).all()
+    return ok({
+        "id": thread.id, "subject": thread.subject, "status": thread.status, "priority": thread.priority,
+        "messages": [{
+            "id": m.id, "body": m.body, "is_staff": m.is_staff, "created_at": m.created_at.isoformat(),
+        } for m in messages],
+    })
 
 
 @bp.post("/threads")

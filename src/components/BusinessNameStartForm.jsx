@@ -3,7 +3,7 @@ import { ArrowRight, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { normalizeBusinessName, validateBusinessName } from '../lib/businessName'
-import { recordLead } from '../lib/leads'
+import { api } from '../lib/api'
 
 // Reused across the homepage hero and other homepage-level "start" CTAs.
 // Renders with the project's existing .state-selector / .state-row classes
@@ -51,7 +51,11 @@ export default function BusinessNameStartForm({
 
     try {
       setBusinessName(normalized)
-      recordLead('business_name_form', { businessName: normalized, source })
+      // Fire-and-forget: lead tracking must never block or delay starting
+      // the application, and a tracking failure here is silent by design
+      // (no success claim is made about it either way) the onboarding
+      // flow itself is the thing that must keep working regardless.
+      api.submitLead({ source, business_name: normalized, funnel_step: source }).catch(() => {})
       onSubmit?.(normalized)
       navigate(`/formation-details?businessName=${encodeURIComponent(normalized)}&source=${encodeURIComponent(source)}`)
     } catch {

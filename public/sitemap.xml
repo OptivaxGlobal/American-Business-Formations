@@ -32,10 +32,13 @@
   <url><loc>https://americanbusinessformations.com/formation-kit</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://americanbusinessformations.com/mail-forwarding</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 
-  <url><loc>https://americanbusinessformations.com/resources/how-to-start-an-llc</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://americanbusinessformations.com/resources/registered-agent-basics</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://americanbusinessformations.com/resources/ein-business-tax-id</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://americanbusinessformations.com/resources/business-bank-readiness</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://americanbusinessformations.com/resources/licenses-permits-checklist</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://americanbusinessformations.com/resources/brand-launch-checklist</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <!--
+    Individual /resources/:slug article URLs are intentionally omitted.
+    Every article currently renders a shared placeholder body (see
+    src/pages/BlogPost.jsx) and is marked noindex until a real, unique,
+    fact-checked article is written for that slug (src/pages/Resources.jsx
+    `posts[].published`). Add a <url> entry back here for a slug only once
+    its `published` flag flips to true and scripts/validate-seo.mjs confirms
+    it. The parent /resources listing page stays indexed above.
+  -->
 </urlset>

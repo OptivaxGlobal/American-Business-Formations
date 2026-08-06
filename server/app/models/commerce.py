@@ -1,8 +1,16 @@
 from ..extensions import db
 from .base import BaseModel
 
-ORDER_STATUSES = ("pending", "paid", "failed", "refunded", "cancelled")
-PAYMENT_STATUSES = ("pending", "succeeded", "failed", "refunded")
+ORDER_STATUSES = ("draft", "pending", "awaiting_payment", "paid", "failed", "refunded", "cancelled")
+PAYMENT_STATUSES = ("not_collected", "pending", "succeeded", "failed", "refunded")
+
+# Orders in a terminal state (refunded/cancelled) or already paid cannot be
+# transitioned to "paid" again recording an offline payment or receiving a
+# Stripe webhook against one of those would be a real status-integrity bug,
+# not a legitimate business event. Anything else (draft/pending/
+# awaiting_payment/failed) is a reasonable starting point for a payment to
+# land on.
+ORDER_STATUSES_PAYABLE_FROM = ("draft", "pending", "awaiting_payment", "failed")
 
 
 class Package(BaseModel):
@@ -63,6 +71,7 @@ class Order(BaseModel):
     def to_dict(self):
         return {
             "id": self.id, "order_number": self.order_number, "status": self.status,
+            "business_id": self.business_id,
             "service_fee_cents": self.service_fee_cents, "state_fee_cents": self.state_fee_cents,
             "add_on_fee_cents": self.add_on_fee_cents, "tax_cents": self.tax_cents,
             "discount_cents": self.discount_cents, "total_cents": self.total_cents,
@@ -91,6 +100,11 @@ class Payment(BaseModel):
     status = db.Column(db.String(20), nullable=False, default="pending")
     amount_cents = db.Column(db.Integer, nullable=False)
     raw_event_id = db.Column(db.String(120), unique=True, nullable=True)  # for webhook idempotency
+    # Free-text reference/note for an offline payment recorded by an admin
+    # (server/app/admin/routes.py record_offline_payment) deliberately not
+    # unique like provider_payment_id, since a reference an admin types by
+    # hand (check number, wire note) shouldn't ever crash on collision.
+    note = db.Column(db.Text, nullable=True)
 
 
 class Subscription(BaseModel):

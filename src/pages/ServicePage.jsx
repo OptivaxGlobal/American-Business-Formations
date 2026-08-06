@@ -38,6 +38,13 @@ export default function ServicePage({ forcedSlug }) {
       title={service.title}
       description={service.short}
       path={path}
+      // Inactive services (services.js `isActive: false`) are real,
+      // reachable routes kept out of nav/footer/sitemap per that file's
+      // own comment but they describe intake tools that aren't launched
+      // yet. Keep them out of search results until launched, same reasoning
+      // as unpublished resource articles.
+      noindex={!service.isActive}
+      follow
       jsonLd={{
         '@context': 'https://schema.org',
         '@graph': [

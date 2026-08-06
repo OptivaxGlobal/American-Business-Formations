@@ -1,7 +1,7 @@
 import uuid
-from datetime import datetime, timezone
 
 from ..extensions import db
+from ..utils import utcnow
 
 
 def gen_uuid():
@@ -12,17 +12,17 @@ class BaseModel(db.Model):
     __abstract__ = True
 
     id = db.Column(db.String(36), primary_key=True, default=gen_uuid)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
     updated_at = db.Column(
         db.DateTime,
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=utcnow,
+        onupdate=utcnow,
         nullable=False,
     )
     deleted_at = db.Column(db.DateTime, nullable=True)
 
     def soft_delete(self):
-        self.deleted_at = datetime.now(timezone.utc)
+        self.deleted_at = utcnow()
 
     @property
     def is_deleted(self):

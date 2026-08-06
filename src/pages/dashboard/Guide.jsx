@@ -22,18 +22,18 @@ export default function Guide(){
   const [question, setQuestion] = useState('')
   const [answer, setAnswer] = useState('')
 
-  const nextStep = selectedBusiness?.timeline?.find(t => !t.done)
-  const openTasks = selectedBusiness?.complianceTasks?.filter(t => !t.done) || []
+  const applicationStatus = selectedBusiness?.application?.status || selectedBusiness?.status
 
   const suggestions = useMemo(() => {
     const list = []
     if (!selectedBusiness) list.push({ text: 'Start your first business', to: '/start' })
-    if (nextStep) list.push({ text: `Review your next step: ${nextStep.label}`, to: selectedBusiness ? `/dashboard/businesses/${selectedBusiness.id}` : '/dashboard/businesses' })
-    openTasks.forEach(t => list.push({ text: `Complete compliance task: ${t.label}`, to: `/dashboard/businesses/${selectedBusiness.id}` }))
-    if (selectedBusiness && selectedBusiness.documents.length === 0) list.push({ text: 'Upload your first document', to: `/dashboard/businesses/${selectedBusiness.id}` })
-    if (list.length === 0) list.push({ text: 'You’re all caught up explore additional services', to: '/services' })
+    else {
+      list.push({ text: `Review your formation status: ${applicationStatus || 'draft'}`, to: `/dashboard/businesses/${selectedBusiness.id}` })
+      list.push({ text: 'Check your documents', to: `/dashboard/businesses/${selectedBusiness.id}` })
+      list.push({ text: 'Review your compliance checklist', to: `/dashboard/businesses/${selectedBusiness.id}` })
+    }
     return list
-  }, [selectedBusiness, nextStep, openTasks])
+  }, [selectedBusiness, applicationStatus])
 
   const ask = e => { e.preventDefault(); if (question.trim()) setAnswer(answerFor(question)) }
 

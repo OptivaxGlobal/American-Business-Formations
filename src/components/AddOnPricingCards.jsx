@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import Reveal from './Reveal'
 
 // A-la-carte service pricing, reusing the exact .pricing-grid/.price-card
-// styling from PricingCards.jsx (no dedicated CSS for this component — the
+// styling from PricingCards.jsx (no dedicated CSS for this component the
 // price-card theme classes there have no visual effect of their own, so
 // omitting a theme here still matches perfectly). Kept as its own small data
 // array rather than derived from src/data/pricing.js so the card copy/order

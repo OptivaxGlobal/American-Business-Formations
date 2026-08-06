@@ -1,0 +1,9 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<p style="font-size:15px;line-height:1.6;">New order <strong>{{ order_number }}</strong> is awaiting payment (payments are not yet configured on this server).</p>
+<table role="presentation" width="100%" style="font-size:14px;margin:16px 0;">
+  <tr><td style="padding:6px 0;color:#616d7e;">Customer</td><td>{{ customer_email }}</td></tr>
+  <tr><td style="padding:6px 0;color:#616d7e;">Order total</td><td>${{ total }}</td></tr>
+</table>
+<p style="font-size:14px;line-height:1.6;">Follow up with the customer to arrange payment manually, then update the order in the admin dashboard once payment is confirmed.</p>
+{% endblock %}

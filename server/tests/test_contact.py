@@ -23,6 +23,16 @@ def test_lead_capture_records_source(client):
     assert res.json["data"]["source"] == "business_name_form"
 
 
+def test_lead_capture_accepts_source_and_email_only(client):
+    # This is exactly the shape Resources.jsx's checklist form and
+    # BusinessNameStartForm.jsx's fire-and-forget lead call send no
+    # business name, no phone, just a source and an email.
+    res = client.post("/api/leads", json={"source": "resource_checklist", "email": "founder@example.com"})
+    assert res.status_code == 201
+    assert res.json["data"]["source"] == "resource_checklist"
+    assert res.json["data"]["email"] == "founder@example.com"
+
+
 def test_health_check(client):
     res = client.get("/api/health")
     assert res.status_code == 200

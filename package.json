@@ -6,9 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "postbuild": "node scripts/prerender.mjs",
+    "postbuild": "node scripts/prerender.mjs && node scripts/validate-seo.mjs",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "validate:seo": "node scripts/validate-seo.mjs",
+    "check:responsive": "node scripts/check-responsive.mjs",
+    "package:source": "node scripts/package-source.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

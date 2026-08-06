@@ -1,52 +1,47 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { api } from '../lib/api'
+import { useApp } from './AppContext'
 
 const OrdersContext = createContext(null)
 
-function load(key, fallback) {
-  try { return JSON.parse(localStorage.getItem(key)) ?? fallback } catch { return fallback }
-}
-
 export function OrdersProvider({ children }) {
-  const [cart, setCart] = useState(() => load('abf-cart', []))
-  const [orders, setOrders] = useState(() => load('abf-orders', []))
+  const { user, authStatus } = useApp()
+  const [orders, setOrders] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  useEffect(() => { localStorage.setItem('abf-cart', JSON.stringify(cart)) }, [cart])
-  useEffect(() => { localStorage.setItem('abf-orders', JSON.stringify(orders)) }, [orders])
-
-  const addToCart = (item) => setCart(prev => prev.some(i => i.id === item.id) ? prev : [...prev, item])
-  const removeFromCart = (id) => setCart(prev => prev.filter(i => i.id !== id))
-  const clearCart = () => setCart([])
-
-  const cartTotals = useMemo(() => {
-    const serviceFees = cart.filter(i => i.type === 'service' || i.type === 'plan').reduce((s, i) => s + (i.price || 0), 0)
-    const stateFees = cart.filter(i => i.type === 'state-fee').reduce((s, i) => s + (i.price || 0), 0)
-    const addOns = cart.filter(i => i.type === 'add-on').reduce((s, i) => s + (i.price || 0), 0)
-    return { serviceFees, stateFees, addOns, total: serviceFees + stateFees + addOns }
-  }, [cart])
-
-  // Mock checkout only no real payment processor is connected. An order is
-  // recorded locally as "paid" for demo purposes; a real integration must
-  // verify payment via a signed server-side webhook before marking anything paid.
-  const checkout = (businessId) => {
-    const order = {
-      id: `ord-${Date.now()}`,
-      businessId,
-      items: cart,
-      ...cartTotals,
-      status: 'paid',
-      createdAt: new Date().toISOString()
+  const load = useCallback(() => {
+    // See BusinessContext.jsx's identical guard: wait for the real /auth/me
+    // check to resolve before flipping `loading` to false, otherwise a
+    // descendant page can see `loading: false, orders: []` for one commit
+    // right as auth resolves, before the real fetch below has run.
+    if (authStatus === 'loading') return
+    if (!user) {
+      setOrders([])
+      setLoading(false)
+      return
     }
-    setOrders(prev => [...prev, order])
-    clearCart()
-    return order
-  }
+    setLoading(true)
+    setError('')
+    api.listOrders()
+      .then(result => setOrders(result?.data || []))
+      .catch(err => setError(err?.message || 'We could not load your orders. Please try again.'))
+      .finally(() => setLoading(false))
+  }, [user, authStatus])
 
-  const ordersForBusiness = (businessId) => orders.filter(o => o.businessId === businessId)
+  useEffect(() => { load() }, [load])
+
+  // Same reset-on-logout guarantee as BusinessContext never let a second
+  // person on the same browser see the previous customer's orders.
+  useEffect(() => {
+    if (!user) setOrders([])
+  }, [user])
+
+  const ordersForBusiness = (businessId) => orders.filter(o => o.business_id === businessId)
 
   const value = useMemo(() => ({
-    cart, addToCart, removeFromCart, clearCart, cartTotals,
-    orders, checkout, ordersForBusiness
-  }), [cart, cartTotals, orders])
+    orders, loading, error, refetch: load, ordersForBusiness,
+  }), [orders, loading, error, load])
 
   return <OrdersContext.Provider value={value}>{children}</OrdersContext.Provider>
 }

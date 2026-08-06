@@ -20,7 +20,7 @@ export default function Pricing() {
   return <>
     <SEO title="Plans & Pricing" description="Transparent Texas LLC formation pricing service fees and state filing fees always shown separately." path="/pricing" jsonLd={faqSchema(faqs)} />
     <PageHero eyebrow="Plans & pricing" title="A clear plan for your LLC" description="Every price below is our service fee. The Texas Secretary of State filing fee is always shown separately, never bundled in a way that hides what goes to the state." actions={<BusinessNameStartForm compact buttonText="Start My LLC" source="pricing_hero"/>} />
-    <section className="section"><div className="container"><PricingCards/><Reveal as="div" delay={3} className="pricing-note"><CheckCircle2/><span><strong>Transparent setup:</strong> plan prices are sample content and state fees are displayed separately.</span></Reveal></div></section>
+    <section className="section"><div className="container"><PricingCards/><Reveal as="div" delay={3} className="pricing-note"><CheckCircle2/><span><strong>Transparent setup:</strong> plan prices reflect our current configured rates, and state fees are always shown separately.</span></Reveal></div></section>
     <section className="section soft-section">
       <div className="container">
         <SectionHeading centered eyebrow="A la carte" title="Individual services, priced separately" description="Add exactly what your business needs, at the price shown below." />

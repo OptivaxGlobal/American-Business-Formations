@@ -1,7 +1,7 @@
 import { ArrowRight, Mail, MailCheck } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { api, withLocalFallback } from '../lib/api'
+import { api } from '../lib/api'
 import { validateEmail } from '../validations/contactValidation'
 import { fieldAria } from '../lib/formErrors'
 import SEO from '../components/SEO'
@@ -16,7 +16,7 @@ export default function ForgotPassword(){
     if (!result.valid) { setError(result.message); return }
     setError(''); setFormError(''); setLoading(true)
     try {
-      await withLocalFallback(() => api.forgotPassword(result.normalized), () => ({ ok: true }))
+      await api.forgotPassword(result.normalized)
       setSent(true)
     } catch (err) {
       setFormError(err.message || 'We could not send a reset link. Please try again.')

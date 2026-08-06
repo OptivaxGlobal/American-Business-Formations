@@ -30,16 +30,25 @@ function upsertLink(rel, href) {
   return created ? el : null
 }
 
-export default function SEO({ title, description, path = '', image, type = 'website', jsonLd, noindex = false }) {
+// `follow` only matters when `noindex` is true it controls whether the
+// robots meta reads "noindex, nofollow" (the right default for auth/private
+// app screens, which have nothing worth crawling onward from) or
+// "noindex, follow" (for a page that's excluded from search itself but
+// still links to real, indexable pages worth reaching, e.g. an unpublished
+// resource article or unlaunched service page linking to active ones).
+export default function SEO({ title, description, path = '', image, type = 'website', jsonLd, noindex = false, follow = false }) {
   useEffect(() => {
     const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME
     const prevTitle = document.title
     document.title = fullTitle
 
     // Normalize so a page passing a trailing slash (or none) always produces
-    // the same canonical URL — prevents duplicate-content ambiguity.
-    const normalizedPath = path === '/' ? '' : path.replace(/\/+$/, '')
-    const canonical = `${SITE_URL}${normalizedPath}` || SITE_URL
+    // the same canonical URL prevents duplicate-content ambiguity. The
+    // homepage is the one path that keeps its trailing slash, matching both
+    // sitemap.xml (`.../` ) and index.html's static canonical every other
+    // path never has one, matching every other prerendered route.
+    const normalizedPath = path === '/' || path === '' ? '/' : `/${path.replace(/^\/+|\/+$/g, '')}`
+    const canonical = normalizedPath === '/' ? `${SITE_URL}/` : `${SITE_URL}${normalizedPath}`
     const ogImage = image || DEFAULT_IMAGE
     const created = []
 
@@ -55,7 +64,7 @@ export default function SEO({ title, description, path = '', image, type = 'webs
     created.push(upsertMeta('name', 'twitter:title', fullTitle))
     created.push(upsertMeta('name', 'twitter:description', description))
     created.push(upsertMeta('name', 'twitter:image', ogImage))
-    created.push(upsertMeta('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow'))
+    created.push(upsertMeta('name', 'robots', noindex ? `noindex, ${follow ? 'follow' : 'nofollow'}` : 'index, follow'))
 
     let scriptEl = null
     if (jsonLd) {

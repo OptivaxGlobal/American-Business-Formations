@@ -20,7 +20,7 @@ describe('Login page - real backend response handling', () => {
 
   it('logs the user in from the real backend envelope { ok, data }, not a { user } shape', async () => {
     // The real /api/auth/login response is { ok: true, data: {...} } (see
-    // server/app/utils.py ok()) — NOT { user: {...} }. This regression test
+    // server/app/utils.py ok()) NOT { user: {...} }. This regression test
     // guards against reintroducing the bug where Login.jsx read `result.user`
     // (always undefined for a real response) instead of `result.data`, which
     // silently set the logged-in user to undefined and bounced straight back
@@ -61,7 +61,7 @@ describe('Login page - real backend response handling', () => {
 
     await user.type(screen.getByLabelText(/email address/i), 'ops@example.com')
     await user.type(screen.getByLabelText(/^password/i), 'Str0ng!Pass1')
-    // Note: demo-admin checkbox intentionally left unchecked here — the real
+    // Note: demo-admin checkbox intentionally left unchecked here the real
     // response's role should still win.
     await user.click(screen.getByRole('button', { name: /log in/i }))
 
@@ -70,13 +70,15 @@ describe('Login page - real backend response handling', () => {
     })
   })
 
-  it('falls back gracefully (never crashes) when /api/* is swallowed by an SPA rewrite and returns HTML instead of JSON', async () => {
+  it('shows a real error (never a fake login, never a crash) when /api/* is swallowed by an SPA rewrite and returns HTML instead of JSON', async () => {
     // Regression test for a real production bug: a hosting rewrite (Vercel's
     // catch-all SPA rewrite) served index.html with a 200 status for /api/*
     // requests instead of hitting the Flask backend. response.ok was true
-    // but the body was HTML, not JSON — this used to produce {} which then
-    // crashed on `loggedInUser.role` with a raw "Cannot read properties of
-    // undefined" error shown to the user. It must now fall back cleanly.
+    // but the body was HTML, not JSON. This used to crash on
+    // `loggedInUser.role` with a raw "Cannot read properties of undefined"
+    // error. Login no longer has any local fallback for authentication (see
+    // docs/part-1-handoff.md), so the correct behavior now is: no crash, no
+    // fake logged-in session, and a clear error message instead.
     vi.stubGlobal('fetch', vi.fn(async () => ({
       ok: true,
       headers: { get: () => 'text/html; charset=utf-8' },
@@ -91,8 +93,9 @@ describe('Login page - real backend response handling', () => {
     await user.click(screen.getByRole('button', { name: /log in/i }))
 
     await waitFor(() => {
-      expect(screen.getByTestId('user-probe')).toHaveTextContent('jordan@example.com:customer')
+      expect(screen.getByText(/we could not log you in/i)).toBeInTheDocument()
     })
+    expect(screen.getByTestId('user-probe')).toHaveTextContent('no-user')
     expect(screen.queryByText(/cannot read properties/i)).not.toBeInTheDocument()
   })
 })

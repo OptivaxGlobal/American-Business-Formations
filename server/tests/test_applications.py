@@ -75,3 +75,30 @@ def test_rejects_invalid_effective_date(client, signup_payload):
     })
     assert res.status_code == 422
     assert "effective_date" in res.json["field_errors"]
+
+
+def test_repeated_autosave_with_same_business_id_never_creates_a_second_business(client, signup_payload):
+    _signed_in_client(client, signup_payload)
+    first = client.post("/api/applications", json={"business_name": "Riverside Consulting LLC"})
+    business_id = first.json["data"]["business"]["id"]
+
+    for _ in range(3):
+        res = client.post("/api/applications", json={"business_id": business_id, "industry": "Consulting"})
+        assert res.status_code == 201
+        assert res.json["data"]["business"]["id"] == business_id
+
+
+def test_cannot_submit_an_application_twice(client, signup_payload):
+    _signed_in_client(client, signup_payload)
+    create = client.post("/api/applications", json={
+        "business_name": "Lonestar Goods LLC",
+        "registered_agent_type": "abf",
+        "registered_agent_consent": True,
+    })
+    business_id = create.json["data"]["business"]["id"]
+
+    first_submit = client.post(f"/api/applications/{business_id}/submit")
+    assert first_submit.status_code == 200
+
+    second_submit = client.post(f"/api/applications/{business_id}/submit")
+    assert second_submit.status_code == 409

@@ -14,6 +14,10 @@ def create_app(config_object=None):
         config_object = get_config()
     app.config.from_object(config_object)
 
+    if os.getenv("FLASK_ENV") == "production":
+        from config import validate_production_config
+        validate_production_config(app.config)
+
     db_uri = app.config["SQLALCHEMY_DATABASE_URI"]
     if db_uri.startswith("sqlite:///") and db_uri != "sqlite:///:memory:":
         os.makedirs(os.path.dirname(db_uri.replace("sqlite:///", "")), exist_ok=True)
@@ -25,6 +29,39 @@ def create_app(config_object=None):
     mail.init_app(app)
     limiter.init_app(app)
     cors.init_app(app, resources={r"/api/*": {"origins": app.config["FRONTEND_ORIGIN"]}}, supports_credentials=True)
+
+    # Flask-JWT-Extended's own default error responses use a different JSON
+    # shape ({"msg": "..."}) than every other error this API returns
+    # ({"ok": false, "message": "..."} via utils.error()) — caught by the
+    # backend test suite's first-ever real run (test_auth.py expected
+    # "message" and got "msg" for a request with no auth cookie at all).
+    # Every jwt_required()-protected route error now goes through the same
+    # envelope as the rest of the API, so the frontend's handleResponse()
+    # (which reads data.message) never silently falls back to a generic
+    # "Request failed" for an auth failure specifically.
+    @jwt.unauthorized_loader
+    def _jwt_missing_token(reason):
+        return error("Authentication required.", 401)
+
+    @jwt.invalid_token_loader
+    def _jwt_invalid_token(reason):
+        return error("Your session is invalid. Please log in again.", 401)
+
+    @jwt.expired_token_loader
+    def _jwt_expired_token(jwt_header, jwt_payload):
+        return error("Your session has expired. Please log in again.", 401)
+
+    @jwt.revoked_token_loader
+    def _jwt_revoked_token(jwt_header, jwt_payload):
+        return error("Your session is no longer valid. Please log in again.", 401)
+
+    @jwt.needs_fresh_token_loader
+    def _jwt_needs_fresh_token(jwt_header, jwt_payload):
+        return error("Please log in again to continue.", 401)
+
+    @jwt.user_lookup_error_loader
+    def _jwt_user_lookup_error(jwt_header, jwt_payload):
+        return error("Your session is invalid. Please log in again.", 401)
 
     from .models import User  # noqa: F401 - ensures models are registered with SQLAlchemy
 
@@ -39,8 +76,29 @@ def create_app(config_object=None):
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        # This API never serves HTML/JS itself (the React app is a separate
+        # static deploy) 'none' by default plus 'self' for the few
+        # directives that matter (e.g. a browser directly opening a JSON
+        # error page) keeps this from ever accidentally allowing a script.
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+        )
         if app.config.get("ENV") == "production" or os.getenv("FLASK_ENV") == "production":
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        # Every authenticated endpoint must never be cached by a shared
+        # cache/proxy/CDN a cached response could leak one customer's
+        # orders, applications, support thread, or account details to
+        # whoever's request happens to hit the same cache entry next.
+        # Applied to the whole API rather than an endpoint-by-endpoint
+        # allowlist (which previously only covered /auth/me, /admin/, and
+        # /documents/ missing /orders, /applications, /support, /account,
+        # /notifications, /compliance) so a newly-added authenticated route
+        # is private-by-default instead of needing to remember to opt in.
+        # The few genuinely public GET reads (catalog/packages, testimonials,
+        # announcement, health) have nothing sensitive to leak, so the
+        # blanket header costs them nothing.
+        if request.path.startswith("/api/"):
+            response.headers["Cache-Control"] = "private, no-store"
         return response
 
     @app.get("/api/health")

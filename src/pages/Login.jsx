@@ -1,7 +1,7 @@
 import { Eye, EyeOff, LockKeyhole, Loader2, Mail } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { api, withLocalFallback } from '../lib/api'
+import { api } from '../lib/api'
 import { useApp } from '../context/AppContext'
 import { validateEmail } from '../validations/contactValidation'
 import { validateLoginPassword } from '../validations/authValidation'
@@ -44,16 +44,13 @@ export default function Login(){
     }
     setFormError('')
     setLoading(true)
-    const isAdmin = new FormData(e.currentTarget).get('is_admin') === 'on'
     const payload = { email: emailResult.normalized, password: values.password }
     try {
       // api.login() resolves to the backend's real envelope { ok, data: {...user} }.
-      // The fallback below is shaped to match so both paths hand `login()`
-      // the same thing regardless of whether the real backend responded.
-      const result = await withLocalFallback(
-        () => api.login(payload),
-        () => ({ data: { name: payload.email.split('@')[0], email: payload.email, role: isAdmin ? 'admin' : 'customer' } })
-      )
+      // Role always comes from that server response there is no local
+      // fallback for authentication, so a failed request always surfaces
+      // as a real error instead of a fake logged-in session.
+      const result = await api.login(payload)
       const loggedInUser = result?.data
       if (!loggedInUser) throw new Error('We could not log you in. Please try again.')
       login(loggedInUser)
@@ -67,7 +64,7 @@ export default function Login(){
       setLoading(false)
     }
   }
-  return <><SEO title="Log In" description="Log in to your American Business Formations account." path="/login" noindex /><section className="auth-page"><div className="auth-shell"><div className="auth-side"><div><span>American Business Formations</span><h1>Your business journey, organized.</h1><p>Sign in to review progress, documents, deadlines, service requests, and recommendations.</p></div><img src="/illustrations/dashboard-preview.svg" alt="Dashboard preview" width="760" height="520"/></div><div className="auth-form-wrap"><Link className="auth-back" to="/">← Back to website</Link><form className="auth-form" onSubmit={submit} noValidate><span>Welcome back</span><h2>Log in to your account</h2><p>Use any valid email and password in the demo.</p>
+  return <><SEO title="Log In" description="Log in to your American Business Formations account." path="/login" noindex /><section className="auth-page"><div className="auth-shell"><div className="auth-side"><div><span>American Business Formations</span><h1>Your business journey, organized.</h1><p>Sign in to review progress, documents, deadlines, service requests, and recommendations.</p></div><img src="/illustrations/dashboard-preview.svg" alt="Dashboard preview" width="760" height="520"/></div><div className="auth-form-wrap"><Link className="auth-back" to="/">← Back to website</Link><form className="auth-form" onSubmit={submit} noValidate><span>Welcome back</span><h2>Log in to your account</h2>
     {formError && <p className="form-error-summary" role="alert">{formError}</p>}
     <label>Email address<div className="input-icon"><Mail/><input required type="email" name="email" autoComplete="email" placeholder="you@example.com" value={values.email} onChange={handleChange('email')} onBlur={handleBlur('email')} ref={el=>fieldRefs.current.email=el} {...fieldAria('login-email-error', errors.email)}/></div>
       {errors.email && <p id="login-email-error" className="field-error">{errors.email}</p>}
@@ -75,5 +72,5 @@ export default function Login(){
     <label>Password<div className="input-icon"><LockKeyhole/><input required type={show?'text':'password'} name="password" autoComplete="current-password" placeholder="••••••••" value={values.password} onChange={handleChange('password')} onBlur={handleBlur('password')} ref={el=>fieldRefs.current.password=el} {...fieldAria('login-password-error', errors.password)}/><button type="button" onClick={()=>setShow(!show)} aria-label={show?'Hide password':'Show password'}>{show?<EyeOff/>:<Eye/>}</button></div>
       {errors.password && <p id="login-password-error" className="field-error">{errors.password}</p>}
     </label>
-    <label className="check-control terms-check"><input type="checkbox" name="is_admin"/> Sign in as demo admin (for testing the admin portal only)</label><div className="form-between"><label className="check-control"><input type="checkbox"/> Remember me</label><Link to="/forgot-password">Forgot password?</Link></div><button className="btn btn-primary btn-block" disabled={loading} aria-busy={loading}>{loading&&<Loader2 className="spin" size={18}/>}<span aria-live="polite">{loading?'Signing in...':'Log in'}</span></button><p className="auth-switch">New to ABF? <Link to="/signup">Create an account</Link></p></form></div></div></section></>
+    <div className="form-between"><label className="check-control"><input type="checkbox"/> Remember me</label><Link to="/forgot-password">Forgot password?</Link></div><button className="btn btn-primary btn-block" disabled={loading} aria-busy={loading}>{loading&&<Loader2 className="spin" size={18}/>}<span aria-live="polite">{loading?'Signing in...':'Log in'}</span></button><p className="auth-switch">New to ABF? <Link to="/signup">Create an account</Link></p></form></div></div></section></>
 }

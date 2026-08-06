@@ -1,8 +1,7 @@
 import { Clock, Mail, Send } from 'lucide-react'
 import { useRef, useState } from 'react'
-import { api, withLocalFallback } from '../lib/api'
+import { api } from '../lib/api'
 import { useApp } from '../context/AppContext'
-import { recordLead } from '../lib/leads'
 import { validateFullName, validateEmail, validatePhone } from '../validations/contactValidation'
 import { validateText } from '../validations/commonValidation'
 import { fieldAria, focusFirstInvalid } from '../lib/formErrors'
@@ -27,6 +26,7 @@ function validateField(name, value) {
 export default function Contact(){
   const [loading,setLoading]=useState(false); const {notify}=useApp()
   const [values, setValues] = useState({ first_name: '', last_name: '', email: '', phone: '', service: 'LLC Formation', message: '' })
+  const [honeypot, setHoneypot] = useState('') // real visitors never fill this in see the input's own comment below
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState({})
   const [formError, setFormError] = useState('')
@@ -49,6 +49,13 @@ export default function Contact(){
 
   const submit = async e => {
     e.preventDefault()
+    // Spam-resistant honeypot: a field real visitors never see or fill in
+    // (hidden off-screen, not display:none, so accessibility tooling that
+    // ignores hidden elements doesn't inadvertently expose it as a real
+    // field but a scripted bot filling every input still catches it). A
+    // non-empty value here quietly no-ops instead of calling the API, no
+    // CAPTCHA involved since none is actually configured.
+    if (honeypot) return
     const nextErrors = {}
     FIELD_ORDER.forEach(name => {
       const result = validateField(name, values[name])
@@ -66,8 +73,11 @@ export default function Contact(){
     setLoading(true)
     const payload = { ...values, first_name: values.first_name.trim(), last_name: values.last_name.trim(), message: values.message.trim() }
     try {
-      await withLocalFallback(() => api.submitContact(payload), () => ({ ok: true }))
-      recordLead('contact_form', { name: `${payload.first_name} ${payload.last_name}`.trim(), email: payload.email, service: payload.service, message: payload.message })
+      // A real 2xx here means the message is actually saved to the
+      // database there is no local fallback, so a genuine failure
+      // (network, validation, server error) always surfaces as a real
+      // error instead of a false "message received."
+      await api.submitContact(payload)
       setValues({ first_name: '', last_name: '', email: '', phone: '', service: 'LLC Formation', message: '' })
       setTouched({})
       notify('Your message has been received. We’ll reply by email.')
@@ -93,6 +103,13 @@ export default function Contact(){
       </Reveal>
       <Reveal as="form" delay={1} className="contact-form" onSubmit={submit} noValidate>
         {formError && <p className="form-error-summary" role="alert">{formError}</p>}
+        {/* Honeypot: real visitors never see this (off-screen, not aria-hidden
+            so it stays out of autofill/scripted-bot blind spots) a filled
+            value means a bot, and submit() quietly no-ops instead of posting. */}
+        <div style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden' }} aria-hidden="false">
+          <label htmlFor="contact-website">Leave this field blank</label>
+          <input id="contact-website" name="website" type="text" tabIndex={-1} autoComplete="off" value={honeypot} onChange={e=>setHoneypot(e.target.value)}/>
+        </div>
         <div className="form-grid">
           <label>First name<input required name="first_name" autoComplete="given-name" value={values.first_name} onChange={handleChange('first_name')} onBlur={handleBlur('first_name')} ref={el=>fieldRefs.current.first_name=el} {...fieldAria('contact-first_name-error', errors.first_name)}/>
             {errors.first_name && <p id="contact-first_name-error" className="field-error">{errors.first_name}</p>}

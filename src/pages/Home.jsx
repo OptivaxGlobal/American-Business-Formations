@@ -2,6 +2,7 @@ import {
   ArrowRight, CalendarClock, CheckCircle2, FileCheck2,
   Lock, Mail, MessageCircle, ReceiptText, ShieldCheck, Sparkles, TrendingUp, X
 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import BusinessNameStartForm from '../components/BusinessNameStartForm'
 import PricingCards from '../components/PricingCards'
@@ -14,7 +15,7 @@ import SEO from '../components/SEO'
 import { SectionHeading } from '../components/ui'
 import { faqSchema, SUPPORT_EMAIL } from '../data/seo'
 import { getTexasConfig } from '../config/texas'
-import { loadTestimonials } from '../data/testimonials'
+import { api } from '../lib/api'
 
 const texas = getTexasConfig()
 
@@ -68,7 +69,13 @@ function TrustBadge() {
 }
 
 export default function Home() {
-  const reviews = loadTestimonials().filter(r => !r.placeholder)
+  const [reviews, setReviews] = useState([])
+
+  useEffect(() => {
+    let cancelled = false
+    api.getTestimonials().then(res => { if (!cancelled) setReviews(res.data || []) }).catch(() => {})
+    return () => { cancelled = true }
+  }, [])
 
   return <>
     <SEO
@@ -238,7 +245,7 @@ export default function Home() {
       <div className="container">
         <SectionHeading centered eyebrow="Founder stories" title="What our customers say" />
         {reviews.length > 0
-          ? <Reveal as="div" className="testimonial-carousel"><article><p>&ldquo;{reviews[0].quote}&rdquo;</p><div className="person"><div>{reviews[0].name?.[0]}</div><span><strong>{reviews[0].name}</strong><small>{reviews[0].role}</small></span></div></article></Reveal>
+          ? <Reveal as="div" className="testimonial-carousel"><article><p>&ldquo;{reviews[0].quote}&rdquo;</p><div className="person"><div>{reviews[0].customer_name?.[0]}</div><span><strong>{reviews[0].customer_name}</strong><small>{reviews[0].customer_role}</small></span></div></article></Reveal>
           : <div className="alert-banner info" style={{ maxWidth: 640, margin: '0 auto' }}><MessageCircle size={20}/><p style={{ margin: 0 }}>We don&rsquo;t publish reviews until we can verify they&rsquo;re from real customers so this section is honestly empty for now. Read <Link to="/about">how we work</Link> instead.</p></div>}
       </div>
     </section>

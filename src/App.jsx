@@ -22,7 +22,6 @@ const Signup = lazy(() => import('./pages/Signup'))
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword'))
-const TwoFactor = lazy(() => import('./pages/TwoFactor'))
 const Onboarding = lazy(() => import('./pages/Onboarding'))
 const DashboardShell = lazy(() => import('./components/dashboard/DashboardShell'))
 const DashboardHome = lazy(() => import('./pages/dashboard/DashboardHome'))
@@ -80,7 +79,6 @@ export default function App(){
     <Route path="verify-email" element={<VerifyEmail/>}/>
     <Route path="forgot-password" element={<ForgotPassword/>}/>
     <Route path="reset-password" element={<ResetPassword/>}/>
-    <Route path="two-factor" element={<TwoFactor/>}/>
     <Route path="start" element={<Navigate to="/formation-details" replace/>}/>
     <Route path="formation-details" element={<Onboarding/>}/>
     <Route path="dashboard" element={<ProtectedRoute><DashboardShell/></ProtectedRoute>}>

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 
 from flask import Blueprint, request, current_app
 from flask_jwt_extended import (
@@ -9,7 +9,7 @@ from flask_jwt_extended import (
 from ..extensions import db, limiter
 from ..models import User, EmailVerificationToken, PasswordResetToken, AuditLog
 from ..services.email import send_email
-from ..utils import ok, error, sanitize_text
+from ..utils import ok, error, sanitize_text, utcnow
 from ..validations.auth import validate_password_strength
 from ..validations.common import collect
 from ..validations.contact import validate_email, validate_full_name
@@ -46,7 +46,7 @@ def signup():
     db.session.add(user)
     db.session.flush()
 
-    token = EmailVerificationToken(user_id=user.id, expires_at=datetime.now(timezone.utc) + timedelta(hours=24))
+    token = EmailVerificationToken(user_id=user.id, expires_at=utcnow() + timedelta(hours=24))
     db.session.add(token)
     db.session.commit()
 
@@ -83,20 +83,20 @@ def login():
     if not user or not user.is_active:
         return generic_error
 
-    if user.locked_until and user.locked_until > datetime.now(timezone.utc):
+    if user.locked_until and user.locked_until > utcnow():
         return error("Too many failed attempts. Try again later.", 423)
 
     if not user.check_password(password):
         user.failed_login_count += 1
         if user.failed_login_count >= 5:
-            user.locked_until = datetime.now(timezone.utc) + timedelta(minutes=15)
+            user.locked_until = utcnow() + timedelta(minutes=15)
             user.failed_login_count = 0
         db.session.commit()
         return generic_error
 
     user.failed_login_count = 0
     user.locked_until = None
-    user.last_login_at = datetime.now(timezone.utc)
+    user.last_login_at = utcnow()
     db.session.commit()
     _log(user.email, "Logged in")
 
@@ -131,12 +131,19 @@ def verify_email():
         return error("This verification link is invalid or has expired.", 400)
 
     token = EmailVerificationToken.query.filter_by(token=token_value, used_at=None).first()
-    if not token or token.expires_at < datetime.now(timezone.utc):
+    if not token or token.expires_at < utcnow():
         return error("This verification link is invalid or has expired.", 400)
 
     user = User.query.get(token.user_id)
+    # The same token flow backs both signup verification and a profile
+    # email change (PATCH /api/account/email) if a change is pending,
+    # confirming this link is what actually swaps the address over, never
+    # before this point.
+    if user.pending_email:
+        user.email = user.pending_email
+        user.pending_email = None
     user.email_verified = True
-    token.used_at = datetime.now(timezone.utc)
+    token.used_at = utcnow()
     db.session.commit()
     _log(user.email, "Verified email")
     return ok({"verified": True})
@@ -155,7 +162,7 @@ def forgot_password():
 
     # Always respond the same way whether or not the account exists.
     if user:
-        token = PasswordResetToken(user_id=user.id, expires_at=datetime.now(timezone.utc) + timedelta(hours=1))
+        token = PasswordResetToken(user_id=user.id, expires_at=utcnow() + timedelta(hours=1))
         db.session.add(token)
         db.session.commit()
         send_email("password_reset", user.email, {
@@ -182,12 +189,12 @@ def reset_password():
         return error("Please correct the highlighted fields.", 422, field_errors=errors)
 
     token = PasswordResetToken.query.filter_by(token=token_value, used_at=None).first()
-    if not token or token.expires_at < datetime.now(timezone.utc):
+    if not token or token.expires_at < utcnow():
         return error("This reset link is invalid or has expired.", 400)
 
     user = User.query.get(token.user_id)
     user.set_password(values["password"])
-    token.used_at = datetime.now(timezone.utc)
+    token.used_at = utcnow()
     db.session.commit()
     _log(user.email, "Reset password")
     return ok({"reset": True})

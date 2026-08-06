@@ -7,7 +7,7 @@ export default function ReviewStep({ wizard }) {
   const { form, errors, handleFieldChange, fieldRefs, addOnCatalog, selectedPlan, stateFee, texas } = wizard
 
   const selectedAddOns = form.addOns.map(id => addOnCatalog.find(a => a.id === id)).filter(Boolean)
-  const dueToday = priceToNumber(selectedPlan.price) + stateFee + selectedAddOns.reduce((s, a) => s + a.price, 0)
+  const estimatedTotal = priceToNumber(selectedPlan.price) + stateFee + selectedAddOns.reduce((s, a) => s + a.price, 0)
   const planRenews = /per year/i.test(selectedPlan.note)
   const recurringAddOns = selectedAddOns.filter(a => a.recurring)
 
@@ -29,7 +29,7 @@ export default function ReviewStep({ wizard }) {
         <div><span>Service plan ({selectedPlan.name})</span><strong>${priceToNumber(selectedPlan.price)}</strong></div>
         <div><span>Texas state filing fee <em>(one-time government fee)</em></span><strong>${stateFee}</strong></div>
         {selectedAddOns.map(a => <div key={a.id}><span>{a.name}{a.recurring ? ` (${a.recurring})` : ''}</span><strong>${a.price}</strong></div>)}
-        <div className="order-total"><span>Billed today</span><strong>${dueToday}</strong></div>
+        <div className="order-total"><span>Order total</span><strong>${estimatedTotal}</strong></div>
         {(planRenews || recurringAddOns.length > 0) && <div className="order-renewal">
           <span>Then renews</span>
           <strong>
@@ -39,7 +39,7 @@ export default function ReviewStep({ wizard }) {
           </strong>
         </div>}
       </div>
-      {!texas.filingFeeVerified && <p className="onboarding-note"><ShieldCheck size={15} /> The filing fee shown is an owner-configured estimate pending confirmation against the Texas Secretary of State. It will be verified before your order is finalized.</p>}
+      {!texas.filingFeeVerified && <p className="onboarding-note"><ShieldCheck size={15} /> The Texas state filing fee shown reflects our current configured rate, pending confirmation against the Texas Secretary of State. Your final total is calculated by our server when you submit.</p>}
       <label className="check-control terms-check">
         <input type="checkbox" checked={form.finalTermsAccepted} onChange={e => handleFieldChange('finalTermsAccepted', e.target.checked)} ref={el => fieldRefs.current.finalTermsAccepted = el} {...fieldAria('finalTermsAccepted-error', errors.finalTermsAccepted)} /> I agree to the Terms of Service, recurring billing terms, and <Link to="/refund-policy" target="_blank" rel="noopener noreferrer">refund and cancellation policy</Link>.
       </label>

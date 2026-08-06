@@ -1,5 +1,7 @@
 node_modules
 dist
+dist.zip
+*.zip
 .env
 server/.env
 __pycache__
@@ -8,5 +10,4 @@ server/.venv
 server/data/*.json
 server/data/*.db
 server/data/uploads/
-server/migrations/
 .pytest_cache

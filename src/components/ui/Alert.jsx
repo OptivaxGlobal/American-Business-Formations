@@ -1,7 +1,7 @@
 import { AlertTriangle, CheckCircle2, Info, ShieldAlert } from 'lucide-react'
 
 // Wraps the existing .alert-banner design-system class (styles.css), already
-// used ad hoc across ServicePage.jsx/Home.jsx/Reviews.jsx — this gives every
+// used ad hoc across ServicePage.jsx/Home.jsx/Reviews.jsx this gives every
 // new usage a consistent icon-per-variant default instead of re-picking one.
 const DEFAULT_ICONS = { info: Info, success: CheckCircle2, warning: AlertTriangle, danger: ShieldAlert }
 

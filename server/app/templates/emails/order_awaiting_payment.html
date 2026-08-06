@@ -1,0 +1,9 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<p style="font-size:15px;line-height:1.6;">Your formation order <strong>{{ order_number }}</strong> has been received.</p>
+<p style="font-size:15px;line-height:1.6;">Online payment is temporarily unavailable. Our team will contact you with the secure payment and next-step details no card information has been requested or collected.</p>
+<table role="presentation" width="100%" style="font-size:14px;margin:16px 0;">
+  <tr><td style="padding:10px 0;font-weight:bold;border-top:1px solid #e5e3db;">Order total</td><td style="text-align:right;font-weight:bold;border-top:1px solid #e5e3db;padding:10px 0;">${{ total }}</td></tr>
+</table>
+<p style="font-size:13px;color:#616d7e;">Questions in the meantime? Reply to this email or reach out to {{ support_email }}.</p>
+{% endblock %}

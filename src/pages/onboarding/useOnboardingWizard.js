@@ -1,34 +1,37 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getTexasConfig } from '../../config/texas'
-import { api, withLocalFallback } from '../../lib/api'
+import { api } from '../../lib/api'
 import { useApp } from '../../context/AppContext'
-import { useBusiness } from '../../context/BusinessContext'
-import { useOrders } from '../../context/OrdersContext'
-import { plans } from '../../components/PricingCards'
 import { normalizeBusinessName, validateBusinessName } from '../../lib/businessName'
 import { validateFullName, validateEmail, validatePhone, validatePreferredContactMethod } from '../../validations/contactValidation'
-import { validateStreetAddress, validateCity } from '../../validations/addressValidation'
+import { validateStreetAddress, validateCity, validateZip } from '../../validations/addressValidation'
 import { validateText, isValidCalendarDate, valid, invalid } from '../../validations/commonValidation'
 import { validateOwnershipPercentage, validateOwnershipTotal, validateEffectiveDate } from '../../validations/formationValidation'
 import { validatePassword, validatePasswordConfirmation } from '../../validations/authValidation'
-import { validateSelectedPlan, validateCardName, validateCardNumber, validateCardExpiry, validateCardCvc } from '../../validations/paymentValidation'
+import { validateSelectedPlan } from '../../validations/paymentValidation'
 import { focusFirstInvalid } from '../../lib/formErrors'
 import { getActiveAddOns } from '../../data/pricing'
+import { plans } from '../../components/PricingCards'
 
 export const texas = getTexasConfig()
 
 export const steps = [
   'Business name', 'Business basics', 'Contact information', 'Business address',
   'Ownership & management', 'Registered agent', 'Organizer', 'Effective date',
-  'EIN assistance', 'Additional services', 'Package', 'Account', 'Review', 'Payment', 'Confirmation'
+  'EIN assistance', 'Additional services', 'Package', 'Account', 'Review', 'Submit order', 'Confirmation'
 ]
 
+// Index of the 'Account' step above — the one place an anonymous visitor's
+// email/password/terms collected in AccountStep.jsx must actually become a
+// real signed-in session (see goNext below) before Review/Submit, which
+// both require a JWT, can possibly succeed.
+const ACCOUNT_STEP = 11
+
 // Only currently-sellable add-ons are offered here (temporarily-disabled
-// entries like registered-agent are excluded by getActiveAddOns()) — every
-// lookup in this file (goNext's plan add, submitPayment's cart build, etc.)
-// shares this same filtered list, so a disabled add-on can never be selected
-// or charged for even from a stale sessionStorage draft.
+// entries like registered-agent are excluded by getActiveAddOns()) every
+// lookup in this file shares this same filtered list, so a disabled add-on
+// can never be selected or ordered even from a stale sessionStorage draft.
 export const addOnCatalog = getActiveAddOns()
 
 export function priceToNumber(price) {
@@ -44,17 +47,61 @@ function businessNameFromQuery() {
   }
 }
 
+// Maps the wizard's camelCase form state to the exact snake_case shape
+// POST/GET /api/applications expects (server/app/api/applications.py).
+// Registered-office and organizer address fields are only included when
+// they're actually collected (self/abf registered agent and "I am the
+// organizer" never show those inputs, so there's nothing valid to send).
+export function buildApplicationPayload(form, businessId) {
+  const payload = {
+    business_name: form.businessName,
+    entity_type: form.entityType,
+    industry: form.industry,
+    purpose: form.purpose,
+    management_structure: form.management,
+    principal_line1: form.principalLine1,
+    principal_city: form.principalCity,
+    principal_zip: form.principalZip,
+    registered_agent_type: form.registeredAgentType,
+    registered_agent_name: form.registeredAgentName,
+    registered_agent_consent: form.registeredAgentConsent,
+    organizer_type: form.organizerType,
+    organizer_name: form.organizerName,
+    effective_date_option: form.effectiveDateOption,
+    needs_ein: form.needsEIN,
+    package_name: form.plan,
+    add_ons: form.addOns,
+    owners: form.ownerDetails.map(o => ({ name: o.name, percentage: Number(o.percentage) || 0 }))
+  }
+  if (businessId) payload.business_id = businessId
+  if (form.effectiveDateOption === 'delayed') payload.effective_date = form.effectiveDate
+  if (form.registeredAgentType !== 'abf') {
+    payload.registered_office_line1 = form.registeredOfficeLine1
+    payload.registered_office_city = form.registeredOfficeCity
+    payload.registered_office_zip = form.registeredOfficeZip
+  }
+  if (form.organizerType === 'other') {
+    payload.organizer_line1 = form.organizerLine1
+    payload.organizer_city = form.organizerCity
+    payload.organizer_zip = form.organizerZip
+  }
+  return payload
+}
+
+function generateIdempotencyKey() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
+  return `idem-${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
 // --- Session recovery ------------------------------------------------------
-// Persists { step, form } to sessionStorage so a refresh or browser back/
-// forward restores progress instead of resetting to step 0 — this is what
-// makes the sidebar's existing "Your answers save automatically as you go"
-// copy actually true. Password and confirm-password are stripped before
-// every save and never persisted, even to sessionStorage; the mock payment
-// fields (card name/number/expiry/cvc) live in fully separate state that
-// this module never touches, so they are never persisted either.
+// Persists { step, form, businessId } to sessionStorage so a refresh or
+// browser back/forward restores progress instead of resetting to step 0.
+// Password/confirm-password are stripped before every save and never
+// persisted, even to sessionStorage there is no card data anywhere in
+// this module to worry about (the mock payment form has been removed).
 const DRAFT_KEY = 'abf_onboarding_draft'
 const NEVER_PERSIST_FIELDS = ['password', 'confirmPassword']
-const MAX_RESTORABLE_STEP = 13 // never restore directly into the confirmation step (14) — it requires a live confirmedOrder that isn't persisted
+const MAX_RESTORABLE_STEP = 13 // never restore directly into the confirmation step (14) that requires a live order fetched from the server
 
 function loadDraft() {
   try {
@@ -68,11 +115,11 @@ function loadDraft() {
   }
 }
 
-function saveDraft(step, form) {
+function saveDraft(step, form, businessId) {
   try {
     const safeForm = { ...form }
     NEVER_PERSIST_FIELDS.forEach(key => { delete safeForm[key] })
-    sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ step, form: safeForm, savedAt: Date.now() }))
+    sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ step, form: safeForm, businessId: businessId || null, savedAt: Date.now() }))
   } catch {
     // sessionStorage unavailable (private browsing, quota, etc.) fail silently, same convention as AppContext's draft persistence
   }
@@ -83,10 +130,10 @@ function clearDraft() {
 }
 
 export default function useOnboardingWizard() {
-  const { user, notify, businessName: draftBusinessName, setBusinessName } = useApp()
-  const { addBusiness } = useBusiness()
-  const { addToCart, checkout } = useOrders()
+  const { user, notify, login, businessName: draftBusinessName, setBusinessName } = useApp()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const orderIdFromUrl = searchParams.get('order')
 
   const [initialDraft] = useState(() => loadDraft())
 
@@ -95,48 +142,25 @@ export default function useOnboardingWizard() {
     return typeof restored === 'number' ? Math.min(Math.max(restored, 0), MAX_RESTORABLE_STEP) : 0
   })
   const [loading, setLoading] = useState(false)
+  const [creatingAccount, setCreatingAccount] = useState(false)
+  const [businessId, setBusinessId] = useState(initialDraft?.businessId || null)
+  const [saveStatus, setSaveStatus] = useState('idle') // idle | saving | saved | failed
   const [confirmedOrder, setConfirmedOrder] = useState(null)
+  const [confirmationError, setConfirmationError] = useState('')
   const [nameError, setNameError] = useState('')
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState({})
   const [formError, setFormError] = useState('')
   const fieldRefs = useRef({})
-
-  // Kept separate from `form` on purpose: these mock card fields are
-  // validated for format only and are never merged into the saved
-  // business/order state, never sent to any API, and never persisted to
-  // sessionStorage a production build replaces this whole panel with
-  // Stripe's hosted fields.
-  const [payment, setPayment] = useState({ cardName: '', cardNumber: '', cardExpiry: '', cardCvc: '' })
-  const [paymentErrors, setPaymentErrors] = useState({})
-  const paymentValidators = { cardName: validateCardName, cardNumber: validateCardNumber, cardExpiry: validateCardExpiry, cardCvc: validateCardCvc }
-  const handlePaymentChange = (key, value) => {
-    setPayment(p => ({ ...p, [key]: value }))
-    if (paymentErrors[key]) {
-      const result = paymentValidators[key](value)
-      setPaymentErrors(e => ({ ...e, [key]: result.valid ? '' : result.message }))
-    }
-  }
-  const markPaymentTouched = (key) => {
-    const result = paymentValidators[key](payment[key])
-    setPaymentErrors(e => ({ ...e, [key]: result.valid ? '' : result.message }))
-  }
-  const computePaymentErrors = () => {
-    const result = {}
-    Object.keys(paymentValidators).forEach(key => {
-      const r = paymentValidators[key](payment[key])
-      if (!r.valid) result[key] = r.message
-    })
-    return result
-  }
+  const [idempotencyKey] = useState(generateIdempotencyKey)
 
   const defaultForm = {
     businessName: draftBusinessName || businessNameFromQuery(), altName: '', nameFinalized: true, industry: '', purpose: '', county: '', city: '', launchDate: '',
     fullName: user?.name || '', email: user?.email || '', phone: '', commPref: 'email',
-    principalAddress: '', mailingSame: true, mailingAddress: '', addressPrivacy: false,
-    registeredAgentType: 'abf', registeredAgentName: '', registeredOfficeAddress: '', registeredAgentConsent: false,
+    principalLine1: '', principalCity: '', principalZip: '', mailingSame: true, mailingLine1: '', mailingCity: '', mailingZip: '', addressPrivacy: false,
+    registeredAgentType: 'abf', registeredAgentName: '', registeredOfficeLine1: '', registeredOfficeCity: '', registeredOfficeZip: '', registeredAgentConsent: false,
     entityType: 'LLC', owners: '1', management: 'Member-managed', ownerDetails: [{ name: '', percentage: 100 }],
-    organizerType: 'self', organizerName: '', organizerAddress: '',
+    organizerType: 'self', organizerName: '', organizerLine1: '', organizerCity: '', organizerZip: '',
     effectiveDateOption: 'filing', effectiveDate: '',
     employees: 'none', hiring: false, salesTax: false,
     needsEIN: true, expectEmployees: false, needsBanking: true, responsibleParty: '',
@@ -149,17 +173,65 @@ export default function useOnboardingWizard() {
   useEffect(() => { setBusinessName(form.businessName) }, [form.businessName])
   const set = (key, value) => setForm(v => ({ ...v, [key]: value }))
 
-  // Debounced session-recovery autosave — never fires more than once every
-  // 400ms of inactivity, matching the "don't repeatedly write on every
-  // keystroke" convention already used elsewhere in the app. Stops once the
-  // order is confirmed (the draft is explicitly cleared at that point instead).
+  // Load a confirmed order fresh from the server whenever the URL carries
+  // one (?order=<id>) this is what makes the confirmation step survive a
+  // refresh instead of depending on the confirmedOrder React state set at
+  // submission time, and is exactly how a returning/refreshed tab lands
+  // back on the right screen with the server's real status and totals.
+  useEffect(() => {
+    if (!orderIdFromUrl) return
+    let cancelled = false
+    setConfirmationError('')
+    api.getOrder(orderIdFromUrl)
+      .then(result => {
+        if (cancelled) return
+        setConfirmedOrder(result?.data || null)
+        clearDraft()
+        setStep(14)
+      })
+      .catch(err => {
+        if (cancelled) return
+        setConfirmationError(err?.message || 'We could not load your order. Please check the link or contact support.')
+      })
+    return () => { cancelled = true }
+  }, [orderIdFromUrl])
+
+  // Debounced session-recovery autosave to sessionStorage never fires
+  // more than once every 400ms of inactivity. Runs regardless of auth state
+  // (this is the safe, non-sensitive draft Step 2 explicitly allows).
   const saveTimeoutRef = useRef(null)
   useEffect(() => {
     if (confirmedOrder) return
     clearTimeout(saveTimeoutRef.current)
-    saveTimeoutRef.current = setTimeout(() => saveDraft(step, form), 400)
+    saveTimeoutRef.current = setTimeout(() => saveDraft(step, form, businessId), 400)
     return () => clearTimeout(saveTimeoutRef.current)
-  }, [step, form, confirmedOrder])
+  }, [step, form, businessId, confirmedOrder])
+
+  // Once the visitor is authenticated, also autosave the application to the
+  // real backend (debounced the same way) so "Saving.../Saved/Save failed"
+  // reflects an actual server round-trip, not just the local sessionStorage
+  // write above. Waits for a plausible business name so the very first
+  // render (before the user has typed anything) doesn't immediately flash
+  // "Save failed" from a 422 on an empty name.
+  const backendSaveTimeoutRef = useRef(null)
+  useEffect(() => {
+    if (confirmedOrder || !user) return
+    if (!form.businessName || form.businessName.trim().length < 2) return
+    clearTimeout(backendSaveTimeoutRef.current)
+    backendSaveTimeoutRef.current = setTimeout(async () => {
+      setSaveStatus('saving')
+      try {
+        const result = await api.saveApplication(buildApplicationPayload(form, businessId))
+        const savedBusinessId = result?.data?.business?.id
+        if (savedBusinessId) setBusinessId(savedBusinessId)
+        setSaveStatus('saved')
+      } catch {
+        setSaveStatus('failed')
+      }
+    }, 600)
+    return () => clearTimeout(backendSaveTimeoutRef.current)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, form, confirmedOrder, user])
 
   // Central map of field -> validator. Each validator reads whatever
   // conditional context it needs off the live form (and `user`) so the
@@ -176,13 +248,21 @@ export default function useOnboardingWizard() {
     email: f => validateEmail(f.email, { required: true }),
     phone: f => validatePhone(f.phone, { required: true }),
     commPref: f => validatePreferredContactMethod(f.commPref, ['email', 'phone', 'sms']),
-    principalAddress: f => validateStreetAddress(f.principalAddress, { required: true }),
-    mailingAddress: f => f.mailingSame ? valid() : validateStreetAddress(f.mailingAddress, { required: true }),
+    principalLine1: f => validateStreetAddress(f.principalLine1, { required: true }),
+    principalCity: f => validateCity(f.principalCity, { required: true }),
+    principalZip: f => validateZip(f.principalZip, { required: true }),
+    mailingLine1: f => f.mailingSame ? valid() : validateStreetAddress(f.mailingLine1, { required: true }),
+    mailingCity: f => f.mailingSame ? valid() : validateCity(f.mailingCity, { required: true }),
+    mailingZip: f => f.mailingSame ? valid() : validateZip(f.mailingZip, { required: true }),
     registeredAgentName: f => f.registeredAgentType === 'abf' ? valid() : validateText(f.registeredAgentName, { required: true, min: 2, max: 200, label: 'Registered agent name' }),
-    registeredOfficeAddress: f => f.registeredAgentType === 'abf' ? valid() : validateStreetAddress(f.registeredOfficeAddress, { required: true, disallowPoBox: true }),
+    registeredOfficeLine1: f => f.registeredAgentType === 'abf' ? valid() : validateStreetAddress(f.registeredOfficeLine1, { required: true, disallowPoBox: true }),
+    registeredOfficeCity: f => f.registeredAgentType === 'abf' ? valid() : validateCity(f.registeredOfficeCity, { required: true }),
+    registeredOfficeZip: f => f.registeredAgentType === 'abf' ? valid() : validateZip(f.registeredOfficeZip, { required: true }),
     registeredAgentConsent: f => f.registeredAgentConsent ? valid() : invalid('You must confirm registered agent consent before continuing.'),
     organizerName: f => f.organizerType !== 'other' ? valid() : validateFullName(f.organizerName, { required: true }),
-    organizerAddress: f => f.organizerType !== 'other' ? valid() : validateStreetAddress(f.organizerAddress, { required: true }),
+    organizerLine1: f => f.organizerType !== 'other' ? valid() : validateStreetAddress(f.organizerLine1, { required: true }),
+    organizerCity: f => f.organizerType !== 'other' ? valid() : validateCity(f.organizerCity, { required: true }),
+    organizerZip: f => f.organizerType !== 'other' ? valid() : validateZip(f.organizerZip, { required: true }),
     effectiveDate: f => f.effectiveDateOption !== 'delayed' ? valid() : validateEffectiveDate(f.effectiveDate, { maxDaysOut: 90 }),
     responsibleParty: f => !f.needsEIN ? valid() : validateFullName(f.responsibleParty, { required: true }),
     plan: f => validateSelectedPlan(f.plan, plans),
@@ -197,9 +277,9 @@ export default function useOnboardingWizard() {
     0: ['businessName', 'industry'],
     1: ['purpose', 'county', 'city', 'launchDate'],
     2: ['fullName', 'email', 'phone', 'commPref'],
-    3: ['principalAddress', 'mailingAddress'],
-    5: ['registeredAgentName', 'registeredOfficeAddress', 'registeredAgentConsent'],
-    6: ['organizerName', 'organizerAddress'],
+    3: ['principalLine1', 'principalCity', 'principalZip', 'mailingLine1', 'mailingCity', 'mailingZip'],
+    5: ['registeredAgentName', 'registeredOfficeLine1', 'registeredOfficeCity', 'registeredOfficeZip', 'registeredAgentConsent'],
+    6: ['organizerName', 'organizerLine1', 'organizerCity', 'organizerZip'],
     7: ['effectiveDate'],
     8: ['responsibleParty'],
     10: ['plan'],
@@ -272,7 +352,7 @@ export default function useOnboardingWizard() {
   const selectedPlan = useMemo(() => plans.find(p => p.name === form.plan) || plans[1], [form.plan])
   const stateFee = texas.filingFee
 
-  const goNext = () => {
+  const goNext = async () => {
     const order = step === 4 ? Object.keys(computeOwnerErrors(form)) : (stepFields[step] || [])
     const stepErrors = computeStepErrors(step, form)
     setErrors(prev => {
@@ -295,7 +375,40 @@ export default function useOnboardingWizard() {
       return
     }
     setFormError('')
-    if (step === 10) addToCart({ id: `plan-${selectedPlan.name}`, type: 'plan', name: `${selectedPlan.name} plan`, price: priceToNumber(selectedPlan.price) })
+
+    // AccountStep.jsx only ever collected accountEmail/password/terms into
+    // local wizard state — nothing previously turned that into a real
+    // account. An anonymous visitor could fill it in, see it marked
+    // "completed" in the sidebar, and reach Submit Order still fully
+    // anonymous: saveApplication/submitApplication/createCheckoutSession
+    // all require a JWT, so submission failed with a 401 every time,
+    // reported as "We could not submit your order." Real signup now
+    // happens here, the one place that transition actually needs to occur
+    // never a fake "completed" state for a step that did nothing.
+    if (step === ACCOUNT_STEP && !user) {
+      setCreatingAccount(true)
+      try {
+        const result = await api.signup({
+          name: form.fullName,
+          email: form.accountEmail,
+          password: form.password,
+          marketing_consent: form.marketingConsent,
+        })
+        const newUser = result?.data
+        if (!newUser) throw new Error('We could not create your account. Please try again.')
+        login(newUser)
+      } catch (err) {
+        setCreatingAccount(false)
+        if (err?.fieldErrors && Object.keys(err.fieldErrors).length) {
+          setErrors(prev => ({ ...prev, ...err.fieldErrors }))
+        }
+        setFormError(err?.message || 'We could not create your account. Please try again.')
+        focusFirstInvalid(fieldRefs, err?.fieldErrors || {}, ['accountEmail', 'password', 'confirmPassword'])
+        return
+      }
+      setCreatingAccount(false)
+    }
+
     setStep(s => Math.min(s + 1, steps.length - 1))
   }
   const goBack = () => step === 0 ? navigate('/') : setStep(s => s - 1)
@@ -307,64 +420,60 @@ export default function useOnboardingWizard() {
     return null
   }
 
-  const submitPayment = async () => {
+  const submitOrder = async () => {
     const invalidStep = findFirstInvalidStep()
     if (invalidStep !== null) {
       notify('Please complete the required information before finishing checkout.')
       setStep(invalidStep)
       return
     }
-    const paymentFieldErrors = computePaymentErrors()
-    setPaymentErrors(paymentFieldErrors)
-    if (Object.keys(paymentFieldErrors).length) {
-      focusFirstInvalid(fieldRefs, paymentFieldErrors, ['cardName', 'cardNumber', 'cardExpiry', 'cardCvc'])
-      return
-    }
     if (loading) return // duplicate-submission guard: a second click while a request is already in flight is a no-op
     setLoading(true)
-    addToCart({ id: `plan-${selectedPlan.name}`, type: 'plan', name: `${selectedPlan.name} plan`, price: priceToNumber(selectedPlan.price) })
-    addToCart({ id: 'state-fee-tx', type: 'state-fee', name: 'Texas state filing fee', price: stateFee })
-    form.addOns.forEach(id => {
-      const item = addOnCatalog.find(a => a.id === id)
-      if (item) addToCart({ id: `addon-${item.id}`, type: 'add-on', name: item.name, price: item.price })
-    })
-    const business = addBusiness({
-      name: form.businessName, entityType: form.entityType, state: 'Texas', industry: form.industry,
-      description: form.purpose, owners: form.owners, management: form.management,
-      registeredAgentType: form.registeredAgentType, organizerType: form.organizerType,
-      effectiveDateOption: form.effectiveDateOption,
-      services: [selectedPlan.name, ...form.addOns]
-    })
+    setFormError('')
     try {
-      await withLocalFallback(() => api.submitOnboarding({ ...form, state: 'Texas', stateFee }), () => ({ ok: true }))
-    } catch (err) {
-      // A genuine backend rejection (not a network/5xx/404 fallback case) must
-      // never be shown to the user as a success — surface it and let them retry.
-      setLoading(false)
-      setFormError(err?.message || 'We could not save your order. Please try again.')
-      notify('We could not complete checkout. Please try again.')
-      return
-    }
-    setTimeout(() => {
-      const order = checkout(business.id)
-      setConfirmedOrder(order)
+      setSaveStatus('saving')
+      const saveResult = await api.saveApplication(buildApplicationPayload(form, businessId))
+      const savedBusinessId = saveResult?.data?.business?.id || businessId
+      setBusinessId(savedBusinessId)
+      setSaveStatus('saved')
+
+      await api.submitApplication(savedBusinessId)
+
+      const checkoutResult = await api.createCheckoutSession({
+        business_id: savedBusinessId,
+        package_id: selectedPlan.name,
+        add_on_ids: form.addOns,
+        idempotency_key: idempotencyKey
+      })
+      const order = checkoutResult?.data?.order
+      if (!order) throw new Error('We could not submit your order. Please try again.')
+
       clearDraft()
-      notify('Your LLC formation plan has been saved.')
+      notify('Your formation order has been received.')
       setLoading(false)
-      setStep(14)
-    }, 700)
+      navigate(`/formation-details?order=${order.id}`)
+    } catch (err) {
+      // A genuine backend rejection must never be shown to the user as a
+      // success the draft is kept intact and the user can retry from
+      // exactly where they left off, with the same idempotency key so a
+      // retry can never create a second order.
+      setLoading(false)
+      setSaveStatus('failed')
+      setFormError(err?.message || 'We could not submit your order. Please try again.')
+      notify('We could not submit your order. Please try again.')
+    }
   }
 
   return {
     user, notify, navigate, steps,
-    step, setStep, loading, confirmedOrder,
+    step, setStep, loading, creatingAccount, confirmedOrder, confirmationError,
+    saveStatus, businessId,
     nameError, setNameError,
     errors, setErrors, touched, setTouched, formError, fieldRefs,
-    payment, paymentErrors, handlePaymentChange, markPaymentTouched,
     form, set, handleFieldChange, markTouched,
     setOwnerCount, setOwnerField, markOwnerTouched, toggleAddOn,
     ownerPercentTotal, selectedPlan, stateFee, texas,
-    goNext, goBack, submitPayment,
+    goNext, goBack, submitOrder,
     addOnCatalog, plans
   }
 }

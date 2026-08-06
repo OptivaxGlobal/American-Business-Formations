@@ -1,7 +1,7 @@
 import { ArrowRight, Eye, EyeOff, LockKeyhole } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { api, withLocalFallback } from '../lib/api'
+import { api } from '../lib/api'
 import { useApp } from '../context/AppContext'
 import { validatePassword, validatePasswordConfirmation } from '../validations/authValidation'
 import { fieldAria } from '../lib/formErrors'
@@ -27,7 +27,7 @@ export default function ResetPassword(){
     setFormError('')
     setLoading(true)
     try {
-      await withLocalFallback(() => api.resetPassword(token, password), () => ({ ok: true }))
+      await api.resetPassword(token, password)
       notify('Password updated. Please log in.')
       navigate('/login')
     } catch (err) {

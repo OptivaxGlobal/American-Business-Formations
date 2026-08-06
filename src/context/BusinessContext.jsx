@@ -1,100 +1,56 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { api } from '../lib/api'
+import { useApp } from './AppContext'
 
 const BusinessContext = createContext(null)
 
-const DEFAULT_TIMELINE = [
-  { label: 'Draft started', done: true },
-  { label: 'Payment received', done: false },
-  { label: 'Information under review', done: false },
-  { label: 'Ready to file', done: false },
-  { label: 'Submitted to state', done: false },
-  { label: 'Approved', done: false }
-]
-
-function migrateLegacyOnboarding() {
-  try {
-    const legacy = JSON.parse(localStorage.getItem('abf-onboarding'))
-    if (!legacy || !legacy.businessName) return []
-    return [{
-      id: 'biz-1',
-      name: legacy.businessName,
-      entityType: legacy.entityType || 'LLC',
-      state: legacy.state || '',
-      industry: legacy.industry || '',
-      description: legacy.description || '',
-      owners: legacy.owners || '1',
-      management: legacy.management || 'Member-managed',
-      services: legacy.services || [],
-      status: 'draft',
-      createdAt: new Date().toISOString(),
-      timeline: DEFAULT_TIMELINE.map(t => ({ ...t })),
-      documents: [],
-      complianceTasks: []
-    }]
-  } catch {
-    return []
-  }
-}
-
-function loadBusinesses() {
-  try {
-    const stored = JSON.parse(localStorage.getItem('abf-businesses'))
-    if (stored && Array.isArray(stored)) return stored
-  } catch { /* fall through to migration */ }
-  return migrateLegacyOnboarding()
-}
-
 export function BusinessProvider({ children }) {
-  const [businesses, setBusinesses] = useState(loadBusinesses)
-  const [selectedBusinessId, setSelectedBusinessId] = useState(() => {
-    return localStorage.getItem('abf-selected-business') || (loadBusinesses()[0]?.id ?? null)
-  })
+  const { user, authStatus } = useApp()
+  const [businesses, setBusinesses] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  // Which business is "selected" in a multi-business account is a small,
+  // non-sensitive UI preference the business data itself always comes
+  // from the server below, this just remembers a choice within the tab.
+  const [selectedBusinessId, setSelectedBusinessId] = useState(null)
 
-  useEffect(() => {
-    localStorage.setItem('abf-businesses', JSON.stringify(businesses))
-  }, [businesses])
-
-  useEffect(() => {
-    if (selectedBusinessId) localStorage.setItem('abf-selected-business', selectedBusinessId)
-  }, [selectedBusinessId])
-
-  const addBusiness = (data) => {
-    const business = {
-      id: `biz-${Date.now()}`,
-      status: 'draft',
-      createdAt: new Date().toISOString(),
-      timeline: DEFAULT_TIMELINE.map(t => ({ ...t })),
-      documents: [],
-      complianceTasks: [],
-      services: [],
-      ...data
+  const load = useCallback(() => {
+    // AppContext's /api/auth/me check hasn't resolved yet stay in the
+    // initial `loading: true` state rather than bailing to an empty list.
+    // Without this guard, `loading` flips to false (bailing on `!user`)
+    // before the real auth check finishes, and the instant it does finish
+    // ProtectedRoute renders a business-detail page in the same commit —
+    // which would see `loading: false, businesses: []` and incorrectly
+    // redirect away before the real fetch below ever gets a chance to run.
+    if (authStatus === 'loading') return
+    if (!user) {
+      setBusinesses([])
+      setLoading(false)
+      return
     }
-    setBusinesses(prev => [...prev, business])
-    setSelectedBusinessId(business.id)
-    return business
-  }
+    setLoading(true)
+    setError('')
+    api.listBusinesses()
+      .then(result => {
+        const rows = (result?.data || []).map(row => ({ ...row.business, application: row.application }))
+        setBusinesses(rows)
+        setSelectedBusinessId(prev => (prev && rows.some(b => b.id === prev)) ? prev : (rows[0]?.id ?? null))
+      })
+      .catch(err => setError(err?.message || 'We could not load your businesses. Please try again.'))
+      .finally(() => setLoading(false))
+  }, [user, authStatus])
 
-  const updateBusiness = (id, patch) => {
-    setBusinesses(prev => prev.map(b => b.id === id ? { ...b, ...(typeof patch === 'function' ? patch(b) : patch) } : b))
-  }
+  useEffect(() => { load() }, [load])
 
-  const addDocument = (businessId, doc) => {
-    updateBusiness(businessId, b => ({
-      documents: [...b.documents, { id: `doc-${Date.now()}`, uploadedAt: new Date().toISOString(), ...doc }]
-    }))
-  }
-
-  const addComplianceTask = (businessId, task) => {
-    updateBusiness(businessId, b => ({
-      complianceTasks: [...b.complianceTasks, { id: `task-${Date.now()}`, done: false, ...task }]
-    }))
-  }
-
-  const toggleComplianceTask = (businessId, taskId) => {
-    updateBusiness(businessId, b => ({
-      complianceTasks: b.complianceTasks.map(t => t.id === taskId ? { ...t, done: !t.done } : t)
-    }))
-  }
+  // Reset cached state the moment there's no authenticated user (logout, or
+  // session expiry) a second person signing into the same browser must
+  // never see the previous customer's businesses, even for a flash.
+  useEffect(() => {
+    if (!user) {
+      setBusinesses([])
+      setSelectedBusinessId(null)
+    }
+  }, [user])
 
   const selectedBusiness = useMemo(
     () => businesses.find(b => b.id === selectedBusinessId) || businesses[0] || null,
@@ -103,15 +59,13 @@ export function BusinessProvider({ children }) {
 
   const value = useMemo(() => ({
     businesses,
+    loading,
+    error,
+    refetch: load,
     selectedBusinessId: selectedBusiness?.id ?? null,
     selectedBusiness,
     setSelectedBusinessId,
-    addBusiness,
-    updateBusiness,
-    addDocument,
-    addComplianceTask,
-    toggleComplianceTask
-  }), [businesses, selectedBusiness])
+  }), [businesses, loading, error, load, selectedBusiness])
 
   return <BusinessContext.Provider value={value}>{children}</BusinessContext.Provider>
 }

@@ -1,7 +1,7 @@
 import { ArrowRight, Loader2, MailCheck, XCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { api, withLocalFallback } from '../lib/api'
+import { api } from '../lib/api'
 import { useApp } from '../context/AppContext'
 import SEO from '../components/SEO'
 
@@ -15,7 +15,7 @@ export default function VerifyEmail(){
   useEffect(() => {
     if (!token) return
     let cancelled = false
-    withLocalFallback(() => api.verifyEmail(token), () => ({ ok: true }))
+    api.verifyEmail(token)
       .then(() => { if (!cancelled) setStatus('verified') })
       .catch(err => { if (!cancelled) { setStatus('error'); setError(err.message || 'This verification link is invalid or has expired.') } })
     return () => { cancelled = true }

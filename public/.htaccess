@@ -7,6 +7,23 @@
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
+  # /api/* must NEVER fall through to index.html. Without this exclusion,
+  # any request to /api/... that doesn't match a real file on this static
+  # host (i.e. every API call, since this host only serves the frontend)
+  # was being served the SPA shell with a 200 status and Content-Type:
+  # text/html instead of a real API response or even a real 404 — the
+  # frontend correctly detected the non-JSON body and reported "We could
+  # not reach the server," but the actual cause (no backend reachable at
+  # /api on this host) was hidden behind that generic message. Excluding
+  # /api here means a genuinely-missing backend now produces a real,
+  # honest 404 from this web server instead of a fake-looking 200 HTML
+  # page. If a Flask backend IS reverse-proxied through this same host
+  # (mod_proxy, if enabled on your plan), add that ProxyPass rule ABOVE
+  # this RewriteCond so it's evaluated first — see docs/deployment-checklist.md.
+  RewriteCond %{REQUEST_URI} ^/api/ [OR]
+  RewriteCond %{REQUEST_URI} ^/api$
+  RewriteRule ^ - [L]
+
   # Everything else falls back to index.html so React Router can handle it
   RewriteRule ^ index.html [L]
 </IfModule>

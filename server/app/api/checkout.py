@@ -4,10 +4,12 @@ from flask import Blueprint, request, current_app
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from ..extensions import db, limiter
-from ..models import Order, OrderItem, Payment, Business, User, AuditLog
+from ..models import Order, OrderItem, Payment, Business, User, AuditLog, Package, AddOn, StatusHistory, ORDER_STATUSES_PAYABLE_FROM
 from ..services.payments import create_checkout_session, verify_webhook_signature, PaymentsNotConfigured
+from ..services.texas import get_texas_config
 from ..services.email import send_email
-from ..utils import ok, error, sanitize_text
+from ..utils import ok, error
+from .notifications import notify_user
 
 bp = Blueprint("checkout", __name__, url_prefix="/api")
 
@@ -16,38 +18,69 @@ def _order_number():
     return f"ABF-{uuid.uuid4().hex[:8].upper()}"
 
 
+AWAITING_PAYMENT_MESSAGE = (
+    "Your formation order has been received. Online payment is temporarily "
+    "unavailable. Our team will contact you with the secure payment and "
+    "next-step details."
+)
+
+
+def _order_response(order, checkout_url=None, message=None, status_code=200):
+    payload = {"order": order.to_dict(), "checkout_url": checkout_url}
+    if message:
+        payload["message"] = message
+    return ok(payload, status_code)
+
+
 @bp.post("/checkout/session")
 @jwt_required()
 @limiter.limit("20 per hour")
 def create_session():
+    """Creates (or, for a repeated idempotency_key, returns) an order priced
+    entirely from server-side data. The request only ever supplies
+    identifiers (business_id, package_id, add_on_ids) never a price. This
+    is the one place order totals are decided; nothing here trusts a number
+    the browser sent."""
     data = request.get_json(silent=True) or {}
     user_id = get_jwt_identity()
     business_id = data.get("business_id")
-    items = data.get("items") or []  # [{type, name, price_cents}]
+    package_id = data.get("package_id")
+    add_on_ids = data.get("add_on_ids") or []
     idempotency_key = data.get("idempotency_key") or uuid.uuid4().hex
 
-    if Order.query.filter_by(idempotency_key=idempotency_key).first():
-        return error("This order has already been submitted.", 409)
-    if not items or not isinstance(items, list):
-        return error("At least one line item is required.", 422)
+    # A retry (dropped connection, double-click, page refresh) with the same
+    # key must be a safe no-op that returns the same order, not an error the
+    # customer has to interpret or a second order being created.
+    existing = Order.query.filter_by(idempotency_key=idempotency_key).first()
+    if existing:
+        return _order_response(existing, checkout_url=None, message=AWAITING_PAYMENT_MESSAGE if existing.status == "awaiting_payment" else None)
 
-    ALLOWED_ITEM_TYPES = ("plan", "state_fee", "add_on")
-    parsed_items = []
-    for i, item in enumerate(items):
-        if not isinstance(item, dict):
-            return error("Please correct the highlighted fields.", 422, field_errors={f"items[{i}]": "Invalid line item."})
-        item_type = item.get("type")
-        if item_type not in ALLOWED_ITEM_TYPES:
-            return error("Please correct the highlighted fields.", 422, field_errors={f"items[{i}].type": "Invalid item type."})
-        try:
-            price_cents = int(item.get("price_cents", 0))
-        except (TypeError, ValueError):
-            return error("Please correct the highlighted fields.", 422, field_errors={f"items[{i}].price_cents": "Enter a valid amount."})
-        if price_cents < 0:
-            return error("Please correct the highlighted fields.", 422, field_errors={f"items[{i}].price_cents": "Amount cannot be negative."})
-        parsed_items.append((item_type, sanitize_text(item.get("name"), 200), price_cents))
+    if not isinstance(add_on_ids, list):
+        return error("Please correct the highlighted fields.", 422, field_errors={"add_on_ids": "Invalid selection."})
 
-    business = Business.query.filter_by(id=business_id, owner_id=user_id).first() if business_id else None
+    business = None
+    if business_id:
+        business = Business.query.filter_by(id=business_id, owner_id=user_id).first()
+        if not business:
+            return error("Not found", 404)
+
+    package = None
+    if package_id:
+        package = Package.query.filter_by(name=package_id, active=True).first()
+        if not package:
+            return error("Please correct the highlighted fields.", 422, field_errors={"package_id": "This package is not available."})
+
+    add_ons = []
+    if add_on_ids:
+        add_ons = AddOn.query.filter(AddOn.slug.in_(add_on_ids), AddOn.active.is_(True)).all()
+        found_slugs = {a.slug for a in add_ons}
+        missing = [slug for slug in add_on_ids if slug not in found_slugs]
+        if missing:
+            return error("Please correct the highlighted fields.", 422,
+                         field_errors={"add_on_ids": f"Not available: {', '.join(missing)}"})
+
+    texas = get_texas_config()
+    state_fee_cents = texas["filing_fee_cents"] if package else 0
 
     order = Order(
         order_number=_order_number(),
@@ -59,34 +92,52 @@ def create_session():
     db.session.add(order)
     db.session.flush()
 
-    totals = {"plan": 0, "state_fee": 0, "add_on": 0}
-    for item_type, name, price_cents in parsed_items:
-        db.session.add(OrderItem(order_id=order.id, item_type=item_type, name=name, price_cents=price_cents))
-        key = "state_fee" if item_type == "state_fee" else ("add_on" if item_type == "add_on" else "plan")
-        totals[key] += price_cents
+    if package:
+        db.session.add(OrderItem(order_id=order.id, item_type="plan", name=package.name, price_cents=package.price_cents))
+    if state_fee_cents:
+        db.session.add(OrderItem(order_id=order.id, item_type="state_fee", name="Texas state filing fee", price_cents=state_fee_cents))
+    for add_on in add_ons:
+        db.session.add(OrderItem(order_id=order.id, item_type="add_on", name=add_on.name, price_cents=add_on.price_cents))
 
-    order.service_fee_cents = totals["plan"]
-    order.state_fee_cents = totals["state_fee"]
-    order.add_on_fee_cents = totals["add_on"]
-    order.total_cents = totals["plan"] + totals["state_fee"] + totals["add_on"]
+    order.service_fee_cents = package.price_cents if package else 0
+    order.state_fee_cents = state_fee_cents
+    order.add_on_fee_cents = sum(a.price_cents for a in add_ons)
+    order.total_cents = order.service_fee_cents + order.state_fee_cents + order.add_on_fee_cents
     db.session.commit()
 
     user = User.query.get(user_id)
     try:
         session = create_checkout_session(
             order,
-            success_url=f"{current_app.config['FRONTEND_ORIGIN']}/formation-details?checkout=success&order={order.order_number}",
+            success_url=f"{current_app.config['FRONTEND_ORIGIN']}/formation-details?checkout=success&order={order.id}",
             cancel_url=f"{current_app.config['FRONTEND_ORIGIN']}/formation-details?checkout=cancelled",
             customer_email=user.email,
         )
         order.stripe_checkout_session_id = session.id
         db.session.commit()
-        return ok({"order": order.to_dict(), "checkout_url": session.url})
+        return _order_response(order, checkout_url=session.url)
     except PaymentsNotConfigured:
-        # Order is recorded as pending; no payment provider is connected yet.
-        # The order will not be marked paid until a real webhook confirms it.
-        return ok({"order": order.to_dict(), "checkout_url": None,
-                   "message": "Payments are not yet configured on this server (missing Stripe keys)."}, 202)
+        # No payment provider is connected yet. The order is saved as
+        # awaiting_payment with an explicit not_collected payment record —
+        # never "pending" (ambiguous) and never "paid". Support follows up
+        # to arrange payment separately; nothing here simulates a charge.
+        order.status = "awaiting_payment"
+        db.session.add(Payment(order_id=order.id, provider="none", status="not_collected", amount_cents=order.total_cents))
+        db.session.add(StatusHistory(entity_type="order", entity_id=order.id, from_status="pending", to_status="awaiting_payment", changed_by=user_id))
+        db.session.add(AuditLog(actor_id=user_id, action="Order awaiting payment (payments not configured)", details=order.order_number))
+        db.session.commit()
+
+        send_email("admin_order_notification", current_app.config["SUPPORT_EMAIL"], {
+            "order_number": order.order_number, "total": order.total_cents / 100,
+            "customer_email": user.email, "support_email": current_app.config["SUPPORT_EMAIL"],
+        })
+        send_email("order_awaiting_payment", user.email, {
+            "order_number": order.order_number, "total": order.total_cents / 100,
+            "support_email": current_app.config["SUPPORT_EMAIL"],
+        })
+        notify_user(user_id, "Order received payment pending", f"Order {order.order_number} is awaiting payment. Our team will be in touch.", link="/dashboard/billing")
+        db.session.commit()
+        return _order_response(order, checkout_url=None, message=AWAITING_PAYMENT_MESSAGE, status_code=202)
 
 
 @bp.post("/webhooks/stripe")
@@ -110,7 +161,13 @@ def stripe_webhook():
 
     if event_type == "checkout.session.completed":
         order = Order.query.filter_by(stripe_checkout_session_id=session_obj["id"]).first()
-        if order:
+        # Guards against a stray/duplicate webhook flipping an order that's
+        # already paid, or one that's since been refunded/cancelled, back to
+        # "paid" the raw_event_id check above already stops the exact same
+        # event from being processed twice, but this stops a *different*
+        # event (e.g. a resent/duplicated session) from doing the same thing
+        # via a different event id.
+        if order and order.status in ORDER_STATUSES_PAYABLE_FROM:
             order.status = "paid"
             db.session.add(Payment(
                 order_id=order.id, provider="stripe", provider_payment_id=session_obj.get("payment_intent"),
@@ -128,7 +185,10 @@ def stripe_webhook():
     elif event_type == "payment_intent.payment_failed":
         payment_intent_id = session_obj.get("id")
         order = Order.query.join(Payment).filter(Payment.provider_payment_id == payment_intent_id).first()
-        if order:
+        # A failed-payment event for an order that's already paid means a
+        # separate, earlier attempt succeeded never let a stray/reordered
+        # webhook downgrade an already-paid order back to "failed".
+        if order and order.status != "paid":
             order.status = "failed"
             db.session.add(AuditLog(action="Payment failed (webhook)", details=order.order_number))
             db.session.commit()

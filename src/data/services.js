@@ -145,8 +145,8 @@ export const services = {
     automated: true,
     isActive: true,
     title: 'A dependable registered agent for your LLC',
-    short: 'Choose a reliable registered agent and registered office for official business notices — $80 per year, per entity.',
-    intro: 'Every LLC and corporation is legally required to maintain a registered agent — a designated recipient for lawsuits, subpoenas, and official state correspondence at a physical street address a P.O. box alone is not enough. Our registered agent service gives your business a reliable, monitored address for service of process and official notices, with scanned documents and compliance reminders delivered straight to your dashboard, for $80 per year, per entity.',
+    short: 'Choose a reliable registered agent and registered office for official business notices $80 per year, per entity.',
+    intro: 'Every LLC and corporation is legally required to maintain a registered agent a designated recipient for lawsuits, subpoenas, and official state correspondence at a physical street address a P.O. box alone is not enough. Our registered agent service gives your business a reliable, monitored address for service of process and official notices, with scanned documents and compliance reminders delivered straight to your dashboard, for $80 per year, per entity.',
     image: '/illustrations/registered-agent.svg',
     features: [
       'Registered office address that meets state requirements',
@@ -189,7 +189,7 @@ export const services = {
       ['How do I switch to your registered agent service if I already have one?', 'Tell us your current registered agent information during intake. We handle the update filing with the state so the change is official, then take over from your renewal date.'],
       ['Will my home address stay private?', 'Yes. Using our registered office address instead of your home address keeps your personal address off the state’s public business filings.'],
       ['How and when do I renew?', 'The service renews annually. We send reminders before your term ends, and renewal is billed automatically unless you cancel from your dashboard.'],
-      ['What’s the difference between a registered agent and mail forwarding?', 'A registered agent is a legal requirement for receiving service of process and state notices. Mail forwarding is a general business mailing address for everyday correspondence. Many customers use both together — see our Mail Forwarding service.']
+      ['What’s the difference between a registered agent and mail forwarding?', 'A registered agent is a legal requirement for receiving service of process and state notices. Mail forwarding is a general business mailing address for everyday correspondence. Many customers use both together see our Mail Forwarding service.']
     ],
     related: ['llc-formation', 'texas-compliance', 'mail-forwarding']
   },
@@ -254,7 +254,7 @@ export const services = {
     automated: true,
     isActive: true,
     title: 'Elect S-Corp tax status for your existing business',
-    short: 'File IRS Form 2553 to elect S-Corporation tax treatment for an already-formed, eligible LLC or corporation — $130.',
+    short: 'File IRS Form 2553 to elect S-Corporation tax treatment for an already-formed, eligible LLC or corporation $130.',
     intro: 'If your LLC or corporation already has an EIN and you have decided S-Corp tax treatment could reduce your self-employment tax, you do not need to redo your EIN filing you just need IRS Form 2553 prepared and filed correctly, within the right deadline. We handle the eligibility check, the paperwork, and the filing for $130, whether or not we handled your original EIN application.',
     image: '/illustrations/compliance.svg',
     features: [

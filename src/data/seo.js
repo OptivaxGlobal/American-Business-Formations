@@ -21,6 +21,16 @@ export const organizationSchema = {
   }
 }
 
+export const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE_NAME,
+  url: SITE_URL
+  // No `potentialAction`/SearchAction this site has no site-wide search
+  // endpoint (the /resources filter is client-side only), so one is not
+  // added rather than pointed at a URL that doesn't exist.
+}
+
 export function breadcrumbSchema(items) {
   return {
     '@context': 'https://schema.org',
@@ -58,7 +68,10 @@ export function serviceSchema({ name, description, path }) {
   }
 }
 
-export function articleSchema({ title, description, path, datePublished }) {
+// `author`/`reviewer` should only ever be real named people once an article
+// is actually written and reviewed never invent a byline. Omit the field
+// entirely (leave it undefined on the post record) until then.
+export function articleSchema({ title, description, path, datePublished, dateModified, author, reviewer }) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -66,6 +79,9 @@ export function articleSchema({ title, description, path, datePublished }) {
     description,
     url: `${SITE_URL}${path}`,
     ...(datePublished ? { datePublished } : {}),
+    ...(dateModified ? { dateModified } : {}),
+    ...(author ? { author: { '@type': 'Person', name: author } } : {}),
+    ...(reviewer ? { reviewedBy: { '@type': 'Person', name: reviewer } } : {}),
     publisher: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL }
   }
 }

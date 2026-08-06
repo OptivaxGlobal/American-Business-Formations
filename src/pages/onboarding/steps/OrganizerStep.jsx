@@ -18,10 +18,20 @@ export default function OrganizerStep({ wizard }) {
           <input value={form.organizerName} onChange={e => handleFieldChange('organizerName', e.target.value)} onBlur={() => markTouched('organizerName')} placeholder="Full name" ref={el => fieldRefs.current.organizerName = el} {...fieldAria('organizerName-error', errors.organizerName)} />
           {errors.organizerName && <p id="organizerName-error" className="field-error">{errors.organizerName}</p>}
         </label>
-        <label>Organizer address
-          <input value={form.organizerAddress} onChange={e => handleFieldChange('organizerAddress', e.target.value)} onBlur={() => markTouched('organizerAddress')} placeholder="Street, city, state, ZIP" ref={el => fieldRefs.current.organizerAddress = el} {...fieldAria('organizerAddress-error', errors.organizerAddress)} />
-          {errors.organizerAddress && <p id="organizerAddress-error" className="field-error">{errors.organizerAddress}</p>}
+        <label>Organizer street address
+          <input value={form.organizerLine1} onChange={e => handleFieldChange('organizerLine1', e.target.value)} onBlur={() => markTouched('organizerLine1')} placeholder="123 Main St" autoComplete="address-line1" ref={el => fieldRefs.current.organizerLine1 = el} {...fieldAria('organizerLine1-error', errors.organizerLine1)} />
+          {errors.organizerLine1 && <p id="organizerLine1-error" className="field-error">{errors.organizerLine1}</p>}
         </label>
+        <div className="form-grid">
+          <label>City
+            <input value={form.organizerCity} onChange={e => handleFieldChange('organizerCity', e.target.value)} onBlur={() => markTouched('organizerCity')} autoComplete="address-level2" ref={el => fieldRefs.current.organizerCity = el} {...fieldAria('organizerCity-error', errors.organizerCity)} />
+            {errors.organizerCity && <p id="organizerCity-error" className="field-error">{errors.organizerCity}</p>}
+          </label>
+          <label>ZIP code
+            <input value={form.organizerZip} onChange={e => handleFieldChange('organizerZip', e.target.value)} onBlur={() => markTouched('organizerZip')} inputMode="numeric" autoComplete="postal-code" ref={el => fieldRefs.current.organizerZip = el} {...fieldAria('organizerZip-error', errors.organizerZip)} />
+            {errors.organizerZip && <p id="organizerZip-error" className="field-error">{errors.organizerZip}</p>}
+          </label>
+        </div>
       </>}
     </div>
   )

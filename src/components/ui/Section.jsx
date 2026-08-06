@@ -2,7 +2,7 @@
 // + .container/.narrow classes (styles.css), applied ad hoc via
 // <section className="section"><div className="container">...</div></section>
 // throughout the app today. Existing pages are not required to migrate to
-// this — it's here so new sections don't hand-copy the scaffolding again.
+// this it's here so new sections don't hand-copy the scaffolding again.
 export function Container({ narrow = false, className = '', children, ...rest }) {
   return <div className={['container', narrow && 'narrow', className].filter(Boolean).join(' ')} {...rest}>{children}</div>
 }
