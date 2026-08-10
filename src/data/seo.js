@@ -1,11 +1,10 @@
 import { SITE_URL, SITE_NAME } from '../components/SEO'
 
-// Single source of truth for the company's published contact address.
-// A phone number and street address were not found anywhere in this
-// project do not add invented ones. If the business owner supplies real
-// values, set them here (and in EMAIL vars server-side) rather than
-// scattering them across components.
+// Single source of truth for the company's published contact details.
+// These values are used in the public contact components and schema.
 export const SUPPORT_EMAIL = 'info@americanbusinessformations.com'
+export const SUPPORT_PHONE = '+1 936 364 9578'
+export const SUPPORT_PHONE_TEL = '+19363649578'
 
 export const organizationSchema = {
   '@context': 'https://schema.org',
@@ -17,6 +16,7 @@ export const organizationSchema = {
     '@type': 'ContactPoint',
     contactType: 'customer service',
     email: SUPPORT_EMAIL,
+    telephone: SUPPORT_PHONE_TEL,
     areaServed: 'US-TX'
   }
 }

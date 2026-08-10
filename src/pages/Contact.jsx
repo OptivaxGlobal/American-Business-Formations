@@ -1,4 +1,4 @@
-import { Clock, Mail, Send } from 'lucide-react'
+import { Clock, Mail, Phone, Send } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { api } from '../lib/api'
 import { useApp } from '../context/AppContext'
@@ -8,7 +8,7 @@ import { fieldAria, focusFirstInvalid } from '../lib/formErrors'
 import PageHero from '../components/PageHero'
 import Reveal from '../components/Reveal'
 import SEO from '../components/SEO'
-import { SUPPORT_EMAIL } from '../data/seo'
+import { SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_PHONE_TEL } from '../data/seo'
 
 const FIELD_ORDER = ['first_name', 'last_name', 'email', 'phone', 'message']
 
@@ -99,6 +99,7 @@ export default function Contact(){
         <h2>Start a conversation</h2>
         <p>Every message reaches a real person, not an automated queue.</p>
         <div><Mail/><span><strong>Email</strong><a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a></span></div>
+        <div><Phone/><span><strong>Phone</strong><a href={`tel:${SUPPORT_PHONE_TEL}`}>{SUPPORT_PHONE}</a></span></div>
         <div><Clock/><span><strong>Response time</strong><p>We reply to every message, typically within one business day.</p></span></div>
       </Reveal>
       <Reveal as="form" delay={1} className="contact-form" onSubmit={submit} noValidate>

@@ -1,7 +1,7 @@
-import { Mail } from 'lucide-react'
+import { Mail, Phone } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Logo from './Logo'
-import { SUPPORT_EMAIL } from '../data/seo'
+import { SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_PHONE_TEL } from '../data/seo'
 
 // Real, verified social profile URLs go here once they exist (e.g.
 // { label: 'LinkedIn', href: 'https://www.linkedin.com/company/...', icon: Linkedin }).
@@ -57,7 +57,8 @@ export default function Footer() {
           <Link to="/terms">Terms and Conditions</Link>
           <Link to="/refund-policy">Refund Policy</Link>
           <Link to="/disclaimer">Legal Disclaimer</Link>
-          <p className="footer-contact"><Mail size={16}/> {SUPPORT_EMAIL}</p>
+          <p className="footer-contact"><Mail size={16}/> <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a></p>
+          <p className="footer-contact"><Phone size={16}/> <a href={`tel:${SUPPORT_PHONE_TEL}`}>{SUPPORT_PHONE}</a></p>
         </div>
       </div>
       <div className="container footer-bottom">
