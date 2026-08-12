@@ -1,4 +1,5 @@
-import { Clock, Mail, Phone, Send } from 'lucide-react'
+import { Clock, Mail, MapPin, Phone, Send } from 'lucide-react'
+import { FaFacebookF, FaInstagram, FaLinkedinIn, FaPinterestP, FaTiktok, FaXTwitter } from 'react-icons/fa6'
 import { useRef, useState } from 'react'
 import { api } from '../lib/api'
 import { useApp } from '../context/AppContext'
@@ -8,7 +9,16 @@ import { fieldAria, focusFirstInvalid } from '../lib/formErrors'
 import PageHero from '../components/PageHero'
 import Reveal from '../components/Reveal'
 import SEO from '../components/SEO'
-import { SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_PHONE_TEL } from '../data/seo'
+import { BUSINESS_ADDRESS, BUSINESS_ADDRESS_MAP_URL, SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_PHONE_TEL } from '../data/seo'
+
+const socialLinks = [
+  { label: 'Facebook', href: 'https://www.facebook.com/americanbusinessformations/', icon: FaFacebookF, cls: 'facebook' },
+  { label: 'Instagram', href: 'https://www.instagram.com/american_business_formations/', icon: FaInstagram, cls: 'instagram' },
+  { label: 'X', href: 'https://x.com/American_bus_F', icon: FaXTwitter, cls: 'x' },
+  { label: 'TikTok', href: 'https://www.tiktok.com/@americanbusinessf?lang=en', icon: FaTiktok, cls: 'tiktok' },
+  { label: 'Pinterest', href: 'https://www.pinterest.com/americanbusinessformations/', icon: FaPinterestP, cls: 'pinterest' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/company/american-business-formations/', icon: FaLinkedinIn, cls: 'linkedin' }
+]
 
 const FIELD_ORDER = ['first_name', 'last_name', 'email', 'phone', 'message']
 
@@ -92,15 +102,24 @@ export default function Contact(){
   }
 
   return <>
-    <SEO title="Contact Us" description="Reach American Business Formations for Texas LLC formation questions, service requests, or support." path="/contact" />
+    <SEO title="Contact Us" description="Reach American Business Formations for LLC formation questions, service requests, or support, in any of our 21 supported states." path="/contact" />
     <PageHero eyebrow="Contact our team" title="Tell us how we can help" description="Use the form for LLC formation questions, service requests, or general support." />
     <section className="section"><div className="container contact-grid">
       <Reveal as="div" delay={0} className="contact-details">
         <h2>Start a conversation</h2>
         <p>Every message reaches a real person, not an automated queue.</p>
+        <div><MapPin/><span><strong>Address</strong><a href={BUSINESS_ADDRESS_MAP_URL} target="_blank" rel="noopener noreferrer">{BUSINESS_ADDRESS}</a></span></div>
         <div><Mail/><span><strong>Email</strong><a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a></span></div>
         <div><Phone/><span><strong>Phone</strong><a href={`tel:${SUPPORT_PHONE_TEL}`}>{SUPPORT_PHONE}</a></span></div>
         <div><Clock/><span><strong>Response time</strong><p>We reply to every message, typically within one business day.</p></span></div>
+        <div className="contact-socials">
+          <strong>Follow us</strong>
+            <div className="social-row">
+            {socialLinks.map(({ label, href, icon: Icon, cls }) => (
+              <a key={label} className={`social-link ${cls}`} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}><Icon /></a>
+            ))}
+          </div>
+        </div>
       </Reveal>
       <Reveal as="form" delay={1} className="contact-form" onSubmit={submit} noValidate>
         {formError && <p className="form-error-summary" role="alert">{formError}</p>}

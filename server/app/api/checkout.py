@@ -6,7 +6,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from ..extensions import db, limiter
 from ..models import Order, OrderItem, Payment, Business, User, AuditLog, Package, AddOn, StatusHistory, ORDER_STATUSES_PAYABLE_FROM
 from ..services.payments import create_checkout_session, verify_webhook_signature, PaymentsNotConfigured
-from ..services.texas import get_texas_config
+from ..services.states import get_state_config
 from ..services.email import send_email
 from ..utils import ok, error
 from .notifications import notify_user
@@ -79,8 +79,21 @@ def create_session():
             return error("Please correct the highlighted fields.", 422,
                          field_errors={"add_on_ids": f"Not available: {', '.join(missing)}"})
 
-    texas = get_texas_config()
-    state_fee_cents = texas["filing_fee_cents"] if package else 0
+    # A package always bundles a real LLC formation, which always has a
+    # formation state — the fee for that state, and only that state, is
+    # what gets charged. Nothing about the fee is ever read from the
+    # request body; `business.state` (set when the business was created/
+    # saved, validated against the same supported-state list there) is the
+    # only input, and the actual cents value always comes from
+    # services/states.py looked up by that code.
+    state_config = None
+    if package:
+        if not business:
+            return error("Please correct the highlighted fields.", 422, field_errors={"business_id": "A business with a formation state is required to price this package."})
+        state_config = get_state_config(business.state)
+        if not state_config:
+            return error("Please correct the highlighted fields.", 422, field_errors={"state": f"LLC formation is not currently available in {business.state!r}."})
+    state_fee_cents = state_config["llc_formation_fee_cents"] if state_config else 0
 
     order = Order(
         order_number=_order_number(),
@@ -95,7 +108,7 @@ def create_session():
     if package:
         db.session.add(OrderItem(order_id=order.id, item_type="plan", name=package.name, price_cents=package.price_cents))
     if state_fee_cents:
-        db.session.add(OrderItem(order_id=order.id, item_type="state_fee", name="Texas state filing fee", price_cents=state_fee_cents))
+        db.session.add(OrderItem(order_id=order.id, item_type="state_fee", name=f"{state_config['name']} state filing fee", price_cents=state_fee_cents))
     for add_on in add_ons:
         db.session.add(OrderItem(order_id=order.id, item_type="add_on", name=add_on.name, price_cents=add_on.price_cents))
 
@@ -176,8 +189,10 @@ def stripe_webhook():
             db.session.add(AuditLog(action="Payment succeeded (webhook)", details=order.order_number))
             db.session.commit()
             user = User.query.get(order.user_id)
+            order_business = Business.query.get(order.business_id) if order.business_id else None
+            order_state = get_state_config(order_business.state) if order_business else None
             send_email("payment_received", user.email, {
-                "order_number": order.order_number,
+                "order_number": order.order_number, "state_name": order_state["name"] if order_state else None,
                 "service_fee": order.service_fee_cents / 100, "state_fee": order.state_fee_cents / 100,
                 "add_on_fee": order.add_on_fee_cents / 100, "total": order.total_cents / 100,
                 "support_email": current_app.config["SUPPORT_EMAIL"],

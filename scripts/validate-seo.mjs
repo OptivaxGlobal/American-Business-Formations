@@ -15,6 +15,14 @@ const ROOT = path.resolve(__dirname, '..')
 const DIST = path.join(ROOT, 'dist')
 const SITE_URL = 'https://americanbusinessformations.com'
 
+// Mirrors the SITE_WIDE_NOINDEX flag in src/components/SEO.jsx by hand
+// keep both in sync. While true, every page (sitemap-listed or not) is
+// expected to render "noindex, nofollow", so check #3 below validates
+// against that instead of "index, follow". This script still fails the
+// build if any page's robots meta drifts from whichever mode is actually
+// active, rather than silently skipping the check.
+const SITE_WIDE_NOINDEX = true
+
 // Route prefixes that must never appear in sitemap.xml and must always be
 // blocked in robots.txt kept in sync by hand with src/App.jsx's
 // non-Layout routes (auth pages, /dashboard, /admin) plus /formation-details
@@ -85,6 +93,9 @@ async function main() {
     console.error('dist/ not found run `npm run build` first.')
     process.exit(1)
   }
+  if (SITE_WIDE_NOINDEX) {
+    console.warn('[validate-seo] SITE_WIDE_NOINDEX is ON every page in this build is noindex, nofollow. Turn it off in src/components/SEO.jsx (and here) when ready to be indexed again.')
+  }
 
   const sitemapUrls = await loadSitemapUrls()
   const disallow = await loadRobotsDisallow()
@@ -123,7 +134,8 @@ async function main() {
     const meta = analyzeHtml(html, path.relative(ROOT, file))
     checked++
 
-    if (meta.robots !== 'index, follow') fail(`${path.relative(ROOT, file)}: is in sitemap.xml but robots meta is "${meta.robots}" (expected "index, follow")`)
+    const expectedRobots = SITE_WIDE_NOINDEX ? 'noindex, nofollow' : 'index, follow'
+    if (meta.robots !== expectedRobots) fail(`${path.relative(ROOT, file)}: is in sitemap.xml but robots meta is "${meta.robots}" (expected "${expectedRobots}")`)
     const expectedCanonical = routePath === '/' ? SITE_URL + '/' : SITE_URL + routePath
     if (meta.canonical !== expectedCanonical) fail(`${path.relative(ROOT, file)}: canonical "${meta.canonical}" does not match its own sitemap URL "${expectedCanonical}"`)
     if (meta.ogUrl !== expectedCanonical) fail(`${path.relative(ROOT, file)}: og:url "${meta.ogUrl}" does not match canonical`)

@@ -1,5 +1,5 @@
 from app.extensions import db
-from app.models import Package
+from app.models import Package, Business, User
 
 
 def _signup(client, payload):
@@ -8,6 +8,17 @@ def _signup(client, payload):
 
 def _second_user_payload():
     return {"name": "Alex Rivera", "email": "alex@example.com", "password": "Correct-Horse7"}
+
+
+def _checkout(client, email):
+    """A package is always priced against a real business's formation
+    state (see checkout.py) creates one here rather than re-driving the
+    full applications flow, matching the real onboarding order."""
+    owner = User.query.filter_by(email=email).first()
+    business = Business(owner_id=owner.id, name="Test Ventures LLC", state="TX")
+    db.session.add(business)
+    db.session.commit()
+    return client.post("/api/checkout/session", json={"package_id": "Accelerated", "business_id": business.id})
 
 
 def test_list_businesses_returns_only_my_own(client, signup_payload):
@@ -49,7 +60,7 @@ def test_list_orders_only_returns_the_callers_orders(client, signup_payload, app
         db.session.commit()
 
     _signup(client, signup_payload)
-    client.post("/api/checkout/session", json={"package_id": "Accelerated"})
+    _checkout(client, signup_payload["email"])
     client.post("/api/auth/logout")
 
     client.post("/api/auth/signup", json=_second_user_payload())
@@ -64,7 +75,7 @@ def test_order_created_via_checkout_shows_awaiting_payment_never_paid(client, si
         db.session.commit()
 
     _signup(client, signup_payload)
-    checkout_res = client.post("/api/checkout/session", json={"package_id": "Accelerated"})
+    checkout_res = _checkout(client, signup_payload["email"])
     order_id = checkout_res.json["data"]["order"]["id"]
 
     res = client.get(f"/api/orders/{order_id}")

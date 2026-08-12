@@ -28,7 +28,7 @@ export default function About(){
     <section className="section"><div className="container stats-grid"><div><strong>7</strong><span>guided formation & compliance services</span></div><div><strong>1</strong><span>state served, done right</span></div><div><strong>100%</strong><span>responsive on any device</span></div><div><strong>2</strong><span>fees always itemized separately</span></div></div></section>
     <section className="section soft-section"><div className="container narrow" style={{textAlign:'center'}}>
       <div className="section-heading centered"><span>Legal disclosure</span><h2>What we are and what we&rsquo;re not</h2></div>
-      <p style={{color:'var(--muted)'}}>American Business Formations is a business filing and document-preparation service. We are not a law firm, an accounting firm, or a government agency, and nothing on this site is legal, tax, or financial advice. Texas state filing fees are separate from our service fees, government approval and processing times are outside our control, and any optional service like EIN assistance can always be completed directly with the relevant government agency at no cost.</p>
+      <p style={{color:'var(--muted)'}}>American Business Formations is a business filing and document-preparation service. We are not a law firm, an accounting firm, or a government agency, and nothing on this site is legal, tax, or financial advice. State filing fees are separate from our service fees and vary by state, government approval and processing times are outside our control, and any optional service like EIN assistance can always be completed directly with the relevant government agency at no cost.</p>
     </div></section>
   </>
 }

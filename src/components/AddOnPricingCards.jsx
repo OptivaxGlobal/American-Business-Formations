@@ -16,7 +16,8 @@ export const addOnPricingItems = [
   { name: 'S-Corp Election', price: '$130', note: 'IRS Form 2553', description: 'Elect S-Corp tax status for an already-formed, eligible LLC or corporation.', to: '/s-corp-election' },
   { name: 'Apostille Services', price: '$450', note: '+ authentication fees', description: 'Authenticate formation documents and certificates for use in another country.', to: '/apostille-services' },
   { name: 'Certificate of Good Standing', price: '$70', note: '+ state fees', description: 'Order an official Certificate of Good Standing or certified copies of your formation documents.', to: '/certificate-of-good-standing' },
-  { name: 'Mail Forwarding', price: '$30', note: 'per month, per entity', description: 'A professional suite address with mail receiving, scanning, and forwarding.', to: '/mail-forwarding' }
+  { name: 'Virtual Office', price: '$29', note: 'per month, per entity', description: 'A professional business address with a unique suite number and a signed lease agreement.', to: '/virtual-office' },
+  { name: 'Mail Forwarding', price: '$20', note: 'per month, per entity', description: 'A professional business address with a unique suite number no lease agreement.', to: '/mail-forwarding' }
 ]
 
 export default function AddOnPricingCards() {

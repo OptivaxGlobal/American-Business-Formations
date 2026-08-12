@@ -29,7 +29,13 @@ export const serviceGroups = [
     items: [
       ['texas-compliance', 'Compliance Support'],
       ['compliance-filings', 'Compliance Filings'],
-      ['formation-kit', 'Formation Documents'],
+      ['formation-kit', 'Formation Documents']
+    ]
+  },
+  {
+    title: 'Business address services',
+    items: [
+      ['virtual-office', 'Virtual Office'],
       ['mail-forwarding', 'Mail Forwarding']
     ]
   }
@@ -46,7 +52,7 @@ export const services = {
     isActive: true,
     title: 'Form your LLC with a clear, guided process',
     short: 'Complete a guided application and prepare the information required to form your LLC.',
-    intro: 'Forming an LLC means filing a Certificate of Formation with the Texas Secretary of State. We organize every piece of information that filing requires, keep your registered agent and ownership details straight, and give you one dashboard to track the whole process from your first answer to state approval.',
+    intro: 'Forming an LLC means filing the required formation document with the Secretary of State or appropriate filing authority in your selected state. We organize every piece of information that filing requires, keep your registered agent and ownership details straight, and give you one dashboard to track the whole process from your first answer to state approval.',
     image: '/illustrations/hero-business.svg',
     features: [
       'Guided formation questionnaire covering every required detail',
@@ -69,7 +75,7 @@ export const services = {
       'Status tracking and document delivery in your client dashboard'
     ],
     limitations: [
-      'Final name availability is determined only by the Texas Secretary of State at the time of filing we cannot guarantee any name',
+      'Final name availability is determined only by the appropriate state filing authority for your formation state at the time of filing we cannot guarantee any name',
       'State processing times vary and are outside our control',
       'This service does not include legal advice about which entity type or structure is right for you'
     ],
@@ -79,10 +85,10 @@ export const services = {
       ['Track every milestone', 'Follow submission, internal review, state filing, and approval from your dashboard.']
     ],
     faq: [
-      ['What does the state charge to file a Certificate of Formation?', 'The current Texas filing fee is shown during checkout and is always displayed separately from our service fee. Confirm the current amount on the Texas Secretary of State website before filing if you want to verify it independently.'],
-      ['Is my business name guaranteed to be available?', 'No. We perform a preliminary review of your proposed name, but only the Texas Secretary of State makes the final determination on availability at the time your Certificate of Formation is filed.'],
-      ['How long does approval take?', 'Processing time depends on the Secretary of State’s current workload and whether you choose standard or expedited processing. Your dashboard shows the current estimate and real status once filed.'],
-      ['Do I need a registered agent?', 'Yes. State law requires every LLC to maintain a registered agent with a Texas street address. You can use our registered agent service or appoint your own eligible agent during the questionnaire.']
+      ['What does the state charge to file a Certificate of Formation?', 'The state filing fee for your selected formation state is shown during checkout and is always displayed separately from our service fee. Confirm the current amount on your state’s official filing authority website before filing if you want to verify it independently.'],
+      ['Is my business name guaranteed to be available?', 'No. We perform a preliminary review of your proposed name, but only the appropriate state filing authority for your formation state makes the final determination on availability at the time your Certificate of Formation is filed.'],
+      ['How long does approval take?', 'Processing time depends on your formation state’s current workload and whether you choose standard or expedited processing. Your dashboard shows the current estimate and real status once filed.'],
+      ['Do I need a registered agent?', 'Yes. State law requires every LLC to maintain a registered agent with a physical address that meets the requirements of your formation state. You can use our registered agent service or appoint your own eligible agent during the questionnaire.']
     ],
     related: ['registered-agent', 'ein', 'operating-agreement']
   },
@@ -530,55 +536,115 @@ export const services = {
   },
   'mail-forwarding': {
     icon: Inbox,
-    category: 'Manage your business',
+    category: 'Business address services',
     eyebrow: 'Mail Forwarding',
     automated: true,
     isActive: true,
-    title: 'A professional business mailing address with suite-based mail forwarding',
-    short: 'Receive, scan, and forward your business mail from a professional suite address starting at $30 per month.',
-    intro: 'A home address on public business filings and correspondence can feel exposed, and a P.O. box doesn’t always look professional to banks, vendors, or customers. Our suite-based mail forwarding service gives your business a real street address with a dedicated suite number. We receive your mail, notify you, and forward or scan it based on your preference for $30 per month, per entity.',
+    title: 'A professional business mailing address with mail forwarding',
+    short: 'A professional business address with a unique suite number, unlimited mail scanning, and online access for $20 per month.',
+    intro: 'A home address on public business filings and correspondence can feel exposed, and a P.O. box doesn’t always look professional to banks, vendors, or customers. Mail Forwarding gives your business a real street address with a unique suite number. We receive your mail, scan and upload it for you to view online, and can ship original documents on request for $20 per month, per entity available in every one of our 21 supported LLC formation states. Need a lease agreement for your address as well? See Virtual Office instead.',
     image: '/illustrations/banking.svg',
     features: [
-      'A real street address with a dedicated suite number not a P.O. box',
-      'Mail receiving for business correspondence, bank mail, and government letters',
-      'Choice of physical forwarding or digital scanning, per your preference',
-      'Notification when new mail arrives',
-      'Secure handling of sensitive correspondence'
+      'A professional business address with a unique suite number not a P.O. box',
+      'Unlimited document scanning and uploads',
+      'Secure online access to view your mail remotely',
+      'Ability to request physical shipment of original documents (separate shipping charges apply)',
+      'Suite number typically assigned within 1–2 business days'
     ],
     benefits: [
       'Keeps your home address off public business listings and correspondence',
       'Presents a professional business image to banks, vendors, and customers',
       'One address for government letters, bank mail, and general business correspondence',
-      'Flexible per-entity pricing scales with the number of businesses you run'
+      'Lower-cost alternative to Virtual Office when you don’t need a lease agreement'
     ],
-    whoNeeds: 'Home-based founders, e-commerce and Amazon sellers, agencies and consultants working remotely, and any business that wants a professional address without a physical office.',
+    whoNeeds: 'Home-based founders, e-commerce and Amazon sellers, agencies and consultants working remotely, and any business that wants a professional address without a physical office or a lease agreement.',
     included: [
       'A dedicated suite address for your business',
-      'Mail receiving and notification when new items arrive',
-      'Your choice of mail forwarding or scanned digital delivery',
+      'Unlimited scanning and online access as mail arrives',
+      'Requestable physical shipment of original documents',
       'Secure handling for sensitive documents like bank and government mail'
     ],
     limitations: [
       'This is a mail-handling service, not a registered agent it does not satisfy the state’s registered agent requirement on its own',
-      'Physical forwarding is subject to standard mail delivery times scanning is faster for time-sensitive documents',
+      'Does not include a lease agreement see Virtual Office if you need one',
+      'Physical shipment of original documents carries separate shipping and handling charges domestic and international rates differ; nothing is shipped for free or unlimited',
       'Pricing is per entity if you operate multiple businesses, each one is billed separately'
     ],
     steps: [
-      ['Choose your mail preference', 'Tell us whether you want physical forwarding, digital scanning, or both.'],
-      ['We receive your mail', 'Your business mail arrives at your dedicated suite address and we notify you when it’s ready.'],
-      ['Get it your way', 'Receive scanned mail digitally or have physical mail forwarded to your preferred address.']
+      ['Choose your state', 'Available across all 21 states we support for LLC formation.'],
+      ['Complete your order', 'Sign up for Mail Forwarding at $20 per month, per entity.'],
+      ['Receive your suite number', 'Typically assigned within 1–2 business days.'],
+      ['View your mail online', 'Every piece is scanned and uploaded for secure remote access.']
     ],
     faq: [
       ['Is this the same as a registered agent?', 'No. A registered agent is a legal requirement for receiving service of process and official state notices. Mail forwarding is a general business mailing address for everyday correspondence. Many customers use both together.'],
-      ['Can I use this address on my business filings?', 'You can use it as a mailing address where one is requested. Registered agent and registered office addresses have separate legal requirements see our Registered Agent service for that specific need.'],
-      ['How quickly will I know when mail arrives?', 'You’ll receive a notification as soon as your mail is received, so you can decide whether to have it scanned or forwarded.'],
-      ['Can I get my mail scanned instead of physically forwarded?', 'Yes. You can choose digital scanning for faster access, physical forwarding to an address of your choice, or a mix of both depending on the item.'],
-      ['What happens to sensitive mail like bank statements or IRS letters?', 'All mail is handled securely regardless of sender. Sensitive correspondence like bank and government mail is treated with the same careful handling as everything else.'],
-      ['Is the $30 per month price per business or per person?', 'It’s per entity. If you operate more than one business, each one is set up and billed as its own mail forwarding subscription.'],
-      ['Can I cancel or change my forwarding preference later?', 'Yes. You can update your forwarding or scanning preference, or cancel the service, from your dashboard at any time.'],
-      ['Do you accept packages, or only mail and letters?', 'This service is built around standard business mail and letters. Contact us before shipping large packages so we can confirm handling.']
+      ['Does Mail Forwarding include a lease agreement?', 'No. Mail Forwarding does not include a lease agreement. If you need one for your business address, choose Virtual Office instead.'],
+      ['How long does it take to get my suite number?', 'A unique suite number is typically assigned within 1–2 business days after your order many are faster, but this isn’t guaranteed.'],
+      ['Can I view my mail online?', 'Yes. Every piece of mail is scanned and uploaded for secure remote viewing, with unlimited scanning included.'],
+      ['Can physical mail be shipped to me?', 'Yes, on request. Shipping and handling charges apply separately or from the $20/month subscription domestic and international shipments are priced differently.'],
+      ['Is the $20 per month price per business or per person?', 'It’s per entity. If you operate more than one business, each one is set up and billed as its own mail forwarding subscription.'],
+      ['Which states is this available in?', 'All 21 states we currently support for LLC formation see the full list on this page.'],
+      ['What’s the difference between Mail Forwarding and Virtual Office?', 'Both include a professional address, a unique suite number, and unlimited digital mail access. Virtual Office additionally includes a lease agreement, for $29 per month instead of $20.']
     ],
-    related: ['registered-agent', 'llc-formation', 'formation-kit']
+    related: ['virtual-office', 'registered-agent', 'llc-formation']
+  },
+  'virtual-office': {
+    icon: MapPinned,
+    category: 'Business address services',
+    eyebrow: 'Virtual Office',
+    automated: true,
+    isActive: true,
+    title: 'A professional virtual office address with a lease agreement',
+    short: 'A professional business address with a unique suite number, a lease agreement, and unlimited mail scanning for $29 per month.',
+    // Full page lives at /virtual-office (src/pages/VirtualOffice.jsx), not
+    // the generic ServicePage template — this entry exists so Virtual
+    // Office still appears correctly in the mega-menu, /services grid, and
+    // other services' "related" links, all of which read from this object.
+    intro: 'Virtual Office gives your business a professional street address, a unique suite number, and a real lease agreement the paperwork banks, lenders, and licensing agencies often ask for that a P.O. box or basic mail-handling service can’t provide. Every piece of mail is scanned and available online, with physical shipment available on request, for $29 per month, per entity across all 21 states we support for LLC formation.',
+    image: '/illustrations/registered-agent.svg',
+    features: [
+      'A professional business address with a unique suite number',
+      'A signed lease agreement for your business address',
+      'Unlimited document scanning and uploads',
+      'Secure online access to view your mail remotely',
+      'Ability to request physical shipment of original documents (separate shipping charges apply)'
+    ],
+    benefits: [
+      'The lease agreement banks, lenders, and licensing agencies frequently require',
+      'Keeps your home address off public business listings and correspondence',
+      'Presents a professional, credible business presence',
+      'Available in every state we support for LLC formation'
+    ],
+    whoNeeds: 'Businesses that need a signed lease agreement for their address for banking, licensing, or lender requirements, plus any founder who wants a professional presence without a physical office.',
+    included: [
+      'A dedicated suite address and lease agreement for your business',
+      'Unlimited scanning and online access as mail arrives',
+      'Requestable physical shipment of original documents',
+      'Secure handling for sensitive documents like bank and government mail'
+    ],
+    limitations: [
+      'This is a mailing address and lease agreement service, not a registered agent it does not satisfy the state’s registered agent requirement on its own',
+      'Physical shipment of original documents carries separate shipping and handling charges domestic and international rates differ; nothing is shipped for free or unlimited',
+      'Pricing is per entity if you operate multiple businesses, each one is billed separately'
+    ],
+    steps: [
+      ['Choose your state', 'Available across all 21 states we support for LLC formation.'],
+      ['Complete your order', 'Sign up for Virtual Office at $29 per month, per entity.'],
+      ['Receive your suite number', 'Typically assigned within 1–2 business days.'],
+      ['Receive your lease agreement', 'Signed and delivered to your document center.'],
+      ['View your mail online', 'Every piece is scanned and uploaded for secure remote access.']
+    ],
+    faq: [
+      ['What is a Virtual Office?', 'A professional business address with a unique suite number, a signed lease agreement, and digital mail handling all for $29 per month.'],
+      ['Do I receive a unique suite number?', 'Yes, typically within 1–2 business days after your order this is a typical timeframe, not a guarantee.'],
+      ['Is a lease agreement included?', 'Yes. A signed lease agreement for your business address is included and is the main difference between Virtual Office and Mail Forwarding.'],
+      ['Can I view my mail online?', 'Yes. Every piece of mail is scanned and uploaded for secure remote viewing, with unlimited scanning included.'],
+      ['Can physical documents be shipped to me?', 'Yes, on request. Shipping and handling charges apply separately domestic and international shipments are priced differently, and shipping is never included free or unlimited in the $29/month price.'],
+      ['Can documents be shipped internationally?', 'Yes. International shipments outside the United States may incur additional overseas shipping charges beyond standard domestic rates.'],
+      ['Which states are supported?', 'All 21 states we currently support for LLC formation see the full list on this page.'],
+      ['What’s the difference between Virtual Office and Mail Forwarding?', 'Both include a professional address, a unique suite number, and unlimited digital mail access. Virtual Office additionally includes a signed lease agreement, for $29 per month versus $20 for Mail Forwarding.']
+    ],
+    related: ['mail-forwarding', 'registered-agent', 'llc-formation']
   },
   'certificate-of-good-standing': {
     icon: Award,
@@ -764,21 +830,6 @@ export const services = {
     steps: [['Tell us about operations', 'Describe services, locations, staff, and assets.'], ['Choose coverage interests', 'Select liability, property, cyber, or other coverage types.'], ['Get connected', 'Receive next steps or a broker referral once available.']],
     faq: [['Do you sell insurance policies directly?', 'No. We are not a licensed insurance agency. This service organizes your information and connects you with a licensed broker or carrier partner.']],
     related: ['business-banking', 'formation-kit']
-  },
-  'virtual-address': {
-    icon: MapPinned, category: 'Stay compliant', eyebrow: 'Virtual Business Address', automated: false, isActive: false,
-    title: 'Request a professional business address solution',
-    short: 'A mail-handling service for founders who don’t want to use a home address on public records.',
-    intro: 'A virtual business address gives your company a professional mailing address separate from your registered agent address.',
-    image: '/illustrations/registered-agent.svg',
-    features: ['Location preference selection', 'Mail scanning and notification preferences'],
-    benefits: ['Keeps your home address off business cards and public-facing materials'],
-    whoNeeds: 'Home-based businesses and remote founders.',
-    included: ['A location request form for your preferred market'],
-    limitations: ['A virtual address is not automatically a valid registered agent address those have separate legal requirements'],
-    steps: [['Pick a preferred market', 'Select a location preference.'], ['Choose mail handling', 'Set scanning and forwarding preferences.'], ['Manage requests online', 'Review incoming mail records.']],
-    faq: [['Can I use a virtual address as my registered agent address?', 'No, not automatically registered agent addresses have specific legal requirements.']],
-    related: ['registered-agent']
   },
   'legal-documents': {
     icon: FileText, category: 'Stay compliant', eyebrow: 'Legal Document Templates', automated: false, isActive: false,

@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react'
 const SAVE_STATUS_LABEL = { saving: 'Saving…', saved: 'Saved', failed: 'Save failed will retry' }
 
 export default function OnboardingShellChrome({ wizard, children }) {
-  const { step, steps, formError, loading, creatingAccount, goBack, goNext, submitOrder, user, saveStatus } = wizard
+  const { step, steps, formError, loading, creatingAccount, goBack, goNext, submitOrder, user, saveStatus, selectedState, form } = wizard
 
   return (
     <section className="onboarding-page">
@@ -22,7 +22,11 @@ export default function OnboardingShellChrome({ wizard, children }) {
         <small>General information only. This workflow is not legal or tax advice.</small>
       </aside>
       <main id="onboarding-main" tabIndex={-1}>
-        <div className="onboarding-progress"><span aria-live="polite">Step {step + 1} of {steps.length}</span><div><i style={{ width: `${((step + 1) / steps.length) * 100}%` }}></i></div></div>
+        <div className="onboarding-progress">
+          <span aria-live="polite">Step {step + 1} of {steps.length}</span>
+          <div><i style={{ width: `${((step + 1) / steps.length) * 100}%` }}></i></div>
+          <p className="onboarding-selected-state">Selected formation state: <strong>{selectedState?.name || form.state}</strong></p>
+        </div>
         {formError && step < 14 && <p className="form-error-summary" role="alert">{formError}</p>}
 
         {children}

@@ -27,3 +27,12 @@
   # Everything else falls back to index.html so React Router can handle it
   RewriteRule ^ index.html [L]
 </IfModule>
+
+# TEMPORARY, site-wide: mirrors the SITE_WIDE_NOINDEX flag in
+# src/components/SEO.jsx — remove this block (and flip that flag back) when
+# ready to be indexed again. Wrapped in IfModule so a host without
+# mod_headers enabled just skips it rather than erroring — the <meta
+# name="robots"> tag on every page is the primary mechanism either way.
+<IfModule mod_headers.c>
+  Header set X-Robots-Tag "noindex, nofollow"
+</IfModule>

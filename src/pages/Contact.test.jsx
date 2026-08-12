@@ -80,6 +80,18 @@ describe('Contact page', () => {
     expect(screen.queryByText(/message has been received/i)).not.toBeInTheDocument()
   })
 
+  it('shows the published business address and official social links', () => {
+    render(<AllProviders><Contact/></AllProviders>)
+
+    expect(screen.getByText(/545 Brandon Road, Conroe, TX 77302/i)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /facebook/i })).toHaveAttribute('href', 'https://www.facebook.com/americanbusinessformations/')
+    expect(screen.getByRole('link', { name: /instagram/i })).toHaveAttribute('href', 'https://www.instagram.com/american_business_formations/')
+    expect(screen.getByRole('link', { name: /x/i })).toHaveAttribute('href', 'https://x.com/American_bus_F')
+    expect(screen.getByRole('link', { name: /tiktok/i })).toHaveAttribute('href', 'https://www.tiktok.com/@americanbusinessf?lang=en')
+    expect(screen.getByRole('link', { name: /pinterest/i })).toHaveAttribute('href', 'https://www.pinterest.com/americanbusinessformations/')
+    expect(screen.getByRole('link', { name: /linkedin/i })).toHaveAttribute('href', 'https://www.linkedin.com/company/american-business-formations/')
+  })
+
   it('never calls the API when the honeypot field is filled (spam bot behavior)', async () => {
     const fetchMock = vi.fn(async () => ({ ok: true, status: 201, headers: { get: () => 'application/json' }, json: async () => ({ ok: true, data: {} }) }))
     vi.stubGlobal('fetch', fetchMock)

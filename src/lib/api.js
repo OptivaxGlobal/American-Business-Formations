@@ -128,6 +128,9 @@ export const api = {
   getPackages: () => request('/packages'),
   getAddOns: () => request('/add-ons'),
   getTexasConfig: () => request('/texas-config'),
+  // Every state's real LLC formation filing fee (server/app/services/states.py)
+  // the same data checkout.py actually prices orders from.
+  getStates: () => request('/states'),
   getTestimonials: () => request('/testimonials'),
   getAnnouncement: () => request('/announcement'),
 

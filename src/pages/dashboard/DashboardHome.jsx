@@ -6,6 +6,7 @@ import { useBusiness } from '../../context/BusinessContext'
 import { api } from '../../lib/api'
 import Reveal from '../../components/Reveal'
 import AsyncState from '../../components/dashboard/AsyncState'
+import { getState } from '../../data/states'
 
 const STATUS_STEPS = ['draft', 'submitted', 'under_review', 'ready_to_file', 'submitted_to_state', 'approved']
 const STATUS_LABELS = {
@@ -27,7 +28,7 @@ export default function DashboardHome(){
   const stepIndex = STATUS_STEPS.indexOf(applicationStatus)
   const pct = stepIndex === -1 ? 100 : Math.round(((stepIndex + 1) / STATUS_STEPS.length) * 100)
   const business = selectedBusiness?.name || 'Your New Business'
-  const state = selectedBusiness?.state || 'Texas'
+  const state = getState(selectedBusiness?.state)?.name || selectedBusiness?.state || 'your state'
 
   return <AsyncState loading={loading} error={error} onRetry={refetch} loadingLabel="Loading your dashboard…">
     <Reveal as="section" delay={0} className="business-summary">

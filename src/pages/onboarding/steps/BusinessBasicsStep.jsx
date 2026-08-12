@@ -1,15 +1,17 @@
 import { MapPin, Lock } from 'lucide-react'
 import { fieldAria } from '../../../lib/formErrors'
+import { getState } from '../../../data/states'
 
 export default function BusinessBasicsStep({ wizard }) {
   const { form, set, errors, handleFieldChange, markTouched, fieldRefs } = wizard
+  const selectedState = getState(form.state)
 
   return (
     <div className="step-panel">
       <MapPin className="step-icon" /><span>Business basics</span>
       <h1>Tell us about your business</h1>
-      <div className="state-lock-badge"><Lock size={14} /> State: Texas</div>
-      <p className="hero-availability-note" style={{ margin: '-8px 0 18px' }}>LLC formation is currently available in Texas only.</p>
+      <div className="state-lock-badge"><Lock size={14} /> State: {selectedState?.name || form.state}</div>
+      <p className="hero-availability-note" style={{ margin: '-8px 0 18px' }}>LLC formation is currently available in 21 states. Change your state on the previous step.</p>
       <label>Business purpose
         <input value={form.purpose} onChange={e => handleFieldChange('purpose', e.target.value)} onBlur={() => markTouched('purpose')} placeholder="Example: Provide marketing consulting services" ref={el => fieldRefs.current.purpose = el} {...fieldAria('purpose-error', errors.purpose)} />
         {errors.purpose && <p id="purpose-error" className="field-error">{errors.purpose}</p>}

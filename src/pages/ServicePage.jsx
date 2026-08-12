@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, Info, ShieldAlert, ShieldCheck } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Info, ShieldAlert } from 'lucide-react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { services, getRelatedServices, serviceDisclaimer } from '../data/services'
 import { getServicePricing } from '../data/pricing'
@@ -9,6 +9,7 @@ import Reveal from '../components/Reveal'
 import SEO from '../components/SEO'
 import BusinessNameStartForm from '../components/BusinessNameStartForm'
 import PricingCards from '../components/PricingCards'
+import AddressServiceComparison from '../components/AddressServiceComparison'
 import { Card, SectionHeading } from '../components/ui'
 import { serviceSchema, breadcrumbSchema, faqSchema } from '../data/seo'
 
@@ -31,7 +32,7 @@ export default function ServicePage({ forcedSlug }) {
   const path = `/${slug}`
   const related = getRelatedServices(slug)
   const pricing = getServicePricing(slug)
-  const hasPricingFacts = Boolean(pricing.addOn) || pricing.governmentFee !== null
+  const hasPricingFacts = Boolean(pricing.addOn) || pricing.governmentFee !== null || Boolean(pricing.governmentFeeRange)
 
   return <>
     <SEO
@@ -99,14 +100,17 @@ export default function ServicePage({ forcedSlug }) {
                 <strong>{pricing.governmentFee === 0 ? 'No cost (paid directly to the IRS)' : `$${pricing.governmentFee}`}</strong>
               </div>
             )}
+            {pricing.governmentFeeRange && (
+              <div>
+                <span>State filing fee</span>
+                <strong>${pricing.governmentFeeRange.min}&ndash;${pricing.governmentFeeRange.max}<small> (varies by state)</small></strong>
+              </div>
+            )}
           </div>
         ) : (
-          <p>Priced as part of your formation package. <Link to="/pricing">See plan pricing</Link> the Texas state filing fee is always itemized separately at checkout.</p>
+          <p>Priced as part of your formation package. <Link to="/pricing">See plan pricing</Link> your state's filing fee is always itemized separately at checkout, based on the state you select.</p>
         )}
         {pricing.governmentFeeNote && <p className="onboarding-note"><Info size={15}/> {pricing.governmentFeeNote}</p>}
-        {slug === 'llc-formation' && !pricing.filingFeeVerified && (
-          <p className="onboarding-note"><ShieldCheck size={15}/> The filing fee shown is an owner-configured estimate pending confirmation against the Texas Secretary of State. It will be verified before your order is finalized.</p>
-        )}
       </Card>
     </div></section>
 
@@ -154,6 +158,11 @@ export default function ServicePage({ forcedSlug }) {
     {slug === 'business-formation-filings' && <section className="section soft-section"><div className="container">
       <SectionHeading centered eyebrow="Formation packages" title="Prefer a complete package instead?" description="These packages bundle formation with the registered agent, compliance, and EIN services most new businesses need in year one." />
       <PricingCards/>
+    </div></section>}
+
+    {slug === 'mail-forwarding' && <section className="section soft-section"><div className="container">
+      <SectionHeading centered eyebrow="Compare" title="Virtual Office vs. Mail Forwarding" description="Need a lease agreement with your business address? Choose Virtual Office instead." />
+      <AddressServiceComparison current="mail-forwarding"/>
     </div></section>}
 
     <FAQ items={service.faq}/>

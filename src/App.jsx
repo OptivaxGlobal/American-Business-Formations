@@ -7,6 +7,7 @@ import { services } from './data/services'
 
 const Home = lazy(() => import('./pages/Home'))
 const ServicePage = lazy(() => import('./pages/ServicePage'))
+const VirtualOffice = lazy(() => import('./pages/VirtualOffice'))
 const Services = lazy(() => import('./pages/Services'))
 const Pricing = lazy(() => import('./pages/Pricing'))
 const About = lazy(() => import('./pages/About'))
@@ -53,7 +54,11 @@ export default function App(){
     <Route element={<Layout/>}>
       <Route index element={<Home/>}/>
       <Route path="services" element={<Services/>}/>
-      {Object.keys(services).map(slug=><Route key={slug} path={slug} element={<ServicePage forcedSlug={slug}/>}/>) }
+      <Route path="virtual-office" element={<VirtualOffice/>}/>
+      {/* virtual-office has its own dedicated page above (richer, multi-section
+          content per its scope) — excluded here so the generic ServicePage
+          template never claims the same URL. */}
+      {Object.keys(services).filter(slug => slug !== 'virtual-office').map(slug=><Route key={slug} path={slug} element={<ServicePage forcedSlug={slug}/>}/>) }
       <Route path="pricing" element={<Pricing/>}/>
       <Route path="how-it-works" element={<HowItWorks/>}/>
       <Route path="about" element={<About/>}/>

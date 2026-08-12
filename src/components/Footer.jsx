@@ -1,12 +1,17 @@
-import { Mail, Phone } from 'lucide-react'
+import { Mail, MapPin, Phone } from 'lucide-react'
+import { FaFacebookF, FaInstagram, FaLinkedinIn, FaPinterestP, FaTiktok, FaXTwitter } from 'react-icons/fa6'
 import { Link } from 'react-router-dom'
 import Logo from './Logo'
-import { SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_PHONE_TEL } from '../data/seo'
+import { BUSINESS_ADDRESS, BUSINESS_ADDRESS_MAP_URL, SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_PHONE_TEL } from '../data/seo'
 
-// Real, verified social profile URLs go here once they exist (e.g.
-// { label: 'LinkedIn', href: 'https://www.linkedin.com/company/...', icon: Linkedin }).
-// Intentionally empty for now rather than linking a generic, non-company URL.
-const socialLinks = []
+const socialLinks = [
+  { label: 'Facebook', href: 'https://www.facebook.com/americanbusinessformations/', icon: FaFacebookF, cls: 'facebook' },
+  { label: 'Instagram', href: 'https://www.instagram.com/american_business_formations/', icon: FaInstagram, cls: 'instagram' },
+  { label: 'X', href: 'https://x.com/American_bus_F', icon: FaXTwitter, cls: 'x' },
+  { label: 'TikTok', href: 'https://www.tiktok.com/@americanbusinessf?lang=en', icon: FaTiktok, cls: 'tiktok' },
+  { label: 'Pinterest', href: 'https://www.pinterest.com/americanbusinessformations/', icon: FaPinterestP, cls: 'pinterest' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/company/american-business-formations/', icon: FaLinkedinIn, cls: 'linkedin' }
+]
 
 const formationLinks = [
   ['llc-formation', 'LLC Formation'],
@@ -28,11 +33,11 @@ export default function Footer() {
       <div className="container footer-grid">
         <div className="footer-brand">
           <Logo light />
-          <p>A guided platform for forming and maintaining your LLC currently available for businesses forming in Texas.</p>
+          <p>A guided platform for forming and maintaining your LLC available for businesses forming in 21 states.</p>
           {socialLinks.length > 0 && (
             <div className="social-row">
-              {socialLinks.map(({ label, href, icon: Icon }) => (
-                <a key={label} href={href} target="_blank" rel="noreferrer" aria-label={label}><Icon /></a>
+              {socialLinks.map(({ label, href, icon: Icon, cls }) => (
+                <a key={label} className={`social-link ${cls}`} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}><Icon /></a>
               ))}
             </div>
           )}
@@ -57,6 +62,7 @@ export default function Footer() {
           <Link to="/terms">Terms and Conditions</Link>
           <Link to="/refund-policy">Refund Policy</Link>
           <Link to="/disclaimer">Legal Disclaimer</Link>
+          <p className="footer-contact footer-address"><MapPin size={16}/> <a href={BUSINESS_ADDRESS_MAP_URL} target="_blank" rel="noopener noreferrer">{BUSINESS_ADDRESS}</a></p>
           <p className="footer-contact"><Mail size={16}/> <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a></p>
           <p className="footer-contact"><Phone size={16}/> <a href={`tel:${SUPPORT_PHONE_TEL}`}>{SUPPORT_PHONE}</a></p>
         </div>

@@ -16,7 +16,7 @@ export default function EffectiveDateStep({ wizard }) {
         <input type="date" value={form.effectiveDate} min={new Date().toISOString().slice(0, 10)} max={new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10)} onChange={e => handleFieldChange('effectiveDate', e.target.value)} onBlur={() => markTouched('effectiveDate')} ref={el => fieldRefs.current.effectiveDate = el} {...fieldAria('effectiveDate-error', errors.effectiveDate)} />
         {errors.effectiveDate && <p id="effectiveDate-error" className="field-error">{errors.effectiveDate}</p>}
       </label>}
-      <p className="onboarding-note"><ShieldCheck size={15} /> Texas allows a delayed effective date up to 90 days after filing. Most businesses choose to be effective immediately upon filing.</p>
+      <p className="onboarding-note"><ShieldCheck size={15} /> You can request a delayed effective date up to 90 days out through this platform. Rules and maximum windows vary by state your dashboard will confirm what's actually accepted once your filing is reviewed. Most businesses choose to be effective immediately upon filing.</p>
     </div>
   )
 }

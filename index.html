@@ -4,17 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#172a46" />
-    <meta name="description" content="American Business Formations helps you form your Texas LLC and manage compliance through one guided platform." />
+    <!-- TEMPORARY, site-wide: mirrors the SITE_WIDE_NOINDEX flag in
+         src/components/SEO.jsx keep both in sync when that flag is
+         turned back off. Covers the instant before SEO.jsx's effect runs
+         (and any route that somehow isn't prerendered), so a crawler never
+         sees a brief indexable flash of the SPA shell. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="googlebot" content="noindex, nofollow" />
+    <meta name="description" content="American Business Formations helps you form your LLC and manage compliance through one guided platform." />
     <link rel="canonical" href="https://americanbusinessformations.com/" />
     <meta property="og:title" content="American Business Formations" />
-    <meta property="og:description" content="American Business Formations helps you form your Texas LLC and manage compliance through one guided platform." />
+    <meta property="og:description" content="American Business Formations helps you form your LLC and manage compliance through one guided platform." />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="American Business Formations" />
     <meta property="og:url" content="https://americanbusinessformations.com/" />
     <meta property="og:image" content="https://americanbusinessformations.com/logo.webp" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="American Business Formations" />
-    <meta name="twitter:description" content="American Business Formations helps you form your Texas LLC and manage compliance through one guided platform." />
+    <meta name="twitter:description" content="American Business Formations helps you form your LLC and manage compliance through one guided platform." />
     <meta name="twitter:image" content="https://americanbusinessformations.com/logo.webp" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />

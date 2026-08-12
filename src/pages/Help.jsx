@@ -15,7 +15,7 @@ const topics = [
 
 export default function Help() {
   return <>
-    <SEO title="Help Center" description="Find answers about Texas LLC formation, compliance, billing, and your American Business Formations account." path="/help" jsonLd={breadcrumbSchema([{ name: 'Help Center' }])} />
+    <SEO title="Help Center" description="Find answers about LLC formation across 21 states, compliance, billing, and your American Business Formations account." path="/help" jsonLd={breadcrumbSchema([{ name: 'Help Center' }])} />
     <PageHero
       crumbs={<Breadcrumbs items={[{ label: 'Help Center' }]} />}
       eyebrow="Help center"

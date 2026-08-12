@@ -8,7 +8,7 @@ describe('Home page', () => {
     render(<AllProviders><Home/></AllProviders>)
 
     expect(screen.getByRole('heading', { level: 1, name: /make your business official/i })).toBeInTheDocument()
-    expect(screen.getByText('Texas', { selector: '.state-lock-badge' })).toBeInTheDocument()
+    expect(screen.getByText('21 states', { selector: '.state-lock-badge' })).toBeInTheDocument()
   })
 
   it('renders the four-step process section', () => {

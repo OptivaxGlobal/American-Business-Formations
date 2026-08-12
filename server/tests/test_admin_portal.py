@@ -1,5 +1,5 @@
 from app.extensions import db
-from app.models import Package, Order, Payment, AuditLog, User
+from app.models import Package, Order, Payment, AuditLog, User, Business
 
 
 def _signup(client, payload):
@@ -17,6 +17,21 @@ def _promote_to_admin(client, email, password):
 def _seed_package():
     db.session.add(Package(name="Accelerated", price_cents=20000, active=True))
     db.session.commit()
+
+
+def _checkout(client, email, extra=None):
+    """A package is always priced against a real business's formation
+    state (see checkout.py) creates one here so these admin/dashboard
+    tests, which only care about what happens to an order after it
+    exists, don't have to re-drive the full applications flow."""
+    owner = User.query.filter_by(email=email).first()
+    business = Business(owner_id=owner.id, name="Test Ventures LLC", state="TX")
+    db.session.add(business)
+    db.session.commit()
+    payload = {"package_id": "Accelerated", "business_id": business.id}
+    if extra:
+        payload.update(extra)
+    return client.post("/api/checkout/session", json=payload)
 
 
 def test_every_new_admin_route_rejects_a_customer(client, signup_payload):
@@ -38,7 +53,7 @@ def test_record_offline_payment_requires_reference_and_note(client, signup_paylo
     with app.app_context():
         _seed_package()
     _signup(client, signup_payload)
-    checkout = client.post("/api/checkout/session", json={"package_id": "Accelerated"})
+    checkout = _checkout(client, signup_payload["email"])
     order_id = checkout.json["data"]["order"]["id"]
     client.post("/api/auth/logout")
 
@@ -56,7 +71,7 @@ def test_record_offline_payment_marks_order_paid_and_logs_audit(client, signup_p
     with app.app_context():
         _seed_package()
     _signup(client, signup_payload)
-    checkout = client.post("/api/checkout/session", json={"package_id": "Accelerated"})
+    checkout = _checkout(client, signup_payload["email"])
     order_id = checkout.json["data"]["order"]["id"]
     assert checkout.json["data"]["order"]["status"] == "awaiting_payment"
     client.post("/api/auth/logout")
@@ -84,7 +99,7 @@ def test_record_offline_payment_rejects_a_refunded_or_cancelled_order(client, si
     with app.app_context():
         _seed_package()
     _signup(client, signup_payload)
-    checkout = client.post("/api/checkout/session", json={"package_id": "Accelerated"})
+    checkout = _checkout(client, signup_payload["email"])
     order_id = checkout.json["data"]["order"]["id"]
     client.post("/api/auth/logout")
 
@@ -109,7 +124,7 @@ def test_customer_has_no_route_to_mark_their_own_order_paid(client, signup_paylo
     with app.app_context():
         _seed_package()
     _signup(client, signup_payload)
-    checkout = client.post("/api/checkout/session", json={"package_id": "Accelerated"})
+    checkout = _checkout(client, signup_payload["email"])
     order_id = checkout.json["data"]["order"]["id"]
 
     # The only customer-facing order route is the read-only GET below —
@@ -125,7 +140,7 @@ def test_editing_package_price_does_not_alter_an_existing_orders_total(client, s
     with app.app_context():
         _seed_package()
     _signup(client, signup_payload)
-    checkout = client.post("/api/checkout/session", json={"package_id": "Accelerated"})
+    checkout = _checkout(client, signup_payload["email"])
     order_id = checkout.json["data"]["order"]["id"]
     original_total = checkout.json["data"]["order"]["total_cents"]
     client.post("/api/auth/logout")

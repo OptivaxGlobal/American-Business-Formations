@@ -4,6 +4,16 @@ const SITE_URL = 'https://americanbusinessformations.com'
 const SITE_NAME = 'American Business Formations'
 const DEFAULT_IMAGE = `${SITE_URL}/logo.webp`
 
+// TEMPORARY, site-wide: the client does not want this site indexed right
+// now. Flipping this one flag is the entire on/off switch for that — every
+// page (public or already-noindex) renders "noindex, nofollow" while this
+// is true, and every page goes back to its own normal per-page `noindex`
+// prop the moment this is set back to false. Deliberately implemented here
+// (the one component every page already renders through) rather than by
+// editing every route's <SEO> call, so turning it off later is a one-line
+// change, not a re-audit of every page.
+const SITE_WIDE_NOINDEX = true
+
 function upsertMeta(attr, key, content) {
   if (!content) return null
   let el = document.head.querySelector(`meta[${attr}="${key}"]`)
@@ -64,7 +74,11 @@ export default function SEO({ title, description, path = '', image, type = 'webs
     created.push(upsertMeta('name', 'twitter:title', fullTitle))
     created.push(upsertMeta('name', 'twitter:description', description))
     created.push(upsertMeta('name', 'twitter:image', ogImage))
-    created.push(upsertMeta('name', 'robots', noindex ? `noindex, ${follow ? 'follow' : 'nofollow'}` : 'index, follow'))
+    const robotsContent = SITE_WIDE_NOINDEX
+      ? 'noindex, nofollow'
+      : (noindex ? `noindex, ${follow ? 'follow' : 'nofollow'}` : 'index, follow')
+    created.push(upsertMeta('name', 'robots', robotsContent))
+    created.push(upsertMeta('name', 'googlebot', robotsContent))
 
     let scriptEl = null
     if (jsonLd) {

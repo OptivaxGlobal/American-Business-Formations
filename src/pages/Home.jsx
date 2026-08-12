@@ -15,21 +15,24 @@ import SEO from '../components/SEO'
 import { SectionHeading } from '../components/ui'
 import { faqSchema, SUPPORT_EMAIL } from '../data/seo'
 import { getTexasConfig } from '../config/texas'
+import { getFilingFeeRange } from '../data/states'
+import SupportedStatesList from '../components/SupportedStatesList'
 import { api } from '../lib/api'
 
 const texas = getTexasConfig()
+const filingFeeRange = getFilingFeeRange()
 
 const homeFaq = [
   ['What do I need to form an LLC?', 'Generally your preferred business name, a registered agent, a registered office address, management structure, and organizer information. Our guided questionnaire walks you through each requirement in plain language.'],
-  ['Is the state filing fee included in your plan prices?', 'No. The Texas state filing fee is always shown separately from our service fee, both during onboarding and at checkout, so you know exactly what goes to the state.'],
-  ['How do I know my business name is available?', 'We run a preliminary name review during onboarding, but final availability is determined only by the Texas Secretary of State when your Certificate of Formation is filed. We never guarantee a name is available.'],
-  ['Which states do you support?', 'LLC formation is currently available in Texas only, with the architecture in place to support more states as we grow. Business Formation Filings, our Registered Agent, and compliance services can extend to other states on request.'],
+  ['Is the state filing fee included in your plan prices?', 'No. The government filing fee for your selected state is always shown separately from our service fee, both during onboarding and at checkout, so you know exactly what goes to the state.'],
+  ['How do I know my business name is available?', 'We run a preliminary name review during onboarding, but final availability is determined only by your state’s Secretary of State (or equivalent filing authority) when your formation document is filed. We never guarantee a name is available.'],
+  ['Which states do you support?', `LLC formation is currently available in 21 states. Choose your state during onboarding the state filing fee (currently $${filingFeeRange.min}–$${filingFeeRange.max} depending on the state) updates automatically. Business Formation Filings, our Registered Agent, and compliance services can extend to other states on request.`],
   ['Does the platform include a client dashboard?', 'Yes. Every account includes a dashboard with formation status, documents, compliance reminders, service management, and support messaging.'],
   ['Do I need a registered agent, and how much does it cost?', 'Yes state law requires every LLC and corporation to maintain one. Our registered agent service is $80 per year, per entity, and includes a monitored registered office address and same-day scanning of official notices.'],
   ['Can you help with EIN applications for foreign founders?', 'Yes. We prepare and file EIN applications for $35 for U.S. applicants and $130 for foreign applicants, who face a longer, non-online IRS process. We also handle S-Corp elections (IRS Form 2553) for eligible businesses.'],
-  ['What is Business Formation Filings, and how is it different from LLC Formation?', 'LLC Formation is our fully automated Texas LLC path. Business Formation Filings covers that same path plus corporations, nonprofits, and foreign qualification filings for $95 plus the applicable state filing fee.'],
+  ['What is Business Formation Filings, and how is it different from LLC Formation?', 'LLC Formation is our fully automated formation path, available across 21 states. Business Formation Filings covers that same path plus corporations, nonprofits, and foreign qualification filings for $95 plus the applicable state filing fee.'],
   ['What are Compliance Filings?', 'A filing service for annual reports, business amendments, Certificates of Good Standing, and registered agent changes prepared and submitted for $95 plus any state fee. Our separate Compliance Support service tracks the deadlines; Compliance Filings handles the paperwork itself.'],
-  ['Do you offer a business mailing address?', 'Yes. Our suite-based mail forwarding service gives your business a professional street address with mail receiving, scanning, and forwarding for $30 per month, per entity.'],
+  ['Do you offer a business mailing address?', 'Yes, two options. Mail Forwarding gives your business a professional address with a unique suite number and digital mail access for $20 per month. Virtual Office adds a signed lease agreement to that same service for $29 per month. Both are available across all 21 states we support.'],
   ['What formation packages do you offer?', 'Foundation ($150), Accelerated ($200), and Complete ($250), each a one-time service fee plus the state filing fee. Accelerated and Complete bundle in services like registered agent, compliance reminders, and EIN filing at a lower combined cost than buying them separately.'],
   ['Can I elect S-Corp status for a business I already formed elsewhere?', 'Yes. Our S-Corp Election service files IRS Form 2553 for an existing, eligible LLC or corporation for $130, whether or not we prepared your original EIN.'],
   ['Do you offer apostille services or Certificates of Good Standing?', 'Yes. We prepare Certificates of Good Standing and certified copies for $70 plus any state fee, and apostille documents for international use for $450 plus any underlying government fee.']
@@ -65,7 +68,7 @@ const llcVsCorp = [
 const complianceSpotlight = texas.complianceTasks.slice(0, 3)
 
 function TrustBadge() {
-  return <div className="state-lock-badge"><Lock size={14}/> Texas</div>
+  return <div className="state-lock-badge"><Lock size={14}/> 21 states</div>
 }
 
 export default function Home() {
@@ -80,7 +83,7 @@ export default function Home() {
   return <>
     <SEO
       title="LLC Formation Made Simple"
-      description="American Business Formations helps you form your LLC and manage compliance through one guided platform. Currently available for Texas LLC formations."
+      description="American Business Formations helps you form your LLC and manage compliance through one guided platform. LLC formation is available in 21 states."
       path="/"
       jsonLd={faqSchema(homeFaq)}
     />
@@ -97,12 +100,20 @@ export default function Home() {
             <TrustBadge/>
             <Link to="/how-it-works" className="text-link">See How It Works <ArrowRight size={16}/></Link>
           </div>
-          <p className="hero-availability-note">Currently available for Texas LLC formations. State filing fees and optional add-on services are shown separately before you pay.</p>
+          <p className="hero-availability-note">LLC formation is available in 21 states. State filing fees and optional add-on services are shown separately before you pay.</p>
           <div className="trust-row"><ShieldCheck size={16}/> <span>Secure checkout · Guided application · Status tracking · Real support</span></div>
         </Reveal>
         <Reveal as="div" delay={1} className="hero-visual">
           <PlatformPreview/>
         </Reveal>
+      </div>
+    </section>
+
+    {/* 1b. Available in 21 states */}
+    <section className="section soft-section">
+      <div className="container">
+        <SectionHeading centered eyebrow="Coverage" title="LLC formation available across 21 states" description="Choose your state during onboarding your state filing fee updates automatically, itemized separately from our service fee." />
+        <SupportedStatesList compact/>
       </div>
     </section>
 
@@ -141,10 +152,10 @@ export default function Home() {
       </div>
     </section>
 
-    {/* 5. LLC vs Corporation comparison (educational only ABF currently forms LLCs in Texas) */}
+    {/* 5. LLC vs Corporation comparison (educational only) */}
     <section className="section soft-section">
       <div className="container">
-        <SectionHeading centered eyebrow="Choosing a structure" title="Why founders often choose an LLC" description="A general comparison to help you understand the basics. This is educational information, not legal or tax advice American Business Formations currently forms LLCs in Texas." />
+        <SectionHeading centered eyebrow="Choosing a structure" title="Why founders often choose an LLC" description="A general comparison to help you understand the basics. This is educational information, not legal or tax advice." />
         <div className="compare-grid llc-vs-corp-grid">
           <Reveal as="div" delay={0} className="compare-card highlight">
             <h3>LLC (Limited Liability Company)</h3>
@@ -181,7 +192,7 @@ export default function Home() {
     {/* 7. Compliance services spotlight */}
     <section className="section soft-section">
       <div className="container">
-        <SectionHeading centered eyebrow="Stay in good standing" title="Compliance services that keep you on track" description="Texas LLCs have ongoing state requirements after formation here are a few we help you track." />
+        <SectionHeading centered eyebrow="Stay in good standing" title="Compliance services that keep you on track" description="Every state has ongoing requirements after formation. Shown below: a few of the Texas-specific requirements we help you track your dashboard reflects the actual requirements for your formation state." />
         <div className="values-grid values-grid-3">
           {complianceSpotlight.map(task => (
             <article key={task.id}><CalendarClock/><h3>{task.name}</h3><p>{task.description}</p><small className="compliance-frequency">{task.frequency}</small></article>

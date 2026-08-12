@@ -8,6 +8,41 @@ import { SUPPORT_EMAIL } from '../data/seo'
 import { api } from '../lib/api'
 import useFocusTrap from '../hooks/useFocusTrap'
 
+// Mega menu column layout: "Business address services" must appear at the
+// top of the right column (previously it was the 3rd item in a flat,
+// array-order 2-column grid, which wrapped it to a new row under the LEFT
+// column — i.e. the bottom-left bug this fixes). Built here as an explicit
+// left/right split rather than reordering `serviceGroups` itself, since
+// that array is also consumed in its original order by ServiceGrid.jsx
+// (Home.jsx's "Start your business" / "Manage your business" sections).
+const MEGA_MENU_LEFT_GROUPS = ['Start your business']
+const MEGA_MENU_RIGHT_GROUPS = ['Business address services', 'Manage your business']
+
+function MegaMenuGroup({ group, isOpen, onToggle, onSelect }) {
+  return (
+    <div className="mega-menu-col" key={group.title}>
+      <button
+        type="button"
+        className="mega-menu-col-head"
+        onClick={() => onToggle(group.title)}
+        aria-expanded={isOpen}
+      >
+        {group.title}
+        <ChevronDown size={14} className="mega-menu-col-chevron" />
+      </button>
+      {isOpen && group.items.map(([slug, label]) => {
+        const Icon = services[slug]?.icon
+        return (
+          <Link key={slug} to={`/${slug}`} onClick={onSelect} className="mega-menu-item" role="menuitem">
+            {Icon && <i><Icon size={16} /></i>}
+            <span>{label}</span>
+          </Link>
+        )
+      })}
+    </div>
+  )
+}
+
 export default function Header() {
   const [open, setOpen] = useState(false)
   const [servicesOpen, setServicesOpen] = useState(false)
@@ -94,31 +129,21 @@ export default function Header() {
             </button>
             <div className="mega-menu mega-menu-compact" role="menu">
               <div className="mega-menu-columns">
-                {serviceGroups.map(group => {
-                  const isGroupOpen = openGroups[group.title]
-                  return (
-                    <div className="mega-menu-col" key={group.title}>
-                      <button
-                        type="button"
-                        className="mega-menu-col-head"
-                        onClick={() => toggleGroup(group.title)}
-                        aria-expanded={isGroupOpen}
-                      >
-                        {group.title}
-                        <ChevronDown size={14} className="mega-menu-col-chevron" />
-                      </button>
-                      {isGroupOpen && group.items.map(([slug, label]) => {
-                        const Icon = services[slug]?.icon
-                        return (
-                          <Link key={slug} to={`/${slug}`} onClick={closeAll} className="mega-menu-item" role="menuitem">
-                            {Icon && <i><Icon size={16} /></i>}
-                            <span>{label}</span>
-                          </Link>
-                        )
-                      })}
-                    </div>
-                  )
-                })}
+                <div className="mega-menu-col-stack">
+                  {MEGA_MENU_LEFT_GROUPS.map(title => serviceGroups.find(g => g.title === title)).filter(Boolean).map(group => (
+                    <MegaMenuGroup key={group.title} group={group} isOpen={openGroups[group.title]} onToggle={toggleGroup} onSelect={closeAll} />
+                  ))}
+                </div>
+                <div className="mega-menu-col-stack">
+                  {/* .find() in MEGA_MENU_RIGHT_GROUPS order, not serviceGroups'
+                      own order — a plain .filter() here previously rendered
+                      "Manage your business" above "Business address services"
+                      because that's their relative order in serviceGroups,
+                      silently undoing the whole point of this layout. */}
+                  {MEGA_MENU_RIGHT_GROUPS.map(title => serviceGroups.find(g => g.title === title)).filter(Boolean).map(group => (
+                    <MegaMenuGroup key={group.title} group={group} isOpen={openGroups[group.title]} onToggle={toggleGroup} onSelect={closeAll} />
+                  ))}
+                </div>
               </div>
               <div className="mega-menu-cta">
                 <span>Ready to make your business official?</span>

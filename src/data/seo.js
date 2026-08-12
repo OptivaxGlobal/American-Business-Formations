@@ -5,6 +5,8 @@ import { SITE_URL, SITE_NAME } from '../components/SEO'
 export const SUPPORT_EMAIL = 'info@americanbusinessformations.com'
 export const SUPPORT_PHONE = '+1 936 364 9578'
 export const SUPPORT_PHONE_TEL = '+19363649578'
+export const BUSINESS_ADDRESS = '545 Brandon Road, Conroe, TX 77302'
+export const BUSINESS_ADDRESS_MAP_URL = 'https://www.google.com/maps/search/?api=1&query=545+Brandon+Road+Conroe+TX+77302'
 
 export const organizationSchema = {
   '@context': 'https://schema.org',

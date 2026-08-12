@@ -21,7 +21,10 @@ describe('Header', () => {
     const user = userEvent.setup()
     render(<AllProviders><Header/></AllProviders>)
 
-    const servicesButton = screen.getByRole('button', { name: /services/i })
+    // Anchored: a mega-menu group is now titled "Business address services",
+    // whose per-group mobile-accordion button also has "services" in its
+    // accessible name a loose /services/i match would hit both.
+    const servicesButton = screen.getByRole('button', { name: /^services$/i })
     expect(servicesButton).toHaveAttribute('aria-expanded', 'false')
 
     await user.hover(servicesButton.closest('.nav-dropdown'))

@@ -1,15 +1,27 @@
 import { Building2, ShieldCheck } from 'lucide-react'
 import { validateBusinessName } from '../../../lib/businessName'
 import { fieldAria } from '../../../lib/formErrors'
+import StateSelect from '../../../components/StateSelect'
+import { getState } from '../../../data/states'
 
 export default function BusinessNameStep({ wizard }) {
-  const { form, set, errors, setErrors, nameError, setNameError, touched, markTouched, fieldRefs } = wizard
+  const { form, set, errors, setErrors, nameError, setNameError, touched, markTouched, fieldRefs, handleFieldChange } = wizard
+  const selectedState = getState(form.state)
 
   return (
     <div className="step-panel">
       <Building2 className="step-icon" /><span>Business name</span>
       <h1>Let&rsquo;s confirm your business name</h1>
-      <p>Review the name you entered, or make changes before continuing. This is a preliminary review only the Texas Secretary of State determines final availability.</p>
+      <p>Review the name you entered, choose the state you're forming in, or make changes before continuing. This is a preliminary review only the state's Secretary of State (or equivalent filing authority) determines final availability.</p>
+      <StateSelect
+        id="formation-state"
+        value={form.state}
+        onChange={v => handleFieldChange('state', v)}
+        onBlur={() => markTouched('state')}
+        error={errors.state}
+        fieldRef={el => fieldRefs.current.state = el}
+        hint="LLC formation is available in 21 states."
+      />
       <label>Proposed business name
         <input
           value={form.businessName}
@@ -45,7 +57,7 @@ export default function BusinessNameStep({ wizard }) {
         </select>
         {errors.industry && <p id="industry-error" className="field-error">{errors.industry}</p>}
       </label>
-      <p className="onboarding-note"><ShieldCheck size={15} /> This is a preliminary name review only. Final availability is determined by the Texas Secretary of State when your Certificate of Formation is filed no name is guaranteed.</p>
+      <p className="onboarding-note"><ShieldCheck size={15} /> This is a preliminary name review only. Final availability is determined by {selectedState ? selectedState.filingAuthority : "your state's filing authority"} when your formation document is filed no name is guaranteed.</p>
     </div>
   )
 }

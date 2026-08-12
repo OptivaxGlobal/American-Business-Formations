@@ -1,5 +1,5 @@
 from app.extensions import db
-from app.models import Package, AddOn, Order, Payment, Business
+from app.models import Package, AddOn, Order, Payment, Business, User
 
 
 def _seed_catalog():
@@ -15,6 +15,19 @@ def _seed_catalog():
 def _signed_in_client(client, signup_payload):
     client.post("/api/auth/signup", json=signup_payload)
     return client
+
+
+def _business_for(email, state="TX"):
+    """A package is always priced against a real business's formation
+    state (see checkout.py) real onboarding always creates the business
+    via /api/applications before checkout ever runs, so tests that only
+    care about pricing/idempotency/webhook behavior create one directly
+    here rather than re-driving the full applications flow."""
+    owner = User.query.filter_by(email=email).first()
+    business = Business(owner_id=owner.id, name="Test Ventures LLC", state=state)
+    db.session.add(business)
+    db.session.commit()
+    return business
 
 
 def test_checkout_requires_authentication(client):
@@ -54,13 +67,15 @@ def test_checkout_rejects_inactive_add_on(client, signup_payload):
     assert "add_on_ids" in res.json["field_errors"]
 
 
-def test_checkout_ignores_client_supplied_price_and_uses_catalog_price(client, signup_payload, app):
+def test_checkout_ignores_client_supplied_price_and_uses_catalog_price(client, signup_payload):
     # The request body below deliberately includes price-shaped fields a
     # tampering client might try to send the endpoint must never read them.
     _seed_catalog()
     _signed_in_client(client, signup_payload)
+    business = _business_for(signup_payload["email"], state="TX")
     res = client.post("/api/checkout/session", json={
         "package_id": "Accelerated",
+        "business_id": business.id,
         "price_cents": 1,
         "total_cents": 1,
         "items": [{"type": "plan", "name": "Accelerated", "price_cents": 1}],
@@ -70,27 +85,46 @@ def test_checkout_ignores_client_supplied_price_and_uses_catalog_price(client, s
     # $200.00 package price from the catalog, not the $0.01 the request tried
     # to supply. A package always carries the real Texas state filing fee
     # alongside it (proven separately and more fully by
-    # test_checkout_computes_totals_from_catalog_and_state_fee below) — this
-    # assertion previously expected total_cents to equal the service fee
-    # alone, which was simply wrong (the state fee was never optional here),
-    # and had never been caught because this suite had never actually been
-    # run before Part 4/5.
-    expected_state_fee = app.config["TEXAS_FILING_FEE"] * 100
+    # test_checkout_computes_totals_from_catalog_and_state_fee below).
     assert order["service_fee_cents"] == 20000
-    assert order["total_cents"] == 20000 + expected_state_fee
+    assert order["total_cents"] == 20000 + 30000  # $300.00 TX filing fee
 
 
-def test_checkout_computes_totals_from_catalog_and_state_fee(client, signup_payload, app):
+def test_checkout_computes_totals_from_catalog_and_state_fee(client, signup_payload):
     _seed_catalog()
     _signed_in_client(client, signup_payload)
-    res = client.post("/api/checkout/session", json={"package_id": "Accelerated", "add_on_ids": ["registered-agent"]})
+    business = _business_for(signup_payload["email"], state="TX")
+    res = client.post("/api/checkout/session", json={"package_id": "Accelerated", "business_id": business.id, "add_on_ids": ["registered-agent"]})
     assert res.status_code == 202
     order = res.json["data"]["order"]
-    expected_state_fee = app.config["TEXAS_FILING_FEE"] * 100
     assert order["service_fee_cents"] == 20000
     assert order["add_on_fee_cents"] == 8000
-    assert order["state_fee_cents"] == expected_state_fee
-    assert order["total_cents"] == 20000 + 8000 + expected_state_fee
+    assert order["state_fee_cents"] == 30000
+    assert order["total_cents"] == 20000 + 8000 + 30000
+
+
+def test_checkout_uses_the_selected_business_formation_state_not_texas(client, signup_payload):
+    """The whole point of multi-state support: two businesses with
+    different formation states must be charged two different, correct
+    state filing fees never Texas's $300 leaking into another state's
+    order, and never a fee guessed rather than looked up."""
+    _seed_catalog()
+    _signed_in_client(client, signup_payload)
+    business = _business_for(signup_payload["email"], state="WY")
+    res = client.post("/api/checkout/session", json={"package_id": "Accelerated", "business_id": business.id})
+    assert res.status_code == 202
+    order = res.json["data"]["order"]
+    assert order["state_fee_cents"] == 10000  # Wyoming's real $100 filing fee, not Texas's $300
+    assert order["total_cents"] == 20000 + 10000
+
+
+def test_checkout_rejects_a_business_with_an_unsupported_formation_state(client, signup_payload):
+    _seed_catalog()
+    _signed_in_client(client, signup_payload)
+    business = _business_for(signup_payload["email"], state="ZZ")
+    res = client.post("/api/checkout/session", json={"package_id": "Accelerated", "business_id": business.id})
+    assert res.status_code == 422
+    assert "state" in res.json["field_errors"]
 
 
 def test_checkout_rejects_unauthorized_business_id(client, signup_payload):
@@ -103,7 +137,8 @@ def test_checkout_rejects_unauthorized_business_id(client, signup_payload):
 def test_checkout_never_creates_a_paid_order_when_payments_are_not_configured(client, signup_payload):
     _seed_catalog()
     _signed_in_client(client, signup_payload)
-    res = client.post("/api/checkout/session", json={"package_id": "Accelerated"})
+    business = _business_for(signup_payload["email"])
+    res = client.post("/api/checkout/session", json={"package_id": "Accelerated", "business_id": business.id})
     assert res.status_code == 202
     order = res.json["data"]["order"]
     assert order["status"] == "awaiting_payment"
@@ -118,9 +153,10 @@ def test_checkout_never_creates_a_paid_order_when_payments_are_not_configured(cl
 def test_checkout_idempotency_key_replay_returns_same_order_not_a_duplicate(client, signup_payload):
     _seed_catalog()
     _signed_in_client(client, signup_payload)
+    business = _business_for(signup_payload["email"])
     key = "retry-key-123"
-    first = client.post("/api/checkout/session", json={"package_id": "Accelerated", "idempotency_key": key})
-    second = client.post("/api/checkout/session", json={"package_id": "Accelerated", "idempotency_key": key})
+    first = client.post("/api/checkout/session", json={"package_id": "Accelerated", "business_id": business.id, "idempotency_key": key})
+    second = client.post("/api/checkout/session", json={"package_id": "Accelerated", "business_id": business.id, "idempotency_key": key})
     assert first.status_code == 202
     assert second.status_code == 200
     assert first.json["data"]["order"]["order_number"] == second.json["data"]["order"]["order_number"]
@@ -137,7 +173,8 @@ def test_stripe_webhook_never_downgrades_an_already_paid_order(client, signup_pa
     status-transition guard in checkout.py itself."""
     _seed_catalog()
     _signed_in_client(client, signup_payload)
-    checkout = client.post("/api/checkout/session", json={"package_id": "Accelerated"})
+    business = _business_for(signup_payload["email"])
+    checkout = client.post("/api/checkout/session", json={"package_id": "Accelerated", "business_id": business.id})
     order_id = checkout.json["data"]["order"]["id"]
     order = Order.query.get(order_id)
     order.status = "paid"

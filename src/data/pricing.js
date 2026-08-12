@@ -7,6 +7,7 @@
 // are sold as part of a package rather than as a standalone add-on and their
 // service pages link to /pricing instead of stating a flat number.
 import { getTexasConfig } from '../config/texas'
+import { getFilingFeeRange } from './states'
 
 const texas = getTexasConfig()
 
@@ -22,7 +23,11 @@ export const addOnCatalog = [
   { id: 's-corp-election', name: 'S-Corp election (IRS Form 2553)', price: 130, recurring: null },
   { id: 'apostille', name: 'Apostille service', price: 450, recurring: null },
   { id: 'certificate-good-standing', name: 'Certificate of Good Standing / certified copy filing service', price: 70, recurring: null },
-  { id: 'mail-forwarding', name: 'Suite-based mail forwarding', price: 30, recurring: 'per month' },
+  // Alternatives, not add-ons meant to be selected together — see
+  // src/pages/onboarding/steps/AddOnsStep.jsx, which enforces picking at
+  // most one of the two.
+  { id: 'mail-forwarding', name: 'Mail forwarding (no lease agreement)', price: 20, recurring: 'per month' },
+  { id: 'virtual-office', name: 'Virtual office (includes lease agreement)', price: 29, recurring: 'per month' },
   { id: 'expedited', name: 'Expedited processing', price: texas.expeditedFee, recurring: null }
 ]
 
@@ -47,7 +52,8 @@ const SERVICE_TO_ADDON = {
   's-corp-election': 's-corp-election',
   'apostille-services': 'apostille',
   'certificate-of-good-standing': 'certificate-good-standing',
-  'mail-forwarding': 'mail-forwarding'
+  'mail-forwarding': 'mail-forwarding',
+  'virtual-office': 'virtual-office'
 }
 
 // A second priced option shown alongside the primary one on a service page
@@ -64,27 +70,38 @@ export function getAddOn(id) {
 // { addOn: null, ... } when the service is bundled into a formation package
 // rather than sold standalone (llc-formation, formation-kit) those pages
 // should link to /pricing instead of stating a flat number.
+//
+// `governmentFee`/`governmentFeeRange`: llc-formation and
+// business-formation-filings are sold across all 21 supported states (see
+// src/data/states.js), so there is no single "the" filing fee to show on a
+// generic marketing page anymore — `governmentFeeRange` gives the real
+// min/max across every supported state instead of picking one state's
+// number to display as if it applied to everyone. The exact fee for the
+// state a visitor actually selects is always shown during onboarding and
+// checkout, computed the same way (getStateFilingFee).
 export function getServicePricing(slug) {
   const addOnId = SERVICE_TO_ADDON[slug]
   const secondaryAddOnId = SERVICE_TO_SECONDARY_ADDON[slug]
+  const showsStateFeeRange = slug === 'llc-formation' || slug === 'business-formation-filings'
   return {
     addOn: addOnId ? getAddOn(addOnId) : null,
     secondaryAddOn: secondaryAddOnId ? getAddOn(secondaryAddOnId) : null,
     secondaryAddOnLabel: slug === 'ein' ? 'Foreign applicants' : null,
-    governmentFee: (slug === 'llc-formation' || slug === 'business-formation-filings') ? texas.filingFee : (slug === 'ein' || slug === 's-corp-election') ? 0 : null,
+    governmentFee: (slug === 'ein' || slug === 's-corp-election') ? 0 : null,
+    governmentFeeRange: showsStateFeeRange ? getFilingFeeRange() : null,
     governmentFeeNote: slug === 'texas-dba'
       ? "Some counties charge an additional filing fee we'll flag this during intake if it applies to you."
       : slug === 'ein'
         ? 'The IRS issues EINs directly at no cost.'
         : slug === 's-corp-election'
           ? 'The IRS does not charge a fee to file Form 2553.'
-          : slug === 'business-formation-filings'
-            ? 'State filing fees vary by entity type and state; the amount shown is the current Texas LLC filing fee.'
+          : showsStateFeeRange
+            ? 'State filing fees vary by entity type and by the state you form in the exact fee for your selected state is shown during onboarding and at checkout, before you pay anything.'
             : slug === 'apostille-services'
               ? "The underlying document's own government or certification fee is separate from our $450 service fee and is confirmed during intake."
               : slug === 'certificate-of-good-standing'
                 ? "The state's own fee for the certificate or certified copy is separate from our $70 filing service fee and varies by state."
                 : null,
-    filingFeeVerified: texas.filingFeeVerified
+    filingFeeVerified: true
   }
 }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { getTexasConfig } from '../../config/texas'
+import { getStateFilingFee, isSupportedState, getState } from '../../data/states'
 import { api } from '../../lib/api'
 import { useApp } from '../../context/AppContext'
 import { normalizeBusinessName, validateBusinessName } from '../../lib/businessName'
@@ -13,8 +13,6 @@ import { validateSelectedPlan } from '../../validations/paymentValidation'
 import { focusFirstInvalid } from '../../lib/formErrors'
 import { getActiveAddOns } from '../../data/pricing'
 import { plans } from '../../components/PricingCards'
-
-export const texas = getTexasConfig()
 
 export const steps = [
   'Business name', 'Business basics', 'Contact information', 'Business address',
@@ -55,6 +53,7 @@ function businessNameFromQuery() {
 export function buildApplicationPayload(form, businessId) {
   const payload = {
     business_name: form.businessName,
+    state: form.state,
     entity_type: form.entityType,
     industry: form.industry,
     purpose: form.purpose,
@@ -156,6 +155,11 @@ export default function useOnboardingWizard() {
 
   const defaultForm = {
     businessName: draftBusinessName || businessNameFromQuery(), altName: '', nameFinalized: true, industry: '', purpose: '', county: '', city: '', launchDate: '',
+    // Formation state drives the real government filing fee shown from
+    // this point forward (see stateFee below) and is what checkout.py
+    // independently re-validates and re-prices from server-side — this
+    // default is only a starting point on-screen, never assumed silently.
+    state: 'TX',
     fullName: user?.name || '', email: user?.email || '', phone: '', commPref: 'email',
     principalLine1: '', principalCity: '', principalZip: '', mailingSame: true, mailingLine1: '', mailingCity: '', mailingZip: '', addressPrivacy: false,
     registeredAgentType: 'abf', registeredAgentName: '', registeredOfficeLine1: '', registeredOfficeCity: '', registeredOfficeZip: '', registeredAgentConsent: false,
@@ -239,6 +243,7 @@ export default function useOnboardingWizard() {
   // "Continue" gate below.
   const fieldValidators = useMemo(() => ({
     businessName: f => validateBusinessName(f.businessName),
+    state: f => isSupportedState(f.state) ? valid() : invalid('Select a state where LLC formation is currently available.'),
     industry: f => f.industry ? valid() : invalid('Select an industry.'),
     purpose: f => validateText(f.purpose, { required: true, min: 5, max: 500, label: 'Business purpose' }),
     county: f => validateText(f.county, { required: true, min: 2, max: 100, label: 'County' }),
@@ -274,7 +279,7 @@ export default function useOnboardingWizard() {
   }), [user])
 
   const stepFields = {
-    0: ['businessName', 'industry'],
+    0: ['businessName', 'state', 'industry'],
     1: ['purpose', 'county', 'city', 'launchDate'],
     2: ['fullName', 'email', 'phone', 'commPref'],
     3: ['principalLine1', 'principalCity', 'principalZip', 'mailingLine1', 'mailingCity', 'mailingZip'],
@@ -346,11 +351,27 @@ export default function useOnboardingWizard() {
     setTouched(t => ({ ...t, [`ownerName${i}`]: true, [`ownerPct${i}`]: true }))
     setErrors(e => ({ ...e, ...computeOwnerErrors(form) }))
   }
-  const toggleAddOn = id => setForm(v => ({ ...v, addOns: v.addOns.includes(id) ? v.addOns.filter(x => x !== id) : [...v.addOns, id] }))
+  // Virtual Office and Mail Forwarding are alternatives, not a bundle both
+  // are the same underlying business-address service, priced differently
+  // depending on whether a lease agreement is included. Selecting one
+  // always drops the other, so a customer can never end up subscribed to
+  // (and billed for) both address services at once.
+  const MUTUALLY_EXCLUSIVE_ADD_ONS = [['virtual-office', 'mail-forwarding']]
+  const toggleAddOn = id => setForm(v => {
+    if (v.addOns.includes(id)) return { ...v, addOns: v.addOns.filter(x => x !== id) }
+    const exclusiveGroup = MUTUALLY_EXCLUSIVE_ADD_ONS.find(group => group.includes(id))
+    const withoutExclusivePartner = exclusiveGroup ? v.addOns.filter(x => !exclusiveGroup.includes(x)) : v.addOns
+    return { ...v, addOns: [...withoutExclusivePartner, id] }
+  })
 
   const ownerPercentTotal = useMemo(() => form.ownerDetails.reduce((s, o) => s + (Number(o.percentage) || 0), 0), [form.ownerDetails])
   const selectedPlan = useMemo(() => plans.find(p => p.name === form.plan) || plans[1], [form.plan])
-  const stateFee = texas.filingFee
+  // The real government filing fee for whichever state the customer chose
+  // in Step 1 (src/data/states.js) never a single hardcoded state's fee.
+  // checkout.py independently recomputes this server-side from
+  // business.state before an order is ever priced for real.
+  const stateFee = getStateFilingFee(form.state) ?? 0
+  const selectedState = getState(form.state)
 
   const goNext = async () => {
     const order = step === 4 ? Object.keys(computeOwnerErrors(form)) : (stepFields[step] || [])
@@ -472,7 +493,7 @@ export default function useOnboardingWizard() {
     errors, setErrors, touched, setTouched, formError, fieldRefs,
     form, set, handleFieldChange, markTouched,
     setOwnerCount, setOwnerField, markOwnerTouched, toggleAddOn,
-    ownerPercentTotal, selectedPlan, stateFee, texas,
+    ownerPercentTotal, selectedPlan, stateFee, selectedState,
     goNext, goBack, submitOrder,
     addOnCatalog, plans
   }

@@ -16,6 +16,31 @@ def test_create_application_saves_draft(client, signup_payload):
     assert res.json["data"]["business"]["status"] == "draft"
 
 
+def test_create_application_saves_a_supported_formation_state(client, signup_payload):
+    _signed_in_client(client, signup_payload)
+    res = client.post("/api/applications", json={"business_name": "Cascade Studio LLC", "state": "wy"})
+    assert res.status_code == 201
+    # Case-insensitive input, stored normalized/uppercase never Texas
+    # leaking in just because it's the default.
+    assert res.json["data"]["business"]["state"] == "WY"
+
+
+def test_create_application_rejects_an_unsupported_formation_state(client, signup_payload):
+    _signed_in_client(client, signup_payload)
+    res = client.post("/api/applications", json={"business_name": "Test LLC", "state": "PR"})
+    assert res.status_code == 422
+    assert "state" in res.json["field_errors"]
+
+
+def test_autosave_can_change_the_formation_state_before_submission(client, signup_payload):
+    _signed_in_client(client, signup_payload)
+    create = client.post("/api/applications", json={"business_name": "Test LLC", "state": "TX"})
+    business_id = create.json["data"]["business"]["id"]
+    update = client.post("/api/applications", json={"business_id": business_id, "state": "DE"})
+    assert update.status_code == 201
+    assert update.json["data"]["business"]["state"] == "DE"
+
+
 def test_registered_office_rejects_po_box(client, signup_payload):
     _signed_in_client(client, signup_payload)
     create = client.post("/api/applications", json={"business_name": "Bright Path Studio"})

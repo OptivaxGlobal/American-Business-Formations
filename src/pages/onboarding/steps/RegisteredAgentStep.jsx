@@ -1,17 +1,20 @@
 import { ShieldCheck } from 'lucide-react'
 import { fieldAria } from '../../../lib/formErrors'
+import { getState } from '../../../data/states'
 
 export default function RegisteredAgentStep({ wizard }) {
   const { form, set, errors, handleFieldChange, markTouched, fieldRefs } = wizard
+  const selectedState = getState(form.state)
+  const stateName = selectedState?.name || 'your formation state'
 
   return (
     <div className="step-panel">
       <ShieldCheck className="step-icon" /><span>Registered agent</span>
       <h1>Who will serve as your registered agent?</h1>
-      <p>Texas law requires a registered agent with a physical Texas street address a P.O. box alone is not enough.</p>
+      <p>State law requires a registered agent with a physical street address in {stateName} a P.O. box alone is not enough.</p>
       <div className="radio-cards">
         <button type="button" className={form.registeredAgentType === 'abf' ? 'selected' : ''} onClick={() => set('registeredAgentType', 'abf')}><strong>American Business Formations</strong><span>Use our registered agent service.</span></button>
-        <button type="button" className={form.registeredAgentType === 'self' ? 'selected' : ''} onClick={() => set('registeredAgentType', 'self')}><strong>Appoint myself</strong><span>I have an eligible Texas street address.</span></button>
+        <button type="button" className={form.registeredAgentType === 'self' ? 'selected' : ''} onClick={() => set('registeredAgentType', 'self')}><strong>Appoint myself</strong><span>I have an eligible street address in {stateName}.</span></button>
         <button type="button" className={form.registeredAgentType === 'other' ? 'selected' : ''} onClick={() => set('registeredAgentType', 'other')}><strong>Appoint someone else</strong><span>An individual or eligible business entity.</span></button>
       </div>
       {form.registeredAgentType !== 'abf' && <>
@@ -19,7 +22,7 @@ export default function RegisteredAgentStep({ wizard }) {
           <input value={form.registeredAgentName} onChange={e => handleFieldChange('registeredAgentName', e.target.value)} onBlur={() => markTouched('registeredAgentName')} placeholder="Full name or entity name" ref={el => fieldRefs.current.registeredAgentName = el} {...fieldAria('registeredAgentName-error', errors.registeredAgentName)} />
           {errors.registeredAgentName && <p id="registeredAgentName-error" className="field-error">{errors.registeredAgentName}</p>}
         </label>
-        <label>Registered office street address (Texas street address, not a P.O. box)
+        <label>Registered office street address (a street address in {stateName}, not a P.O. box)
           <input value={form.registeredOfficeLine1} onChange={e => handleFieldChange('registeredOfficeLine1', e.target.value)} onBlur={() => markTouched('registeredOfficeLine1')} placeholder="123 Main St" autoComplete="address-line1" ref={el => fieldRefs.current.registeredOfficeLine1 = el} {...fieldAria('registeredOfficeLine1-error', errors.registeredOfficeLine1)} />
           {errors.registeredOfficeLine1 && <p id="registeredOfficeLine1-error" className="field-error">{errors.registeredOfficeLine1}</p>}
         </label>

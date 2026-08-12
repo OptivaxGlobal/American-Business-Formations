@@ -98,7 +98,7 @@ export default function AdminContent(){
       <div className="admin-plan-editor">
         <label className="check-control"><input type="checkbox" checked={announcement.enabled} onChange={e=>setAnnouncement(a=>({...a, enabled: e.target.checked}))}/> Show announcement bar</label>
         <label>Message</label>
-        <input value={announcement.message} onChange={e=>{setAnnouncement(a=>({...a, message: e.target.value})); if(announcementError) setAnnouncementError('')}} placeholder="e.g. LLC formation currently available in Texas." aria-invalid={announcementError?'true':'false'}/>
+        <input value={announcement.message} onChange={e=>{setAnnouncement(a=>({...a, message: e.target.value})); if(announcementError) setAnnouncementError('')}} placeholder="e.g. LLC formation now available in 21 states." aria-invalid={announcementError?'true':'false'}/>
         {announcementError && <p className="field-error">{announcementError}</p>}
       </div>
       <button className="btn btn-primary" onClick={saveAnnouncementBar}>Save announcement</button>

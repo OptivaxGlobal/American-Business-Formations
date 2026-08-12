@@ -2,6 +2,7 @@ from flask import Blueprint
 
 from ..models import Package, AddOn, Testimonial, SiteSetting
 from ..services.texas import get_texas_config
+from ..services.states import list_supported_states
 from ..utils import ok
 
 bp = Blueprint("catalog", __name__, url_prefix="/api")
@@ -22,6 +23,27 @@ def list_add_ons():
 @bp.get("/texas-config")
 def texas_config():
     return ok(get_texas_config())
+
+
+@bp.get("/states")
+def states_config():
+    """Every state LLC Formation, Virtual Office, and Mail Forwarding
+    currently support, with the real formation filing fee for each —
+    checkout.py uses the same underlying data (services/states.py) to
+    price an order; this route just exposes it for the frontend's state
+    selector and pricing displays so the fee shown before checkout always
+    matches what checkout actually charges."""
+    return ok({
+        "states": [
+            {
+                "code": s["code"], "name": s["name"],
+                "llcFormationFeeCents": s["llc_formation_fee_cents"],
+                "filingAuthority": s["filing_authority"],
+                "note": s["note"],
+            }
+            for s in list_supported_states()
+        ]
+    })
 
 
 @bp.get("/testimonials")

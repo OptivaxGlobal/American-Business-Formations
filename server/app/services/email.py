@@ -8,17 +8,23 @@ TEMPLATES = {
     "welcome": "Welcome to American Business Formations",
     "verify_email": "Verify your email address",
     "password_reset": "Reset your password",
-    "application_saved": "Your Texas LLC application was saved",
-    "application_submitted": "We received your Texas LLC application",
+    # Deliberately state-agnostic — LLC formation is available across 21
+    # states (see server/app/services/states.py), and these fire for every
+    # customer regardless of which one they formed in. A previous version
+    # of these hardcoded "Texas LLC" into every subject line, which would
+    # have sent a Wyoming or Delaware customer an email about "Your Texas
+    # LLC" — caught during the multi-state expansion, not by a report.
+    "application_saved": "Your LLC application was saved",
+    "application_submitted": "We received your LLC application",
     "payment_received": "Payment received order confirmation",
     "payment_failed": "We couldn't process your payment",
     "info_requested": "We need a bit more information",
-    "status_changed": "Your Texas LLC application status changed",
-    "filing_submitted": "Your Certificate of Formation was submitted to the state",
-    "formation_approved": "Your Texas LLC has been approved",
+    "status_changed": "Your LLC application status changed",
+    "filing_submitted": "Your formation document was submitted to the state",
+    "formation_approved": "Your LLC has been approved",
     "document_uploaded": "A new document is ready in your dashboard",
     "support_message": "New reply to your support ticket",
-    "compliance_reminder": "Upcoming Texas compliance deadline",
+    "compliance_reminder": "Upcoming compliance deadline",
     "service_renewal": "An upcoming service renewal",
     "contact_confirmation": "We received your message",
     "admin_lead_notification": "New lead captured",

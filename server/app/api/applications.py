@@ -8,6 +8,7 @@ from ..models import (
     GoverningPerson, AuditLog, StatusHistory,
 )
 from ..services.email import send_email
+from ..services.states import is_supported_state, get_state_config, DEFAULT_STATE
 from .notifications import notify_user
 from ..utils import ok, error, sanitize_text, utcnow
 from ..validations.address import validate_city, validate_street_address, validate_zip
@@ -38,14 +39,22 @@ def _address_errors(data, prefix, required, disallow_po_box=False):
     return (line1_value, city_value, zip_value), errors
 
 
-def _build_address(data, prefix, line1, city, zip_code):
+def _build_address(data, prefix, line1, city, zip_code, state):
     if not line1:
         return None
     return Address(
         line1=line1,
         line2=sanitize_text(data.get(f"{prefix}_line2"), 255),
         city=city or "",
-        state="TX",
+        # Defaults to the business's own formation state rather than a
+        # hardcoded one — this address doesn't collect its own state field
+        # in the wizard yet, and for the large majority of customers the
+        # principal/registered/organizer address is in the same state
+        # they're forming in. A customer whose address is genuinely in a
+        # different state isn't supported by this field yet; the formation
+        # state itself (business.state, validated below) is what always
+        # drives the real filing fee, independent of this.
+        state=state,
         postal_code=zip_code or "",
         county=sanitize_text(data.get(f"{prefix}_county"), 120),
         is_po_box=False,
@@ -73,6 +82,19 @@ def create_application():
     name_value, name_err = validate_business_name(data.get("business_name"), required=name_required)
     if name_err:
         errors["business_name"] = name_err
+
+    # LLC Formation State the one input that decides the real government
+    # filing fee at checkout (see checkout.py). Only validated/applied when
+    # actually supplied so an in-progress autosave that hasn't reached the
+    # state-selection step yet doesn't get rejected; a business created
+    # with no state at all defaults to DEFAULT_STATE until the customer
+    # picks one, and checkout.py independently re-validates whatever
+    # ends up stored before ever pricing an order from it.
+    state_value = None
+    if data.get("state"):
+        state_value = str(data.get("state")).strip().upper()
+        if not is_supported_state(state_value):
+            errors["state"] = "Select a state where LLC formation is currently available."
 
     entity_type = data.get("entity_type")
     if entity_type:
@@ -142,17 +164,18 @@ def create_application():
         return error("Please correct the highlighted fields.", 422, field_errors=errors)
 
     if not business:
-        business = Business(owner_id=user_id, name=name_value, state="TX")
+        business = Business(owner_id=user_id, name=name_value, state=state_value or DEFAULT_STATE)
         db.session.add(business)
         db.session.flush()
 
     business.name = name_value or business.name
+    business.state = state_value or business.state
     business.entity_type = sanitize_text(entity_type, 40) or business.entity_type or "LLC"
     business.industry = sanitize_text(data.get("industry"), 120) or business.industry
     business.purpose = sanitize_text(data.get("purpose"), 2000) or business.purpose
     business.management_structure = management_structure or business.management_structure
 
-    principal = _build_address(data, "principal", principal_line1, principal_city, principal_zip)
+    principal = _build_address(data, "principal", principal_line1, principal_city, principal_zip, business.state)
     if principal:
         db.session.add(principal)
         db.session.flush()
@@ -177,7 +200,7 @@ def create_application():
         agent = business.registered_agent or RegisteredAgent(business_id=business.id)
         agent.agent_type = ra_type
         agent.name = sanitize_text(data.get("registered_agent_name"), 200) or agent.name
-        office = _build_address(data, "registered_office", office_line1, office_city, office_zip)
+        office = _build_address(data, "registered_office", office_line1, office_city, office_zip, business.state)
         if office:
             db.session.add(office)
             db.session.flush()
@@ -194,7 +217,7 @@ def create_application():
         organizer = Organizer.query.filter_by(business_id=business.id).first() or Organizer(business_id=business.id)
         organizer.organizer_type = org_type
         organizer.name = sanitize_text(data.get("organizer_name"), 200) or organizer.name
-        organizer_address = _build_address(data, "organizer", organizer_line1, organizer_city, organizer_zip)
+        organizer_address = _build_address(data, "organizer", organizer_line1, organizer_city, organizer_zip, business.state)
         if organizer_address:
             db.session.add(organizer_address)
             db.session.flush()
@@ -276,8 +299,11 @@ def submit_application(business_id):
 
     from ..models import User
     owner = User.query.get(user_id)
+    state_config = get_state_config(business.state)
     send_email("application_submitted", owner.email, {
         "business_name": business.name,
+        "state_name": state_config["name"] if state_config else business.state,
+        "filing_authority": state_config["filing_authority"] if state_config else "your state's filing authority",
         "dashboard_url": f"{current_app.config['FRONTEND_ORIGIN']}/dashboard/businesses/{business.id}",
         "support_email": current_app.config["SUPPORT_EMAIL"],
     })

@@ -47,14 +47,16 @@ const SERVICE_SLUGS = [
   'texas-compliance', 'compliance-filings', 'certificate-of-good-standing', 'apostille-services',
   'formation-kit', 'mail-forwarding',
   'sales-tax-permit', 'licenses-permits', 'bookkeeping',
-  'business-banking', 'business-insurance', 'virtual-address', 'legal-documents',
+  'business-banking', 'business-insurance', 'legal-documents',
   'funding-search', 'business-coaching', 'business-plan', 'logo-design',
   'business-website', 'domain', 'business-email', 'business-cards', 'trademark'
+  // 'virtual-address' removed — superseded by the real, dedicated
+  // /virtual-office page (STATIC_PAGES below), not a services.js entry.
 ]
 
 const STATIC_PAGES = [
   '/', '/services', '/pricing', '/how-it-works', '/about', '/reviews',
-  '/resources', '/contact', '/help', '/faq',
+  '/resources', '/contact', '/help', '/faq', '/virtual-office',
   '/privacy', '/terms', '/disclaimer', '/cookie-policy', '/refund-policy',
   '/accessibility', '/do-not-sell'
 ]

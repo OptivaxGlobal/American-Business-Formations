@@ -65,7 +65,8 @@ with app.app_context():
             AddOn(slug="s-corp-election", name="S-Corp election (IRS Form 2553)", price_cents=13000),
             AddOn(slug="apostille", name="Apostille service", price_cents=45000),
             AddOn(slug="certificate-good-standing", name="Certificate of Good Standing / certified copy filing service", price_cents=7000),
-            AddOn(slug="mail-forwarding", name="Suite-based mail forwarding", price_cents=3000, recurring=True),
+            AddOn(slug="mail-forwarding", name="Mail forwarding (business address, no lease agreement)", price_cents=2000, recurring=True),
+            AddOn(slug="virtual-office", name="Virtual office (business address + lease agreement)", price_cents=2900, recurring=True),
             AddOn(slug="expedited", name="Expedited processing", price_cents=2500),
         ])
         print("Seeded starter add-ons.")

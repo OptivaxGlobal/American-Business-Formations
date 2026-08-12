@@ -15,7 +15,7 @@ export default function Reviews(){
   }, [])
 
   return <>
-    <SEO title="Customer Stories" description="Verified customer stories from Texas founders who formed their LLC with American Business Formations." path="/reviews" />
+    <SEO title="Customer Stories" description="Verified customer stories from founders who formed their LLC with American Business Formations." path="/reviews" />
     <PageHero
       eyebrow="Customer stories"
       title="What our customers say"

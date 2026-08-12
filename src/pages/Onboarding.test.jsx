@@ -76,6 +76,60 @@ describe('Onboarding wizard - contact information step', () => {
   })
 })
 
+describe('Onboarding wizard - multi-state formation', () => {
+  afterEach(() => { vi.unstubAllGlobals() })
+
+  it('recalculates the state filing fee shown in the order summary when a different state is selected', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (url) => {
+      const path = String(url)
+      if (path.includes('/auth/me')) {
+        return { ok: true, status: 200, headers: { get: () => 'application/json' }, json: async () => ({ ok: true, data: { id: 'user-1', name: 'Jordan Lee', email: 'jordan@example.com', role: 'customer', email_verified: true } }) }
+      }
+      return { ok: false, status: 401, headers: { get: () => 'application/json' }, json: async () => ({ ok: false, message: 'Not authenticated' }) }
+    }))
+
+    const user = userEvent.setup()
+    render(<AllProviders initialEntries={['/formation-details']}><Onboarding/></AllProviders>)
+
+    // Default selection is Texas the $300 fee should be reflected nowhere
+    // yet since we haven't reached a pricing screen. Switch to Wyoming
+    // before continuing past step 1.
+    await user.selectOptions(screen.getByLabelText(/formation state/i), 'WY')
+    await fillStep0(user)
+    await fillStep1(user)
+    await fillContactStep(user)
+    await fillAddressStep(user)
+    await user.type(screen.getByPlaceholderText(/owner 1 name/i), 'Jordan Lee')
+    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.click(screen.getByLabelText(/i authorize american business formations/i))
+    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.type(screen.getByLabelText(/responsible party full name/i), 'Jordan Lee')
+    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.click(screen.getByRole('button', { name: /continue/i }))
+
+    // Review step: Wyoming's real $100 filing fee, never Texas's $300.
+    expect(await screen.findByText(/wyoming state filing fee/i)).toBeInTheDocument()
+    expect(screen.queryByText(/texas state filing fee/i)).not.toBeInTheDocument()
+    expect(screen.getByText('$100')).toBeInTheDocument()
+  }, 20000)
+
+  it('blocks continuing without a valid formation state', async () => {
+    const user = userEvent.setup()
+    render(<AllProviders initialEntries={['/formation-details']}><Onboarding/></AllProviders>)
+
+    await user.type(screen.getByLabelText(/proposed business name/i), 'Bright Path Studio LLC')
+    await user.selectOptions(screen.getByLabelText(/formation state/i), '')
+    await user.selectOptions(screen.getByLabelText(/^industry/i), 'Technology')
+    await user.click(screen.getByRole('button', { name: /continue/i }))
+
+    expect(await screen.findByText(/select a state where llc formation is currently available/i)).toBeInTheDocument()
+  })
+})
+
 describe('Onboarding wizard - accessibility', () => {
   it('announces the current step and moves focus to the first invalid field with a programmatically connected error', async () => {
     const user = userEvent.setup()

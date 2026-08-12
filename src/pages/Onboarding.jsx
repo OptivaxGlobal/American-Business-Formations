@@ -30,7 +30,7 @@ export default function Onboarding() {
 
   return (
     <>
-      <SEO title="Form Your LLC" description="Complete your LLC formation details. Currently available for Texas LLC formations." path="/formation-details" noindex />
+      <SEO title="Form Your LLC" description="Complete your LLC formation details. Available in 21 states." path="/formation-details" noindex />
       <OnboardingShellChrome wizard={wizard}>
         <StepComponent key={wizard.step} wizard={wizard} />
       </OnboardingShellChrome>

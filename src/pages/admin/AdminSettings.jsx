@@ -1,11 +1,11 @@
-import { AlertTriangle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { api } from '../../lib/api'
 import { SUPPORT_EMAIL } from '../../data/seo'
 import AsyncState from '../../components/dashboard/AsyncState'
+import { Table } from '../../components/ui'
 
 export default function AdminSettings(){
-  const [config, setConfig] = useState(null)
+  const [states, setStates] = useState([])
   const [paymentsEnabled, setPaymentsEnabled] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -13,9 +13,9 @@ export default function AdminSettings(){
   const load = () => {
     setLoading(true)
     setError('')
-    Promise.all([api.getTexasConfig(), api.adminGetPaymentStatus()])
-      .then(([configRes, statusRes]) => {
-        setConfig(configRes.data)
+    Promise.all([api.getStates(), api.adminGetPaymentStatus()])
+      .then(([statesRes, statusRes]) => {
+        setStates(statesRes.data.states || [])
         setPaymentsEnabled(statusRes.data.payments_enabled)
       })
       .catch(err => setError(err?.message || 'We could not load settings. Please try again.'))
@@ -25,16 +25,24 @@ export default function AdminSettings(){
   useEffect(() => { load() }, [])
 
   return <div className="dash-card">
-    <div className="admin-toolbar"><h3>Texas configuration</h3></div>
+    <div className="admin-toolbar"><h3>LLC formation states ({states.length})</h3></div>
     <AsyncState loading={loading} error={error} onRetry={load} loadingLabel="Loading settings…">
-      {config && <>
-        {!config.filing_fee_verified && <p className="onboarding-note admin-warning"><AlertTriangle size={15}/> The filing fee below is an owner-configured placeholder pending confirmation against the Texas Secretary of State.</p>}
-        <div className="admin-plan-editor">
-          <div><small>Certificate of Formation filing fee</small><strong>${(config.filing_fee_cents/100).toFixed(2)}</strong></div>
-          <div style={{marginTop:8}}><small>Verified against the Secretary of State</small><strong>{config.filing_fee_verified ? 'Yes' : 'No'}</strong></div>
-        </div>
+      {states.length > 0 && <>
+        <Table>
+          <thead><tr><th>State</th><th>Filing fee</th><th>Filing authority</th><th>Notes</th></tr></thead>
+          <tbody>
+            {states.map(s => (
+              <tr key={s.code}>
+                <td>{s.name} ({s.code})</td>
+                <td>${(s.llcFormationFeeCents / 100).toFixed(2)}</td>
+                <td>{s.filingAuthority}</td>
+                <td>{s.note || '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
         <p className="dash-empty" style={{padding:0, marginTop:12}}>
-          This is set on the server via the <code>TEXAS_FILING_FEE</code> / <code>TEXAS_FILING_FEE_VERIFIED</code> environment variables (see <code>server/.env.example</code>) it deliberately isn't editable from a form, since this number feeds directly into real order totals at checkout and should only change through a reviewed deploy, not a runtime click.
+          These figures are set in <code>server/app/services/states.py</code> (mirrored for display on the frontend at <code>src/data/states.js</code>) it deliberately isn't editable from a form, since these numbers feed directly into real order totals at checkout and should only change through a reviewed deploy, not a runtime click. Each state's fee was verified against that state's own filing authority; government fees can change without notice — re-verify periodically.
         </p>
       </>}
 
