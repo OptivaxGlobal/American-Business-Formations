@@ -37,6 +37,18 @@ const BLOG_SLUGS = [
   'business-bank-readiness', 'licenses-permits-checklist', 'brand-launch-checklist'
 ]
 
+// The real, written /blog article slugs (src/data/blog/posts/*.js) —
+// distinct from BLOG_SLUGS above, which is the older /resources/:slug
+// placeholder-article template. Kept as a hand-maintained list here (same
+// convention as SERVICE_SLUGS/BLOG_SLUGS) since this plain Node script
+// can't run Vite's import.meta.glob the way src/data/blog/index.js does.
+// Add a new article's slug here (and to sitemap.xml) when it's published.
+const NEW_BLOG_ARTICLE_SLUGS = [
+  'how-to-form-an-llc-in-texas', 'what-does-a-registered-agent-do', 'standard-llc-vs-series-llc',
+  'certificate-of-formation-vs-articles-of-organization', 'new-york-llc-publication-requirement-explained',
+  'does-my-llc-need-an-ein', 'virtual-office-vs-mail-forwarding', 'post-formation-compliance-checklist'
+]
+
 // Includes both active and inactive (isActive: false in services.js)
 // service slugs. Inactive ones are real routes, absent from nav/sitemap,
 // and marked `noindex` by ServicePage.jsx still prerendered so a direct
@@ -50,13 +62,13 @@ const SERVICE_SLUGS = [
   'business-banking', 'business-insurance', 'legal-documents',
   'funding-search', 'business-coaching', 'business-plan', 'logo-design',
   'business-website', 'domain', 'business-email', 'business-cards', 'trademark'
-  // 'virtual-address' removed — superseded by the real, dedicated
+  // 'virtual-address' removed superseded by the real, dedicated
   // /virtual-office page (STATIC_PAGES below), not a services.js entry.
 ]
 
 const STATIC_PAGES = [
   '/', '/services', '/pricing', '/how-it-works', '/about', '/reviews',
-  '/resources', '/contact', '/help', '/faq', '/virtual-office',
+  '/resources', '/blog', '/contact', '/help', '/faq', '/virtual-office',
   '/privacy', '/terms', '/disclaimer', '/cookie-policy', '/refund-policy',
   '/accessibility', '/do-not-sell'
 ]
@@ -65,6 +77,7 @@ const ROUTES = [
   ...STATIC_PAGES,
   ...SERVICE_SLUGS.map(s => `/${s}`),
   ...BLOG_SLUGS.map(s => `/resources/${s}`),
+  ...NEW_BLOG_ARTICLE_SLUGS.map(s => `/blog/${s}`),
   // Not auth-gated (step 1 is open to anonymous visitors) so, unlike
   // /dashboard or /admin, it needs a real static shell: without this, a
   // direct hit or unfurl bot hitting /formation-details falls through to

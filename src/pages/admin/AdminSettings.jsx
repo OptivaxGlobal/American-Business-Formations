@@ -42,7 +42,7 @@ export default function AdminSettings(){
           </tbody>
         </Table>
         <p className="dash-empty" style={{padding:0, marginTop:12}}>
-          These figures are set in <code>server/app/services/states.py</code> (mirrored for display on the frontend at <code>src/data/states.js</code>) it deliberately isn't editable from a form, since these numbers feed directly into real order totals at checkout and should only change through a reviewed deploy, not a runtime click. Each state's fee was verified against that state's own filing authority; government fees can change without notice — re-verify periodically.
+          These figures are set in <code>server/app/services/states.py</code> (mirrored for display on the frontend at <code>src/data/states.js</code>) it deliberately isn't editable from a form, since these numbers feed directly into real order totals at checkout and should only change through a reviewed deploy, not a runtime click. Each state's fee was verified against that state's own filing authority; government fees can change without notice re-verify periodically.
         </p>
       </>}
 

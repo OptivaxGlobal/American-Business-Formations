@@ -102,7 +102,7 @@ export default function Contact(){
   }
 
   return <>
-    <SEO title="Contact Us" description="Reach American Business Formations for LLC formation questions, service requests, or support, in any of our 21 supported states." path="/contact" />
+    <SEO title="Contact Us" description="Reach American Business Formations for LLC formation questions, service requests, or support, in any of our 52 supported states and jurisdictions." path="/contact" />
     <PageHero eyebrow="Contact our team" title="Tell us how we can help" description="Use the form for LLC formation questions, service requests, or general support." />
     <section className="section"><div className="container contact-grid">
       <Reveal as="div" delay={0} className="contact-details">

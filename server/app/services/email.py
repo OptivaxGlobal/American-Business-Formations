@@ -8,12 +8,12 @@ TEMPLATES = {
     "welcome": "Welcome to American Business Formations",
     "verify_email": "Verify your email address",
     "password_reset": "Reset your password",
-    # Deliberately state-agnostic — LLC formation is available across 21
+    # Deliberately state-agnostic LLC formation is available across 21
     # states (see server/app/services/states.py), and these fire for every
     # customer regardless of which one they formed in. A previous version
     # of these hardcoded "Texas LLC" into every subject line, which would
     # have sent a Wyoming or Delaware customer an email about "Your Texas
-    # LLC" — caught during the multi-state expansion, not by a report.
+    # LLC" caught during the multi-state expansion, not by a report.
     "application_saved": "Your LLC application was saved",
     "application_submitted": "We received your LLC application",
     "payment_received": "Payment received order confirmation",

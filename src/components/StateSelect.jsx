@@ -1,7 +1,7 @@
 import { stateList } from '../data/states'
 import { fieldAria } from '../lib/formErrors'
 
-// A native <select> rather than a custom combobox — matches every other
+// A native <select> rather than a custom combobox matches every other
 // single-choice field in this app (industry, entity type, management
 // structure, effective date option all use plain <select>). A native
 // select is already keyboard-accessible, works correctly on mobile with

@@ -6,7 +6,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from ..extensions import db, limiter
 from ..models import Order, OrderItem, Payment, Business, User, AuditLog, Package, AddOn, StatusHistory, ORDER_STATUSES_PAYABLE_FROM
 from ..services.payments import create_checkout_session, verify_webhook_signature, PaymentsNotConfigured
-from ..services.states import get_state_config
+from ..services.states import get_state_config, is_virtual_office_available
 from ..services.email import send_email
 from ..utils import ok, error
 from .notifications import notify_user
@@ -79,8 +79,19 @@ def create_session():
             return error("Please correct the highlighted fields.", 422,
                          field_errors={"add_on_ids": f"Not available: {', '.join(missing)}"})
 
+        # Virtual Office was deliberately NOT expanded nationwide (stayed at
+        # its original 21-state footprint) even though LLC Formation and
+        # Registered Agent were never trust the client to have honored
+        # that UI-level restriction (AddOnsStep.jsx hides/disables the card,
+        # but the same "never trust the browser" rule applied to the filing
+        # fee itself applies here too). Mail Forwarding has no such
+        # restriction and is unaffected.
+        if "virtual-office" in found_slugs and business and not is_virtual_office_available(business.state):
+            return error("Please correct the highlighted fields.", 422,
+                         field_errors={"add_on_ids": "Virtual Office is not available in this business's formation state."})
+
     # A package always bundles a real LLC formation, which always has a
-    # formation state — the fee for that state, and only that state, is
+    # formation state the fee for that state, and only that state, is
     # what gets charged. Nothing about the fee is ever read from the
     # request body; `business.state` (set when the business was created/
     # saved, validated against the same supported-state list there) is the

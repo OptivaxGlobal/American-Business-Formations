@@ -25,7 +25,7 @@ const faqs = [
 
 export default function HowItWorks() {
   return <>
-    <SEO title="How It Works" description="See exactly how American Business Formations takes your LLC from a business name to a filed formation document, in any of our 21 supported states." path="/how-it-works" jsonLd={breadcrumbSchema([{ name: 'How It Works' }])} />
+    <SEO title="How It Works" description="See exactly how American Business Formations takes your LLC from a business name to a filed formation document, in any of our 52 supported states and jurisdictions." path="/how-it-works" jsonLd={breadcrumbSchema([{ name: 'How It Works' }])} />
     <PageHero
       crumbs={<Breadcrumbs items={[{ label: 'How It Works' }]} />}
       eyebrow="How it works"

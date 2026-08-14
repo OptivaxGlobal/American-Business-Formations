@@ -5,7 +5,7 @@ const SITE_NAME = 'American Business Formations'
 const DEFAULT_IMAGE = `${SITE_URL}/logo.webp`
 
 // TEMPORARY, site-wide: the client does not want this site indexed right
-// now. Flipping this one flag is the entire on/off switch for that — every
+// now. Flipping this one flag is the entire on/off switch for that every
 // page (public or already-noindex) renders "noindex, nofollow" while this
 // is true, and every page goes back to its own normal per-page `noindex`
 // prop the moment this is set back to false. Deliberately implemented here

@@ -11,7 +11,7 @@ import useFocusTrap from '../hooks/useFocusTrap'
 // Mega menu column layout: "Business address services" must appear at the
 // top of the right column (previously it was the 3rd item in a flat,
 // array-order 2-column grid, which wrapped it to a new row under the LEFT
-// column — i.e. the bottom-left bug this fixes). Built here as an explicit
+// column i.e. the bottom-left bug this fixes). Built here as an explicit
 // left/right split rather than reordering `serviceGroups` itself, since
 // that array is also consumed in its original order by ServiceGrid.jsx
 // (Home.jsx's "Start your business" / "Manage your business" sections).
@@ -136,7 +136,7 @@ export default function Header() {
                 </div>
                 <div className="mega-menu-col-stack">
                   {/* .find() in MEGA_MENU_RIGHT_GROUPS order, not serviceGroups'
-                      own order — a plain .filter() here previously rendered
+                      own order a plain .filter() here previously rendered
                       "Manage your business" above "Business address services"
                       because that's their relative order in serviceGroups,
                       silently undoing the whole point of this layout. */}
@@ -156,6 +156,7 @@ export default function Header() {
           <NavLink to="/how-it-works" onClick={closeAll}>How It Works</NavLink>
           <NavLink to="/pricing" onClick={closeAll}>Pricing</NavLink>
           <NavLink to="/resources" onClick={closeAll}>Resources</NavLink>
+          <NavLink to="/blog" onClick={closeAll}>Blog</NavLink>
           <NavLink to="/about" onClick={closeAll}>About</NavLink>
           <NavLink to="/contact" onClick={closeAll}>Contact</NavLink>
           <div className="nav-actions">

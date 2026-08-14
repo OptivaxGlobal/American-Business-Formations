@@ -11,3 +11,4 @@ server/data/*.json
 server/data/*.db
 server/data/uploads/
 .pytest_cache
+scripts/geo-source/

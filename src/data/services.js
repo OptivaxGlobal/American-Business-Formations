@@ -155,6 +155,7 @@ export const services = {
     intro: 'Every LLC and corporation is legally required to maintain a registered agent a designated recipient for lawsuits, subpoenas, and official state correspondence at a physical street address a P.O. box alone is not enough. Our registered agent service gives your business a reliable, monitored address for service of process and official notices, with scanned documents and compliance reminders delivered straight to your dashboard, for $80 per year, per entity.',
     image: '/illustrations/registered-agent.svg',
     features: [
+      'Available across all 50 states, Washington, D.C., and Puerto Rico',
       'Registered office address that meets state requirements',
       'Same-day scanning of service of process and official notices',
       'Compliance deadline reminders tied to your entity',
@@ -177,8 +178,8 @@ export const services = {
     ],
     limitations: [
       'We cannot act as your registered agent until you’ve reviewed and confirmed the consent agreement',
-      'A P.O. box cannot be used as the registered office address under Texas law',
-      'Pricing is per entity, per state our Texas registered agent service is available today; coverage for entities registered in other states is arranged on request',
+      'A P.O. box cannot be used as a registered office address state law requires a physical street address',
+      'Pricing is per entity, per state or jurisdiction',
       'This service does not include legal representation or advice about any documents you receive'
     ],
     steps: [
@@ -191,7 +192,7 @@ export const services = {
       ['Can I be my own registered agent?', 'Yes, if you have a physical street address in the state (not a P.O. box) and are available during normal business hours to receive documents. Many owners choose our service instead to keep that address off the public record.'],
       ['What happens if I miss a notice?', 'Missing service of process or an official notice can result in default judgments or loss of good standing. That’s the core problem a registered agent service solves.'],
       ['What does "$80 per year, per entity" mean?', 'The service is priced per business entity, per year. If you run more than one LLC or corporation, each one is billed separately at $80 per year.'],
-      ['Do you provide registered agent service in states other than Texas?', 'Our Texas registered agent service is available today through the standard intake. If you have an entity registered in another state, contact us we can arrange coverage on a case-by-case basis.'],
+      ['Which states do you provide registered agent service in?', 'All 50 states, Washington, D.C., and Puerto Rico available through the standard intake for any of those jurisdictions.'],
       ['How do I switch to your registered agent service if I already have one?', 'Tell us your current registered agent information during intake. We handle the update filing with the state so the change is official, then take over from your renewal date.'],
       ['Will my home address stay private?', 'Yes. Using our registered office address instead of your home address keeps your personal address off the state’s public business filings.'],
       ['How and when do I renew?', 'The service renews annually. We send reminders before your term ends, and renewal is billed automatically unless you cancel from your dashboard.'],
@@ -541,8 +542,8 @@ export const services = {
     automated: true,
     isActive: true,
     title: 'A professional business mailing address with mail forwarding',
-    short: 'A professional business address with a unique suite number, unlimited mail scanning, and online access for $20 per month.',
-    intro: 'A home address on public business filings and correspondence can feel exposed, and a P.O. box doesn’t always look professional to banks, vendors, or customers. Mail Forwarding gives your business a real street address with a unique suite number. We receive your mail, scan and upload it for you to view online, and can ship original documents on request for $20 per month, per entity available in every one of our 21 supported LLC formation states. Need a lease agreement for your address as well? See Virtual Office instead.',
+    short: 'A professional business address with a unique suite number, unlimited mail scanning, and online access for $35 per month.',
+    intro: 'A home address on public business filings and correspondence can feel exposed, and a P.O. box doesn’t always look professional to banks, vendors, or customers. Mail Forwarding gives your business a real street address with a unique suite number. We receive your mail, scan and upload it for you to view online, and can ship original documents on request for $35 per month, per entity available in every one of our 21 supported LLC formation states. Need a lease agreement for your address as well? See Virtual Office instead.',
     image: '/illustrations/banking.svg',
     features: [
       'A professional business address with a unique suite number not a P.O. box',
@@ -571,8 +572,8 @@ export const services = {
       'Pricing is per entity if you operate multiple businesses, each one is billed separately'
     ],
     steps: [
-      ['Choose your state', 'Available across all 21 states we support for LLC formation.'],
-      ['Complete your order', 'Sign up for Mail Forwarding at $20 per month, per entity.'],
+      ['Choose your state', 'Available nationwide, across all 50 states, Washington, D.C. & Puerto Rico.'],
+      ['Complete your order', 'Sign up for Mail Forwarding at $35 per month, per entity.'],
       ['Receive your suite number', 'Typically assigned within 1–2 business days.'],
       ['View your mail online', 'Every piece is scanned and uploaded for secure remote access.']
     ],
@@ -581,10 +582,10 @@ export const services = {
       ['Does Mail Forwarding include a lease agreement?', 'No. Mail Forwarding does not include a lease agreement. If you need one for your business address, choose Virtual Office instead.'],
       ['How long does it take to get my suite number?', 'A unique suite number is typically assigned within 1–2 business days after your order many are faster, but this isn’t guaranteed.'],
       ['Can I view my mail online?', 'Yes. Every piece of mail is scanned and uploaded for secure remote viewing, with unlimited scanning included.'],
-      ['Can physical mail be shipped to me?', 'Yes, on request. Shipping and handling charges apply separately or from the $20/month subscription domestic and international shipments are priced differently.'],
-      ['Is the $20 per month price per business or per person?', 'It’s per entity. If you operate more than one business, each one is set up and billed as its own mail forwarding subscription.'],
-      ['Which states is this available in?', 'All 21 states we currently support for LLC formation see the full list on this page.'],
-      ['What’s the difference between Mail Forwarding and Virtual Office?', 'Both include a professional address, a unique suite number, and unlimited digital mail access. Virtual Office additionally includes a lease agreement, for $29 per month instead of $20.']
+      ['Can physical mail be shipped to me?', 'Yes, on request. Shipping and handling charges apply separately or from the $35/month subscription domestic and international shipments are priced differently.'],
+      ['Is the $35 per month price per business or per person?', 'It’s per entity. If you operate more than one business, each one is set up and billed as its own mail forwarding subscription.'],
+      ['Which states is this available in?', 'Mail Forwarding is available nationwide, across all 50 states, Washington, D.C., and Puerto Rico.'],
+      ['What’s the difference between Mail Forwarding and Virtual Office?', 'Both include a professional address, a unique suite number, and unlimited digital mail access. Virtual Office additionally includes a lease agreement, for $49 per month instead of $35.']
     ],
     related: ['virtual-office', 'registered-agent', 'llc-formation']
   },
@@ -595,12 +596,12 @@ export const services = {
     automated: true,
     isActive: true,
     title: 'A professional virtual office address with a lease agreement',
-    short: 'A professional business address with a unique suite number, a lease agreement, and unlimited mail scanning for $29 per month.',
+    short: 'A professional business address with a unique suite number, a lease agreement, and unlimited mail scanning for $49 per month.',
     // Full page lives at /virtual-office (src/pages/VirtualOffice.jsx), not
-    // the generic ServicePage template — this entry exists so Virtual
+    // the generic ServicePage template this entry exists so Virtual
     // Office still appears correctly in the mega-menu, /services grid, and
     // other services' "related" links, all of which read from this object.
-    intro: 'Virtual Office gives your business a professional street address, a unique suite number, and a real lease agreement the paperwork banks, lenders, and licensing agencies often ask for that a P.O. box or basic mail-handling service can’t provide. Every piece of mail is scanned and available online, with physical shipment available on request, for $29 per month, per entity across all 21 states we support for LLC formation.',
+    intro: 'Virtual Office gives your business a professional street address, a unique suite number, and a real lease agreement the paperwork banks, lenders, and licensing agencies often ask for that a P.O. box or basic mail-handling service can’t provide. Every piece of mail is scanned and available online, with physical shipment available on request, for $49 per month, per entity across the 21 states where Virtual Office is available.',
     image: '/illustrations/registered-agent.svg',
     features: [
       'A professional business address with a unique suite number',
@@ -628,21 +629,21 @@ export const services = {
       'Pricing is per entity if you operate multiple businesses, each one is billed separately'
     ],
     steps: [
-      ['Choose your state', 'Available across all 21 states we support for LLC formation.'],
-      ['Complete your order', 'Sign up for Virtual Office at $29 per month, per entity.'],
+      ['Choose your state', 'Available in the 21 states where Virtual Office is offered — LLC Formation itself is available more broadly, nationwide.'],
+      ['Complete your order', 'Sign up for Virtual Office at $49 per month, per entity.'],
       ['Receive your suite number', 'Typically assigned within 1–2 business days.'],
       ['Receive your lease agreement', 'Signed and delivered to your document center.'],
       ['View your mail online', 'Every piece is scanned and uploaded for secure remote access.']
     ],
     faq: [
-      ['What is a Virtual Office?', 'A professional business address with a unique suite number, a signed lease agreement, and digital mail handling all for $29 per month.'],
+      ['What is a Virtual Office?', 'A professional business address with a unique suite number, a signed lease agreement, and digital mail handling all for $49 per month.'],
       ['Do I receive a unique suite number?', 'Yes, typically within 1–2 business days after your order this is a typical timeframe, not a guarantee.'],
       ['Is a lease agreement included?', 'Yes. A signed lease agreement for your business address is included and is the main difference between Virtual Office and Mail Forwarding.'],
       ['Can I view my mail online?', 'Yes. Every piece of mail is scanned and uploaded for secure remote viewing, with unlimited scanning included.'],
-      ['Can physical documents be shipped to me?', 'Yes, on request. Shipping and handling charges apply separately domestic and international shipments are priced differently, and shipping is never included free or unlimited in the $29/month price.'],
+      ['Can physical documents be shipped to me?', 'Yes, on request. Shipping and handling charges apply separately domestic and international shipments are priced differently, and shipping is never included free or unlimited in the $49/month price.'],
       ['Can documents be shipped internationally?', 'Yes. International shipments outside the United States may incur additional overseas shipping charges beyond standard domestic rates.'],
-      ['Which states are supported?', 'All 21 states we currently support for LLC formation see the full list on this page.'],
-      ['What’s the difference between Virtual Office and Mail Forwarding?', 'Both include a professional address, a unique suite number, and unlimited digital mail access. Virtual Office additionally includes a signed lease agreement, for $29 per month versus $20 for Mail Forwarding.']
+      ['Which states are supported?', 'Virtual Office is available in 21 supported states see the full list on this page. LLC Formation and Registered Agent are available more broadly, across all 50 states, Washington, D.C., and Puerto Rico.'],
+      ['What’s the difference between Virtual Office and Mail Forwarding?', 'Both include a professional address, a unique suite number, and unlimited digital mail access. Virtual Office additionally includes a signed lease agreement, for $49 per month versus $35 for Mail Forwarding.']
     ],
     related: ['mail-forwarding', 'registered-agent', 'llc-formation']
   },

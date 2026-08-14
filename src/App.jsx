@@ -14,6 +14,8 @@ const About = lazy(() => import('./pages/About'))
 const Reviews = lazy(() => import('./pages/Reviews'))
 const Resources = lazy(() => import('./pages/Resources'))
 const BlogPost = lazy(() => import('./pages/BlogPost'))
+const Blog = lazy(() => import('./pages/Blog'))
+const BlogArticle = lazy(() => import('./pages/BlogArticle'))
 const Contact = lazy(() => import('./pages/Contact'))
 const HowItWorks = lazy(() => import('./pages/HowItWorks'))
 const Help = lazy(() => import('./pages/Help'))
@@ -56,7 +58,7 @@ export default function App(){
       <Route path="services" element={<Services/>}/>
       <Route path="virtual-office" element={<VirtualOffice/>}/>
       {/* virtual-office has its own dedicated page above (richer, multi-section
-          content per its scope) — excluded here so the generic ServicePage
+          content per its scope) excluded here so the generic ServicePage
           template never claims the same URL. */}
       {Object.keys(services).filter(slug => slug !== 'virtual-office').map(slug=><Route key={slug} path={slug} element={<ServicePage forcedSlug={slug}/>}/>) }
       <Route path="pricing" element={<Pricing/>}/>
@@ -65,6 +67,8 @@ export default function App(){
       <Route path="reviews" element={<Reviews/>}/>
       <Route path="resources" element={<Resources/>}/>
       <Route path="resources/:slug" element={<BlogPost/>}/>
+      <Route path="blog" element={<Blog/>}/>
+      <Route path="blog/:slug" element={<BlogArticle/>}/>
       <Route path="contact" element={<Contact/>}/>
       <Route path="help" element={<Help/>}/>
       <Route path="faq" element={<FAQPage/>}/>

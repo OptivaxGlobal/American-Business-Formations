@@ -7,6 +7,7 @@
   <url><loc>https://americanbusinessformations.com/about</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://americanbusinessformations.com/reviews</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
   <url><loc>https://americanbusinessformations.com/resources</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://americanbusinessformations.com/blog</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://americanbusinessformations.com/contact</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://americanbusinessformations.com/help</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
   <url><loc>https://americanbusinessformations.com/faq</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -42,4 +43,23 @@
     its `published` flag flips to true and scripts/validate-seo.mjs confirms
     it. The parent /resources listing page stays indexed above.
   -->
+
+  <!--
+    /blog/:slug articles below ARE real, unique, written content (see
+    src/data/blog/posts/*.js) unlike the /resources/:slug placeholders
+    above, so they're listed here. Add a new <url> entry whenever a new
+    article file is added, and add its slug to NEW_BLOG_ARTICLE_SLUGS in
+    scripts/prerender.mjs so it's actually prerendered to match. All pages
+    site-wide (including these) still carry noindex while SITE_WIDE_NOINDEX
+    is on in src/components/SEO.jsx see that file before assuming this
+    sitemap alone controls indexing.
+  -->
+  <url><loc>https://americanbusinessformations.com/blog/how-to-form-an-llc-in-texas</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://americanbusinessformations.com/blog/what-does-a-registered-agent-do</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://americanbusinessformations.com/blog/standard-llc-vs-series-llc</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://americanbusinessformations.com/blog/certificate-of-formation-vs-articles-of-organization</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://americanbusinessformations.com/blog/new-york-llc-publication-requirement-explained</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://americanbusinessformations.com/blog/does-my-llc-need-an-ein</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://americanbusinessformations.com/blog/virtual-office-vs-mail-forwarding</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://americanbusinessformations.com/blog/post-formation-compliance-checklist</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 </urlset>

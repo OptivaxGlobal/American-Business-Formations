@@ -11,7 +11,8 @@
     "test": "vitest run",
     "validate:seo": "node scripts/validate-seo.mjs",
     "check:responsive": "node scripts/check-responsive.mjs",
-    "package:source": "node scripts/package-source.mjs"
+    "package:source": "node scripts/package-source.mjs",
+    "generate:geography": "node scripts/generate-geography.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

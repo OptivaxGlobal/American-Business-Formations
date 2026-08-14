@@ -32,7 +32,7 @@ def create_app(config_object=None):
 
     # Flask-JWT-Extended's own default error responses use a different JSON
     # shape ({"msg": "..."}) than every other error this API returns
-    # ({"ok": false, "message": "..."} via utils.error()) — caught by the
+    # ({"ok": false, "message": "..."} via utils.error()) caught by the
     # backend test suite's first-ever real run (test_auth.py expected
     # "message" and got "msg" for a request with no auth cookie at all).
     # Every jwt_required()-protected route error now goes through the same

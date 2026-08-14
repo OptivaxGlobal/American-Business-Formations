@@ -20,7 +20,7 @@ export default function BusinessNameStep({ wizard }) {
         onBlur={() => markTouched('state')}
         error={errors.state}
         fieldRef={el => fieldRefs.current.state = el}
-        hint="LLC formation is available in 21 states."
+        hint="LLC formation is available across all 50 states, Washington, D.C. & Puerto Rico."
       />
       <label>Proposed business name
         <input

@@ -11,11 +11,12 @@ import { SectionHeading } from '../components/ui'
 import { services, serviceDisclaimer } from '../data/services'
 import { getAddOn } from '../data/pricing'
 import { breadcrumbSchema, faqSchema, serviceSchema } from '../data/seo'
+import { virtualOfficeStateList } from '../data/states'
 
 const HOW_IT_WORKS = [
   ['Choose your state', 'Available across all 21 states we support for LLC formation.'],
-  ['Complete your order', 'Sign up for Virtual Office at $29 per month, per entity.'],
-  ['Receive your suite number', 'Typically assigned within 1–2 business days — not a guaranteed timeframe.'],
+  ['Complete your order', 'Sign up for Virtual Office at $49 per month, per entity.'],
+  ['Receive your suite number', 'Typically assigned within 1–2 business days not a guaranteed timeframe.'],
   ['Receive digitized mail', 'Every piece is scanned and uploaded for secure online viewing.'],
   ['Request original documents when needed', 'Physical shipment is available on request; separate shipping and handling charges apply.']
 ]
@@ -28,7 +29,7 @@ export default function VirtualOffice() {
   return <>
     <SEO
       title="Virtual Office Address with Lease Agreement"
-      description="A professional virtual office address with a unique suite number, a signed lease agreement, and unlimited digital mail access for $29 per month, across 21 states."
+      description="A professional virtual office address with a unique suite number, a signed lease agreement, and unlimited digital mail access for $49 per month, across 21 states."
       path={path}
       jsonLd={{
         '@context': 'https://schema.org',
@@ -48,7 +49,7 @@ export default function VirtualOffice() {
       description="A unique suite number, a signed lease agreement, and unlimited digital mail access, available in 21 states."
       actions={<>
         <div className="hero-actions">
-          <Link className="btn btn-primary" to="/formation-details">Get Virtual Office — ${addOn.price}/month <ArrowRight size={18}/></Link>
+          <Link className="btn btn-primary" to="/formation-details">Get Virtual Office ${addOn.price}/month <ArrowRight size={18}/></Link>
           <Link className="btn btn-outline" to="/mail-forwarding">Compare address services</Link>
         </div>
         <div className="mini-proof">
@@ -78,8 +79,8 @@ export default function VirtualOffice() {
 
     {/* 4. Available in 21 states */}
     <section className="section"><div className="container narrow">
-      <SectionHeading centered eyebrow="Coverage" title="Available in 21 states" description="Virtual Office is offered everywhere we currently support LLC formation." />
-      <SupportedStatesList/>
+      <SectionHeading centered eyebrow="Coverage" title="Available in 21 supported states" description="Virtual Office is offered in these 21 states. LLC Formation and Registered Agent are available more broadly, across all 50 states, Washington, D.C. & Puerto Rico." />
+      <SupportedStatesList list={virtualOfficeStateList}/>
     </div></section>
 
     {/* 5. Virtual Office vs Mail Forwarding */}
@@ -99,7 +100,7 @@ export default function VirtualOffice() {
     <div className="closing-cta">
       <div className="container closing-cta-inner">
         <div><span>Ready to get started?</span><h2>Establish your professional business presence.</h2></div>
-        <Link className="btn btn-primary" to="/formation-details">Get Virtual Office — ${addOn.price}/month <ArrowRight size={18}/></Link>
+        <Link className="btn btn-primary" to="/formation-details">Get Virtual Office ${addOn.price}/month <ArrowRight size={18}/></Link>
       </div>
     </div>
   </>

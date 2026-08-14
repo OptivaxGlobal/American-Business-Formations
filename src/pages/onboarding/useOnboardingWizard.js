@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { getStateFilingFee, isSupportedState, getState } from '../../data/states'
+import { getStateFilingFee, isSupportedState, getState, isVirtualOfficeAvailable } from '../../data/states'
+import { getEntityTypeOptions } from '../../config/stateRequirements'
 import { api } from '../../lib/api'
 import { useApp } from '../../context/AppContext'
 import { normalizeBusinessName, validateBusinessName } from '../../lib/businessName'
@@ -17,14 +18,19 @@ import { plans } from '../../components/PricingCards'
 export const steps = [
   'Business name', 'Business basics', 'Contact information', 'Business address',
   'Ownership & management', 'Registered agent', 'Organizer', 'Effective date',
-  'EIN assistance', 'Additional services', 'Package', 'Account', 'Review', 'Submit order', 'Confirmation'
+  'EIN assistance', 'Additional services', 'Documents & verification', 'Package',
+  'Account', 'Review', 'Submit order', 'Confirmation'
 ]
 
-// Index of the 'Account' step above — the one place an anonymous visitor's
+// Index of the 'Account' step above the one place an anonymous visitor's
 // email/password/terms collected in AccountStep.jsx must actually become a
 // real signed-in session (see goNext below) before Review/Submit, which
-// both require a JWT, can possibly succeed.
-const ACCOUNT_STEP = 11
+// both require a JWT, can possibly succeed. (Shifted from 11 -> 12 by the
+// new "Documents & verification" step inserted before Package.)
+const ACCOUNT_STEP = 12
+// Index of the Review step, used as the upper bound when validating every
+// prior step before allowing final submission (see findFirstInvalidStep).
+const REVIEW_STEP = 13
 
 // Only currently-sellable add-ons are offered here (temporarily-disabled
 // entries like registered-agent are excluded by getActiveAddOns()) every
@@ -61,9 +67,15 @@ export function buildApplicationPayload(form, businessId) {
     principal_line1: form.principalLine1,
     principal_city: form.principalCity,
     principal_zip: form.principalZip,
+    // No county field is collected from the customer (Part 1) for the
+    // one state that actually requires it on its own formation document
+    // (New York), the backend derives it server-side from this verified
+    // address via the U.S. Census Geocoder (see
+    // server/app/services/geocoding.py) rather than asking for it here.
     registered_agent_type: form.registeredAgentType,
     registered_agent_name: form.registeredAgentName,
     registered_agent_consent: form.registeredAgentConsent,
+    registered_agent_signer_name: form.registeredAgentSignerName,
     organizer_type: form.organizerType,
     organizer_name: form.organizerName,
     effective_date_option: form.effectiveDateOption,
@@ -73,6 +85,14 @@ export function buildApplicationPayload(form, businessId) {
     owners: form.ownerDetails.map(o => ({ name: o.name, percentage: Number(o.percentage) || 0 }))
   }
   if (businessId) payload.business_id = businessId
+  // Generated-document review acknowledgement (Part 16) only sent once the
+  // customer has actually checked the box on the Review step; omitted
+  // otherwise so an in-progress autosave from an earlier step never
+  // overwrites a previously-recorded approval with "unapproved."
+  if (form.formationReviewApproved) {
+    payload.formation_review_approved = true
+    payload.formation_review_version = form.formationReviewVersion
+  }
   if (form.effectiveDateOption === 'delayed') payload.effective_date = form.effectiveDate
   if (form.registeredAgentType !== 'abf') {
     payload.registered_office_line1 = form.registeredOfficeLine1
@@ -100,7 +120,7 @@ function generateIdempotencyKey() {
 // this module to worry about (the mock payment form has been removed).
 const DRAFT_KEY = 'abf_onboarding_draft'
 const NEVER_PERSIST_FIELDS = ['password', 'confirmPassword']
-const MAX_RESTORABLE_STEP = 13 // never restore directly into the confirmation step (14) that requires a live order fetched from the server
+const MAX_RESTORABLE_STEP = 14 // never restore directly into the confirmation step (15) that requires a live order fetched from the server
 
 function loadDraft() {
   try {
@@ -154,15 +174,20 @@ export default function useOnboardingWizard() {
   const [idempotencyKey] = useState(generateIdempotencyKey)
 
   const defaultForm = {
-    businessName: draftBusinessName || businessNameFromQuery(), altName: '', nameFinalized: true, industry: '', purpose: '', county: '', city: '', launchDate: '',
+    businessName: draftBusinessName || businessNameFromQuery(), altName: '', nameFinalized: true, industry: '', purpose: '', launchDate: '',
     // Formation state drives the real government filing fee shown from
     // this point forward (see stateFee below) and is what checkout.py
-    // independently re-validates and re-prices from server-side — this
+    // independently re-validates and re-prices from server-side this
     // default is only a starting point on-screen, never assumed silently.
     state: 'TX',
     fullName: user?.name || '', email: user?.email || '', phone: '', commPref: 'email',
     principalLine1: '', principalCity: '', principalZip: '', mailingSame: true, mailingLine1: '', mailingCity: '', mailingZip: '', addressPrivacy: false,
     registeredAgentType: 'abf', registeredAgentName: '', registeredOfficeLine1: '', registeredOfficeCity: '', registeredOfficeZip: '', registeredAgentConsent: false,
+    // Electronic signature evidence for registered-agent consent (Part 15)
+    // a typed full legal name captured alongside the consent checkbox,
+    // with the timestamp recorded server-side the moment consent is given
+    // (RegisteredAgent.consent_given_at).
+    registeredAgentSignerName: '',
     entityType: 'LLC', owners: '1', management: 'Member-managed', ownerDetails: [{ name: '', percentage: 100 }],
     organizerType: 'self', organizerName: '', organizerLine1: '', organizerCity: '', organizerZip: '',
     effectiveDateOption: 'filing', effectiveDate: '',
@@ -170,6 +195,10 @@ export default function useOnboardingWizard() {
     needsEIN: true, expectEmployees: false, needsBanking: true, responsibleParty: '',
     plan: 'Accelerated', addOns: [],
     accountEmail: user?.email || '', password: '', confirmPassword: '', termsAccepted: false, marketingConsent: false,
+    // Generated formation-document review acknowledgement (Part 16) —
+    // distinct from finalTermsAccepted (the checkout/billing terms
+    // agreement); this one specifically confirms the filing data itself.
+    formationReviewApproved: false, formationReviewApprovedAt: '', formationReviewVersion: 0,
     finalTermsAccepted: false
   }
   const [form, setForm] = useState(() => (initialDraft?.form ? { ...defaultForm, ...initialDraft.form } : defaultForm))
@@ -191,7 +220,7 @@ export default function useOnboardingWizard() {
         if (cancelled) return
         setConfirmedOrder(result?.data || null)
         clearDraft()
-        setStep(14)
+        setStep(steps.length - 1) // Confirmation is always the last step
       })
       .catch(err => {
         if (cancelled) return
@@ -246,8 +275,8 @@ export default function useOnboardingWizard() {
     state: f => isSupportedState(f.state) ? valid() : invalid('Select a state where LLC formation is currently available.'),
     industry: f => f.industry ? valid() : invalid('Select an industry.'),
     purpose: f => validateText(f.purpose, { required: true, min: 5, max: 500, label: 'Business purpose' }),
-    county: f => validateText(f.county, { required: true, min: 2, max: 100, label: 'County' }),
-    city: f => validateCity(f.city, { required: true }),
+    entityType: f => getEntityTypeOptions(f.state).find(t => t.id === f.entityType)?.available
+      ? valid() : invalid('This entity type is not currently available in your selected state. Choose another option below.'),
     launchDate: f => (!f.launchDate || isValidCalendarDate(f.launchDate)) ? valid() : invalid('Enter a valid date.'),
     fullName: f => validateFullName(f.fullName, { required: true }),
     email: f => validateEmail(f.email, { required: true }),
@@ -264,6 +293,7 @@ export default function useOnboardingWizard() {
     registeredOfficeCity: f => f.registeredAgentType === 'abf' ? valid() : validateCity(f.registeredOfficeCity, { required: true }),
     registeredOfficeZip: f => f.registeredAgentType === 'abf' ? valid() : validateZip(f.registeredOfficeZip, { required: true }),
     registeredAgentConsent: f => f.registeredAgentConsent ? valid() : invalid('You must confirm registered agent consent before continuing.'),
+    registeredAgentSignerName: f => validateFullName(f.registeredAgentSignerName, { required: true }),
     organizerName: f => f.organizerType !== 'other' ? valid() : validateFullName(f.organizerName, { required: true }),
     organizerLine1: f => f.organizerType !== 'other' ? valid() : validateStreetAddress(f.organizerLine1, { required: true }),
     organizerCity: f => f.organizerType !== 'other' ? valid() : validateCity(f.organizerCity, { required: true }),
@@ -275,21 +305,41 @@ export default function useOnboardingWizard() {
     password: f => user ? valid() : validatePassword(f.password, { required: true }),
     confirmPassword: f => user ? valid() : validatePasswordConfirmation(f.password, f.confirmPassword),
     termsAccepted: f => (user || f.termsAccepted) ? valid() : invalid('You must agree to the Terms of Service before continuing.'),
+    formationReviewApproved: f => f.formationReviewApproved ? valid() : invalid('Please confirm your formation details are accurate before continuing.'),
     finalTermsAccepted: f => f.finalTermsAccepted ? valid() : invalid('You must agree before completing your purchase.')
   }), [user])
 
+  // Step 10 ("Documents & verification") intentionally has no entry here —
+  // it never blocks Continue. Required customer uploads are rare (see
+  // src/config/stateRequirements.js none of the 52 states/jurisdictions require one for
+  // a standard formation) and conditional ones only appear once the
+  // customer has an account/business record to attach a file to (Part 14);
+  // blocking the step itself before that record exists would create a
+  // dead end. Progress is still shown ("X of Y completed") and any
+  // outstanding item stays visible on the customer's dashboard afterward.
   const stepFields = {
     0: ['businessName', 'state', 'industry'],
-    1: ['purpose', 'county', 'city', 'launchDate'],
+    // Business Basics collects the principal business address directly
+    // (no separate County field see src/config/stateRequirements.js;
+    // the one state whose own formation document actually asks for a
+    // county, New York, has it derived server-side from this same
+    // verified address instead of asking the customer to pick one).
+    // These are the exact same form fields (principalLine1/City/Zip) the
+    // Business Address step below reads and edits one address record,
+    // entered once, never asked for twice.
+    1: ['purpose', 'principalLine1', 'principalCity', 'principalZip', 'entityType', 'launchDate'],
     2: ['fullName', 'email', 'phone', 'commPref'],
-    3: ['principalLine1', 'principalCity', 'principalZip', 'mailingLine1', 'mailingCity', 'mailingZip'],
-    5: ['registeredAgentName', 'registeredOfficeLine1', 'registeredOfficeCity', 'registeredOfficeZip', 'registeredAgentConsent'],
+    // Only the mailing address (when different from principal) is
+    // validated here the principal address was already required and
+    // validated back on Business Basics.
+    3: ['mailingLine1', 'mailingCity', 'mailingZip'],
+    5: ['registeredAgentName', 'registeredOfficeLine1', 'registeredOfficeCity', 'registeredOfficeZip', 'registeredAgentConsent', 'registeredAgentSignerName'],
     6: ['organizerName', 'organizerLine1', 'organizerCity', 'organizerZip'],
     7: ['effectiveDate'],
     8: ['responsibleParty'],
-    10: ['plan'],
-    11: ['accountEmail', 'password', 'confirmPassword', 'termsAccepted'],
-    12: ['finalTermsAccepted']
+    11: ['plan'],
+    12: ['accountEmail', 'password', 'confirmPassword', 'termsAccepted'],
+    13: ['formationReviewApproved', 'finalTermsAccepted']
   }
 
   const computeOwnerErrors = (f) => {
@@ -330,7 +380,40 @@ export default function useOnboardingWizard() {
     }
   }
 
+  // Changing the formation state must never reset the whole application —
+  // only the state-scoped pieces that could now be wrong: the City
+  // autocomplete (a different state's geography see
+  // src/data/geography/; the street address and ZIP are free text and
+  // not state-sourced, so they're left alone rather than wiped) and, if
+  // the now-selected entity type isn't offered in the new state (e.g.
+  // Series LLC picked while on Texas, then switched to California), the
+  // entity type falls back to the standard LLC every state supports.
+  // Everything else the customer already entered (name, addresses,
+  // agent, owners, etc.) is left exactly as-is. stateFee/selectedState
+  // below already recompute from `form.state` on every render, and
+  // DocumentsStep/BusinessBasicsStep re-derive their state-specific
+  // content the same way nothing needs to be "reset," it's all
+  // live-derived from this one field.
   const handleFieldChange = (key, value) => {
+    if (key === 'state' && value !== form.state) {
+      const stillAvailable = getEntityTypeOptions(value).find(t => t.id === form.entityType && t.available)
+      // Virtual Office stayed at its original 21-state footprint even
+      // though LLC Formation went nationwide (Part 7) — if the new state
+      // doesn't have it, drop it from the selected add-ons rather than
+      // leaving a now-unavailable service silently selected through
+      // checkout. Mail Forwarding has no such restriction.
+      const dropVirtualOffice = form.addOns.includes('virtual-office') && !isVirtualOfficeAvailable(value)
+      setForm(v => ({
+        ...v, state: value, principalCity: '', entityType: stillAvailable ? v.entityType : 'LLC',
+        addOns: dropVirtualOffice ? v.addOns.filter(id => id !== 'virtual-office') : v.addOns,
+      }))
+      setErrors(e => ({ ...e, principalCity: '' }))
+      if (touched.state) {
+        const result = fieldValidators.state({ ...form, state: value })
+        setErrors(e => ({ ...e, state: result.valid ? '' : result.message }))
+      }
+      return
+    }
     set(key, value)
     if (touched[key]) {
       const validator = fieldValidators[key]
@@ -398,7 +481,7 @@ export default function useOnboardingWizard() {
     setFormError('')
 
     // AccountStep.jsx only ever collected accountEmail/password/terms into
-    // local wizard state — nothing previously turned that into a real
+    // local wizard state nothing previously turned that into a real
     // account. An anonymous visitor could fill it in, see it marked
     // "completed" in the sidebar, and reach Submit Order still fully
     // anonymous: saveApplication/submitApplication/createCheckoutSession
@@ -435,7 +518,7 @@ export default function useOnboardingWizard() {
   const goBack = () => step === 0 ? navigate('/') : setStep(s => s - 1)
 
   const findFirstInvalidStep = () => {
-    for (let s = 0; s <= 12; s++) {
+    for (let s = 0; s <= REVIEW_STEP; s++) {
       if (Object.keys(computeStepErrors(s, form)).length) return s
     }
     return null

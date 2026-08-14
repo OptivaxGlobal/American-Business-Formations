@@ -5,6 +5,18 @@ import { useBusiness } from '../../context/BusinessContext'
 import { api } from '../../lib/api'
 import { validateFile } from '../../validations/commonValidation'
 import AsyncState from '../../components/dashboard/AsyncState'
+import Badge from '../../components/ui/Badge'
+
+// Mirrors DocumentCard.jsx's status vocabulary (Part 23: customers should
+// see the same statuses here as during the formation wizard).
+const DOC_STATUS_LABEL = {
+  not_started: 'Not Started', uploaded: 'Uploaded', received: 'Received',
+  under_review: 'Under Review', approved: 'Approved', needs_attention: 'Needs Attention', not_required: 'Not Required',
+}
+const DOC_STATUS_VARIANT = {
+  uploaded: 'success', received: 'success', approved: 'success',
+  under_review: 'warning', needs_attention: 'danger', not_started: 'neutral', not_required: 'neutral',
+}
 
 const tabs = ['Formation', 'Documents', 'Compliance', 'Services']
 
@@ -140,7 +152,8 @@ export default function BusinessDetail(){
         {documents.length===0 && <p className="dash-empty">No documents yet.</p>}
         {documents.map(doc => <div key={doc.id}>
           <div className="doc-icon"><FileText/></div>
-          <span><strong>{doc.file_name}</strong><small>{doc.document_type} • {new Date(doc.created_at).toLocaleDateString()}</small></span>
+          <span><strong>{doc.file_name}</strong><small>{doc.document_type.replace(/_/g, ' ')} • {new Date(doc.created_at).toLocaleDateString()}</small></span>
+          {doc.status && <Badge variant={DOC_STATUS_VARIANT[doc.status] || 'neutral'}>{DOC_STATUS_LABEL[doc.status] || doc.status}</Badge>}
           <a className="btn btn-outline" href={api.documentDownloadUrl(business.id, doc.id)} target="_blank" rel="noreferrer" aria-label={`Download ${doc.file_name}`}><Download size={16}/></a>
         </div>)}
       </AsyncState>

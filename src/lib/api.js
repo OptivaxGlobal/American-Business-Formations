@@ -34,7 +34,7 @@ async function handleResponse(response) {
   // backend rather than trusting an empty/garbage body as real data.
   const contentType = response.headers.get('content-type') || ''
   if (!contentType.includes('application/json')) {
-    // Diagnostic breadcrumb only — never shown to the user, never changes
+    // Diagnostic breadcrumb only never shown to the user, never changes
     // the thrown error. This exact failure mode (a 200 HTML page instead
     // of JSON) has a real, recurring cause worth naming directly in the
     // console: VITE_API_URL pointing at a host with no backend behind it,
@@ -42,7 +42,7 @@ async function handleResponse(response) {
     // SPA shell before it ever reaches the backend.
     console.error(
       `[api] ${response.url} returned "${contentType || '(no content-type)'}" (status ${response.status}) instead of JSON. ` +
-      'This usually means the request never reached the Flask backend — check VITE_API_URL and any .htaccess/CDN rewrite rules for an /api exclusion.'
+      'This usually means the request never reached the Flask backend check VITE_API_URL and any .htaccess/CDN rewrite rules for an /api exclusion.'
     )
     throw new ApiError('We could not reach the server. Please try again.', { isNetworkError: true })
   }
@@ -144,6 +144,15 @@ export const api = {
   // Documents (server/app/api/documents.py).
   listDocuments: (businessId) => request(`/documents/${businessId}`),
   documentDownloadUrl: (businessId, documentId) => `${API_URL}/documents/${businessId}/${documentId}/download`,
+  deleteDocument: (businessId, documentId) => request(`/documents/${businessId}/${documentId}`, { method: 'DELETE' }),
+  // Staff/admin document review (Part 24) server-side @admin_required;
+  // a non-admin JWT gets a real 403 regardless of what the frontend renders.
+  adminUpdateDocumentStatus: (businessId, documentId, payload) => request(`/documents/${businessId}/${documentId}/status`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  // Formation review acknowledgement (Part 16) is not a separate call —
+  // formation_review_approved/formation_review_version ride along on the
+  // normal saveApplication() autosave (see buildApplicationPayload in
+  // useOnboardingWizard.js) and server/app/api/applications.py records the
+  // confirmation timestamp the moment it sees `formation_review_approved`.
 
   // Compliance tasks (server/app/api/compliance.py).
   listComplianceTasks: (businessId) => request(`/compliance/${businessId}`),

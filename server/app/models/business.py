@@ -69,6 +69,13 @@ class RegisteredAgent(BaseModel):
     registered_office_address = db.relationship("Address")
     consent_given = db.Column(db.Boolean, default=False, nullable=False)
     consent_given_at = db.Column(db.DateTime)
+    # Electronic-signature evidence for registered-agent consent (Part 15):
+    # a typed full legal name captured alongside the consent checkbox on
+    # the wizard's Registered Agent step. Kept on file as the acceptance
+    # record no state in STATES requires this to be filed with the
+    # state itself (see registeredAgentRequirements.consentFiledWithState
+    # in src/config/stateRequirements.js).
+    signer_name = db.Column(db.String(200))
     active = db.Column(db.Boolean, default=True, nullable=False)
     renewal_date = db.Column(db.Date)
 
@@ -116,6 +123,15 @@ class FormationApplication(BaseModel):
     submitted_at = db.Column(db.DateTime, nullable=True)
     reviewed_by = db.Column(db.String(36), db.ForeignKey("users.id"), nullable=True)
     internal_notes = db.Column(db.Text)
+    # Generated-document review acknowledgement (Part 16): recorded the
+    # moment the customer checks "I confirm the information above is
+    # accurate..." on the Review step, after previewing the state-specific
+    # formation document data we're about to prepare from their answers.
+    # formation_data_version increments each time they re-confirm (e.g.
+    # after going back to correct something), so the acceptance record
+    # always reflects which version of their data was actually approved.
+    formation_data_confirmed_at = db.Column(db.DateTime, nullable=True)
+    formation_data_version = db.Column(db.Integer, default=0, nullable=False)
 
     def to_dict(self):
         return {
@@ -123,4 +139,6 @@ class FormationApplication(BaseModel):
             "effective_date_option": self.effective_date_option,
             "package_name": self.package_name, "add_ons": self.add_ons or [],
             "submitted_at": self.submitted_at.isoformat() if self.submitted_at else None,
+            "formation_data_confirmed_at": self.formation_data_confirmed_at.isoformat() if self.formation_data_confirmed_at else None,
+            "formation_data_version": self.formation_data_version,
         }

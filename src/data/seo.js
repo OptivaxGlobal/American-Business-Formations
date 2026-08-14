@@ -73,7 +73,12 @@ export function serviceSchema({ name, description, path }) {
 // `author`/`reviewer` should only ever be real named people once an article
 // is actually written and reviewed never invent a byline. Omit the field
 // entirely (leave it undefined on the post record) until then.
-export function articleSchema({ title, description, path, datePublished, dateModified, author, reviewer }) {
+// `authorType` defaults to 'Person' (the existing behavior for
+// individually-bylined articles) pass 'Organization' when `author` is a
+// team/company byline rather than a named individual (e.g. the /blog
+// articles' "American Business Formations Team" byline) so the schema
+// itself doesn't misrepresent a team credit as a specific person.
+export function articleSchema({ title, description, path, datePublished, dateModified, author, authorType = 'Person', reviewer }) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -82,7 +87,7 @@ export function articleSchema({ title, description, path, datePublished, dateMod
     url: `${SITE_URL}${path}`,
     ...(datePublished ? { datePublished } : {}),
     ...(dateModified ? { dateModified } : {}),
-    ...(author ? { author: { '@type': 'Person', name: author } } : {}),
+    ...(author ? { author: { '@type': authorType, name: author } } : {}),
     ...(reviewer ? { reviewedBy: { '@type': 'Person', name: reviewer } } : {}),
     publisher: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL }
   }

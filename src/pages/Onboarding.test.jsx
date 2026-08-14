@@ -12,8 +12,12 @@ async function fillStep0(user) {
 
 async function fillStep1(user) {
   await user.type(screen.getByLabelText(/business purpose/i), 'Provide marketing consulting services')
-  await user.type(screen.getByLabelText(/^county/i), 'Travis County')
+  await user.type(screen.getByLabelText(/business street address/i), '123 Main St')
+  // Not end-anchored: the City combobox's accessible label text also
+  // includes its hint text (Combobox.jsx renders the hint inside the
+  // same wrapping <label>), so only the "City" prefix is guaranteed.
   await user.type(screen.getByLabelText(/^city/i), 'Austin')
+  await user.type(screen.getByLabelText(/zip code/i), '78701')
   await user.click(screen.getByRole('button', { name: /continue/i }))
 }
 
@@ -24,10 +28,13 @@ async function fillContactStep(user) {
   await user.click(screen.getByRole('button', { name: /continue/i }))
 }
 
+// The Business Address step no longer collects the principal address
+// itself that's entered once on Business Basics (fillStep1 above) and
+// simply appears here already filled in, the same underlying
+// principalLine1/principalCity/principalZip fields. This helper just
+// advances past the step (mailing-same-as-principal defaults to checked,
+// so nothing else is required here).
 async function fillAddressStep(user) {
-  await user.type(screen.getByLabelText(/principal office street address/i), '123 Main St')
-  await user.type(screen.getByLabelText(/^city$/i), 'Austin')
-  await user.type(screen.getByLabelText(/zip code/i), '78701')
   await user.click(screen.getByRole('button', { name: /continue/i }))
 }
 
@@ -72,7 +79,7 @@ describe('Onboarding wizard - contact information step', () => {
     await fillStep1(user)
     await fillContactStep(user)
 
-    expect(await screen.findByText(/where is the business located/i)).toBeInTheDocument()
+    expect(await screen.findByText(/confirm your business address/i)).toBeInTheDocument()
   })
 })
 
@@ -102,11 +109,14 @@ describe('Onboarding wizard - multi-state formation', () => {
     await user.type(screen.getByPlaceholderText(/owner 1 name/i), 'Jordan Lee')
     await user.click(screen.getByRole('button', { name: /continue/i }))
     await user.click(screen.getByLabelText(/i authorize american business formations/i))
+    await user.type(screen.getByLabelText(/typed signature/i), 'Jordan Lee')
     await user.click(screen.getByRole('button', { name: /continue/i }))
     await user.click(screen.getByRole('button', { name: /continue/i }))
     await user.click(screen.getByRole('button', { name: /continue/i }))
     await user.type(screen.getByLabelText(/responsible party full name/i), 'Jordan Lee')
     await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.click(screen.getByRole('button', { name: /continue/i }))
+    // Step 10: documents & verification (no uploads required for a standard filing)
     await user.click(screen.getByRole('button', { name: /continue/i }))
     await user.click(screen.getByRole('button', { name: /continue/i }))
     await user.click(screen.getByRole('button', { name: /continue/i }))
@@ -136,8 +146,8 @@ describe('Onboarding wizard - accessibility', () => {
     render(<AllProviders initialEntries={['/formation-details']}><Onboarding/></AllProviders>)
 
     // Step announcement exists and is a live region (screen reader users
-    // hear "Step 1 of 15" etc. without needing to look at the sidebar).
-    const stepAnnouncement = screen.getByText(/step 1 of 15/i)
+    // hear "Step 1 of 16" etc. without needing to look at the sidebar).
+    const stepAnnouncement = screen.getByText(/step 1 of 16/i)
     expect(stepAnnouncement).toHaveAttribute('aria-live', 'polite')
 
     await fillStep0(user)
@@ -162,14 +172,45 @@ describe('Onboarding wizard - accessibility', () => {
   })
 })
 
+describe('Onboarding wizard - business basics step', () => {
+  it('requires street address, city, and ZIP separately, and never shows a County field', async () => {
+    const user = userEvent.setup()
+    render(<AllProviders initialEntries={['/formation-details']}><Onboarding/></AllProviders>)
+
+    await fillStep0(user)
+    await user.type(screen.getByLabelText(/business purpose/i), 'Provide marketing consulting services')
+    await user.click(screen.getByRole('button', { name: /continue/i }))
+
+    expect(await screen.findByText(/enter a street address/i)).toBeInTheDocument()
+    expect(screen.getByText(/enter a city/i)).toBeInTheDocument()
+    expect(screen.getByText(/enter a zip code/i)).toBeInTheDocument()
+    expect(screen.queryByLabelText(/^county/i)).not.toBeInTheDocument()
+  })
+})
+
 describe('Onboarding wizard - business address step', () => {
-  it('requires street, city, and ZIP separately', async () => {
+  it('prefills the address entered on Business Basics rather than asking again', async () => {
     const user = userEvent.setup()
     render(<AllProviders initialEntries={['/formation-details']}><Onboarding/></AllProviders>)
 
     await fillStep0(user)
     await fillStep1(user)
     await fillContactStep(user)
+
+    expect(await screen.findByText(/confirm your business address/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/principal office street address/i)).toHaveValue('123 Main St')
+    expect(screen.getByLabelText(/^city$/i)).toHaveValue('Austin')
+    expect(screen.getByLabelText(/zip code/i)).toHaveValue('78701')
+  })
+
+  it('requires a mailing street, city, and ZIP when it differs from the principal address', async () => {
+    const user = userEvent.setup()
+    render(<AllProviders initialEntries={['/formation-details']}><Onboarding/></AllProviders>)
+
+    await fillStep0(user)
+    await fillStep1(user)
+    await fillContactStep(user)
+    await user.click(screen.getByLabelText(/mailing address is the same/i))
     await user.click(screen.getByRole('button', { name: /continue/i }))
 
     expect(await screen.findByText(/enter a street address/i)).toBeInTheDocument()
@@ -237,8 +278,9 @@ async function fillThroughReviewAuthenticated(user) {
   // Step 4: ownership (single default owner at 100%)
   await user.type(screen.getByPlaceholderText(/owner 1 name/i), 'Jordan Lee')
   await user.click(screen.getByRole('button', { name: /continue/i }))
-  // Step 5: registered agent (default ABF, just consent)
+  // Step 5: registered agent (default ABF, just consent + typed signature)
   await user.click(screen.getByLabelText(/i authorize american business formations/i))
+  await user.type(screen.getByLabelText(/typed signature/i), 'Jordan Lee')
   await user.click(screen.getByRole('button', { name: /continue/i }))
   // Step 6: organizer (default self)
   await user.click(screen.getByRole('button', { name: /continue/i }))
@@ -249,11 +291,14 @@ async function fillThroughReviewAuthenticated(user) {
   await user.click(screen.getByRole('button', { name: /continue/i }))
   // Step 9: additional services (none required)
   await user.click(screen.getByRole('button', { name: /continue/i }))
-  // Step 10: package (default plan already selected)
+  // Step 10: documents & verification (no uploads required for a standard filing)
   await user.click(screen.getByRole('button', { name: /continue/i }))
-  // Step 11: account (already signed in nothing to fill)
+  // Step 11: package (default plan already selected)
   await user.click(screen.getByRole('button', { name: /continue/i }))
-  // Step 12: review - final consent
+  // Step 12: account (already signed in nothing to fill)
+  await user.click(screen.getByRole('button', { name: /continue/i }))
+  // Step 13: review - confirm generated-document accuracy + final consent
+  await user.click(screen.getByLabelText(/information above is accurate/i))
   await user.click(screen.getByLabelText(/recurring billing terms/i))
   await user.click(screen.getByRole('button', { name: /continue/i }))
 }

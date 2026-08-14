@@ -11,7 +11,7 @@
   # any request to /api/... that doesn't match a real file on this static
   # host (i.e. every API call, since this host only serves the frontend)
   # was being served the SPA shell with a 200 status and Content-Type:
-  # text/html instead of a real API response or even a real 404 — the
+  # text/html instead of a real API response or even a real 404 the
   # frontend correctly detected the non-JSON body and reported "We could
   # not reach the server," but the actual cause (no backend reachable at
   # /api on this host) was hidden behind that generic message. Excluding
@@ -19,7 +19,7 @@
   # honest 404 from this web server instead of a fake-looking 200 HTML
   # page. If a Flask backend IS reverse-proxied through this same host
   # (mod_proxy, if enabled on your plan), add that ProxyPass rule ABOVE
-  # this RewriteCond so it's evaluated first — see docs/deployment-checklist.md.
+  # this RewriteCond so it's evaluated first see docs/deployment-checklist.md.
   RewriteCond %{REQUEST_URI} ^/api/ [OR]
   RewriteCond %{REQUEST_URI} ^/api$
   RewriteRule ^ - [L]
@@ -29,9 +29,9 @@
 </IfModule>
 
 # TEMPORARY, site-wide: mirrors the SITE_WIDE_NOINDEX flag in
-# src/components/SEO.jsx — remove this block (and flip that flag back) when
+# src/components/SEO.jsx remove this block (and flip that flag back) when
 # ready to be indexed again. Wrapped in IfModule so a host without
-# mod_headers enabled just skips it rather than erroring — the <meta
+# mod_headers enabled just skips it rather than erroring the <meta
 # name="robots"> tag on every page is the primary mechanism either way.
 <IfModule mod_headers.c>
   Header set X-Robots-Tag "noindex, nofollow"

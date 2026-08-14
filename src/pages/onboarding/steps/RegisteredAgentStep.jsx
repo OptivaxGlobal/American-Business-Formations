@@ -1,11 +1,13 @@
-import { ShieldCheck } from 'lucide-react'
+import { ShieldCheck, PenLine } from 'lucide-react'
 import { fieldAria } from '../../../lib/formErrors'
 import { getState } from '../../../data/states'
+import { getStateRequirements } from '../../../config/stateRequirements'
 
 export default function RegisteredAgentStep({ wizard }) {
   const { form, set, errors, handleFieldChange, markTouched, fieldRefs } = wizard
   const selectedState = getState(form.state)
   const stateName = selectedState?.name || 'your formation state'
+  const raRequirements = getStateRequirements(form.state)?.registeredAgentRequirements
 
   return (
     <div className="step-panel">
@@ -41,6 +43,13 @@ export default function RegisteredAgentStep({ wizard }) {
         <input type="checkbox" checked={form.registeredAgentConsent} onChange={e => handleFieldChange('registeredAgentConsent', e.target.checked)} ref={el => fieldRefs.current.registeredAgentConsent = el} {...fieldAria('registeredAgentConsent-error', errors.registeredAgentConsent)} /> {form.registeredAgentType === 'abf' ? 'I authorize American Business Formations to serve as my registered agent.' : 'I confirm this registered agent has consented to serve, and I will keep a signed record of that consent.'}
       </label>
       {errors.registeredAgentConsent && <p id="registeredAgentConsent-error" className="field-error">{errors.registeredAgentConsent}</p>}
+
+      <label>
+        <PenLine size={14} style={{ verticalAlign: '-2px', marginRight: 6 }} aria-hidden="true" />Typed signature (your full legal name)
+        <input value={form.registeredAgentSignerName} onChange={e => handleFieldChange('registeredAgentSignerName', e.target.value)} onBlur={() => markTouched('registeredAgentSignerName')} placeholder="Type your full legal name to sign electronically" ref={el => fieldRefs.current.registeredAgentSignerName = el} {...fieldAria('registeredAgentSignerName-error', errors.registeredAgentSignerName)} />
+        {errors.registeredAgentSignerName && <p id="registeredAgentSignerName-error" className="field-error">{errors.registeredAgentSignerName}</p>}
+      </label>
+      <p className="onboarding-note"><ShieldCheck size={15} /> Typing your name above and confirming the checkbox is your electronic signature. We record the signer name, consent timestamp, and this acceptance record securely with your formation file{raRequirements?.consentFiledWithState ? '.' : ' it is kept on file by American Business Formations and is not itself filed with the state.'}</p>
     </div>
   )
 }

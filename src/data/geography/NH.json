@@ -1,0 +1,33 @@
+{
+  "stateCode": "NH",
+  "source": "U.S. Census Bureau, 2023 Gazetteer Files (counties + incorporated places, FUNCSTAT=Active)",
+  "sourceUrl": "https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.html",
+  "generatedAt": "2026-08-13",
+  "counties": [
+    "Belknap County",
+    "Carroll County",
+    "Cheshire County",
+    "Coos County",
+    "Grafton County",
+    "Hillsborough County",
+    "Merrimack County",
+    "Rockingham County",
+    "Strafford County",
+    "Sullivan County"
+  ],
+  "cities": [
+    "Berlin",
+    "Claremont",
+    "Concord",
+    "Dover",
+    "Franklin",
+    "Keene",
+    "Laconia",
+    "Lebanon",
+    "Manchester",
+    "Nashua",
+    "Portsmouth",
+    "Rochester",
+    "Somersworth"
+  ]
+}

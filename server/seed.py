@@ -33,8 +33,15 @@ with app.app_context():
     # and src/data/pricing.js (add-ons) the frontend catalog is what
     # customers actually see, so these rows must match it exactly. Since
     # this block only runs once (skipped when the table already has rows),
-    # an already-seeded server/data/dev.db needs deleting and re-seeding to
-    # pick up a correction like this one.
+    # an already-seeded database (any real deployment, or a pre-existing
+    # local dev.db) needs a targeted update instead of a re-seed deleting
+    # and re-seeding a live database would also wipe users/orders/
+    # businesses. For a price-only correction like Aug 2026's Virtual
+    # Office/Mail Forwarding update, either run a one-off idempotent
+    # correction script (see fix_addon_pricing_2026-08.py) or use the
+    # existing Admin > Plans page (PATCH /api/admin/plans/add-ons/<id>),
+    # which is exactly what it's for and never alters an already-placed
+    # order's price.
     if not Package.query.first():
         db.session.add_all([
             Package(name="Foundation", price_cents=15000, billing_note="one-time service fee + state filing fee",
@@ -65,8 +72,8 @@ with app.app_context():
             AddOn(slug="s-corp-election", name="S-Corp election (IRS Form 2553)", price_cents=13000),
             AddOn(slug="apostille", name="Apostille service", price_cents=45000),
             AddOn(slug="certificate-good-standing", name="Certificate of Good Standing / certified copy filing service", price_cents=7000),
-            AddOn(slug="mail-forwarding", name="Mail forwarding (business address, no lease agreement)", price_cents=2000, recurring=True),
-            AddOn(slug="virtual-office", name="Virtual office (business address + lease agreement)", price_cents=2900, recurring=True),
+            AddOn(slug="mail-forwarding", name="Mail forwarding (business address, no lease agreement)", price_cents=3500, recurring=True),
+            AddOn(slug="virtual-office", name="Virtual office (business address + lease agreement)", price_cents=4900, recurring=True),
             AddOn(slug="expedited", name="Expedited processing", price_cents=2500),
         ])
         print("Seeded starter add-ons.")

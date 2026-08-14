@@ -559,3 +559,152 @@ html{scroll-padding-top:100px}
 @media(max-width:480px){
   .steps-grid-5{grid-template-columns:1fr}
 }
+
+/* ===== LLC formation: state-aware autocomplete, entity types, Documents &
+   Verification step ===== Additive only reuses existing tokens (--navy,
+   --blue, --line, --soft, --radius*, --shadow*, --space-*, --danger,
+   --success, --warning) and the same input/label/.btn/.field-error/
+   .onboarding-note visual language already established above. Nothing here
+   changes branding, color, or typography. */
+
+.btn-link{background:none;border:0;padding:0;color:var(--blue);font-weight:700;font-size:inherit;display:inline-flex;align-items:center;gap:4px;text-decoration:underline;text-underline-offset:2px}
+.onboarding-field-label{display:block;font-weight:600;color:var(--navy);font-size:.92rem;margin:22px 0 10px}
+
+/* Combobox (County/City autocomplete) */
+.combobox-field{position:relative}
+.combobox-control{position:relative;margin-top:8px;display:flex;align-items:center}
+.combobox-control input{width:100%;border:1px solid #d9e1eb;background:#fff;border-radius:10px;padding:14px 42px;min-height:52px;font-size:1rem;color:var(--text);outline:none}
+.combobox-control input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(49,95,157,.1)}
+.combobox-control input[aria-invalid="true"]{border-color:var(--danger)}
+.combobox-control.is-disabled{opacity:.65}
+.combobox-icon{position:absolute;left:14px;color:#8490a0;pointer-events:none}
+.combobox-chevron{position:absolute;right:14px;color:#8490a0;pointer-events:none}
+.combobox-spinner{position:absolute;right:14px;color:var(--blue)}
+.combobox-listbox{position:absolute;z-index:40;top:calc(100% + 6px);left:0;right:0;max-height:280px;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);list-style:none;margin:0;padding:6px}
+.combobox-option{padding:11px 14px;border-radius:8px;font-size:.94rem;color:var(--text);cursor:pointer}
+.combobox-option.is-active,.combobox-option:hover{background:var(--soft);color:var(--navy)}
+.combobox-option-other{color:var(--muted);font-style:italic;border-top:1px solid var(--line);margin-top:4px;padding-top:11px}
+.combobox-status{padding:12px 14px;color:var(--muted);font-size:.86rem;display:flex;align-items:center;gap:8px}
+.combobox-fallback-note{display:block;color:var(--warning);margin-top:6px}
+
+/* File dropzone */
+.file-dropzone-wrap{margin-top:4px}
+.file-dropzone{border:1.5px dashed #c7d2e0;border-radius:14px;padding:22px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--muted);background:var(--soft);transition:border-color .15s ease,background .15s ease}
+.file-dropzone svg{color:var(--blue)}
+.file-dropzone strong{color:var(--navy)}
+.file-dropzone:hover,.file-dropzone:focus-visible{border-color:var(--blue);background:#eef2fb}
+.file-dropzone.is-dragover{border-color:var(--blue);background:#e6edfb}
+.file-dropzone.is-disabled{opacity:.55;cursor:not-allowed}
+.file-dropzone.is-uploading{border-style:solid}
+.file-dropzone-progress{width:100%;max-width:260px;height:6px;background:#e3e8f0;border-radius:8px;overflow:hidden}
+.file-dropzone-progress i{display:block;height:100%;background:var(--blue);transition:.2s}
+.file-dropzone-hint{display:block;color:var(--muted);font-size:.76rem;margin-top:7px}
+
+/* Document cards (Documents & Verification step) */
+.document-card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:16px 0 28px}
+.document-card{border:1px solid var(--line);border-radius:16px;padding:20px;background:#fff;display:flex;flex-direction:column;gap:12px}
+.document-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.document-card-title{display:flex;align-items:flex-start;gap:10px}
+.document-card-title svg{color:var(--blue);flex:0 0 auto;margin-top:2px}
+.document-card-title strong{color:var(--navy);display:block}
+.document-card-official{display:block;color:var(--muted);font-size:.78rem;margin-top:2px}
+.document-card-desc{color:var(--muted);font-size:.88rem;margin:0;line-height:1.55}
+.document-card-status{display:flex;align-items:center;gap:7px;font-size:.82rem;font-weight:700;color:var(--navy)}
+.document-card-generated,.document-card-locked{display:flex;align-items:center;gap:8px;background:var(--soft);color:var(--navy);border-radius:10px;padding:11px 13px;font-size:.84rem}
+.document-card-locked{color:var(--muted)}
+.document-card-file{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--soft);border-radius:10px;padding:11px 13px;font-size:.86rem}
+.document-card-file svg{color:var(--success)}
+.document-card-filename{font-weight:700;color:var(--navy);word-break:break-all}
+.document-card-filesize{color:var(--muted);font-size:.78rem}
+.document-card-file-actions{display:flex;gap:8px;margin-left:auto}
+.document-card-file-actions .btn{padding:0 12px;min-height:34px}
+.document-card-remove{color:var(--danger)}
+
+/* Documents & Verification step layout */
+.documents-step h3{font-family:var(--font-heading);color:var(--navy);font-size:1.15rem;margin:26px 0 4px}
+.documents-section-hint{color:var(--muted);font-size:.86rem;margin:0 0 4px}
+.documents-progress{font-weight:700;color:var(--navy);background:var(--soft);display:inline-flex;border-radius:var(--radius-pill);padding:8px 16px;font-size:.86rem;margin:4px 0 8px}
+.documents-progress-empty{display:flex;align-items:center;gap:8px;color:var(--success);font-weight:700;font-size:.9rem;margin:4px 0 8px}
+.documents-signin-note{display:flex;align-items:flex-start;gap:8px;background:#fbf0dd;color:#7a5a12;border-radius:11px;padding:12px 14px;font-size:.84rem;margin:6px 0 8px}
+.documents-signin-note svg{flex:0 0 auto;margin-top:1px}
+.documents-collected-summary{margin-top:6px}
+.documents-support-card{display:flex;gap:14px;background:var(--soft);border:1px solid #d7e1f7;border-radius:16px;padding:20px;margin-top:32px}
+.documents-support-icon{width:38px;height:38px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;flex:0 0 auto}
+.documents-support-card h4{font-family:var(--font-heading);color:var(--navy);margin:0 0 6px;font-size:1.02rem}
+.documents-support-card p{color:var(--muted);font-size:.88rem;margin:0 0 10px;line-height:1.6}
+.documents-support-contact{display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:.86rem;color:var(--navy);font-weight:600}
+.documents-support-contact span{display:inline-flex;align-items:center;gap:6px}
+
+/* Generated formation-document review card (Review step) */
+.generated-document-preview{border:1px solid #d7e1f7;background:var(--soft);border-radius:18px;padding:22px;margin-bottom:20px}
+.generated-document-preview-head{display:flex;gap:10px;align-items:flex-start;margin-bottom:14px}
+.generated-document-preview-head svg{color:var(--blue);margin-top:2px;flex:0 0 auto}
+.generated-document-preview-head strong{display:block;color:var(--navy);font-size:1.05rem}
+.generated-document-preview-head span{color:var(--muted);font-size:.86rem}
+.generated-document-preview .review-card{margin-bottom:14px}
+.generated-document-preview-note{color:var(--muted);font-size:.84rem;margin:0 0 14px}
+
+/* Entity type cards: unavailable-in-this-state state */
+.radio-cards button.is-unavailable{opacity:.55;cursor:not-allowed;background:#f7f7f8}
+.radio-cards button.is-unavailable:hover{background:#f7f7f8}
+.entity-unavailable-reason{display:block;color:var(--warning);font-size:.76rem;font-style:normal;margin-top:6px;line-height:1.5}
+
+@media(max-width:640px){
+  .document-card-grid{grid-template-columns:1fr}
+  .documents-support-card{flex-direction:column}
+}
+
+/* ===== Blog (/blog, /blog/:slug) ===== Additive only reuses existing
+   tokens and patterns already established above (.page-hero-shared.dark,
+   .resource-search, .closing-cta, .article-hero/.article-body/.article-callout,
+   .section-heading, .card-hover-style shadows) rather than introducing a
+   parallel design language. Desktop: 3-column card grid. Tablet: 2. Mobile: 1. */
+.blog-featured-section{padding-top:56px}
+.blog-featured-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.blog-toolbar{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:30px}
+.blog-category-pills{display:flex;flex-wrap:wrap;gap:8px}
+.blog-category-pills button{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:var(--radius-pill);padding:8px 16px;font-size:.84rem;font-weight:700}
+.blog-category-pills button:hover{border-color:var(--blue);color:var(--blue)}
+.blog-category-pills button.active{background:var(--navy);border-color:var(--navy);color:#fff}
+
+.blog-card{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden;transition:box-shadow var(--transition-fast),transform var(--transition-fast)}
+.blog-card:hover{box-shadow:var(--shadow-md);transform:translateY(-3px)}
+.blog-card-image{aspect-ratio:16/9;background:var(--soft);overflow:hidden}
+.blog-card-image img{width:100%;height:100%;object-fit:cover}
+.blog-card-body{padding:22px;display:flex;flex-direction:column;flex:1}
+.blog-card-category{display:inline-block;align-self:flex-start;background:var(--soft);color:var(--blue);border-radius:var(--radius-pill);padding:5px 12px;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.blog-card-body h3{font-family:'Manrope';color:var(--navy);font-size:1.15rem;line-height:1.32;margin:0 0 8px}
+.blog-card-body p{color:var(--muted);font-size:.9rem;line-height:1.6;margin:0 0 16px;flex:1}
+.blog-card-meta{display:flex;justify-content:space-between;align-items:center;color:#8490a0;font-size:.78rem;margin-bottom:14px}
+.blog-card-meta span{display:inline-flex;align-items:center;gap:5px}
+.blog-card-link{display:flex;align-items:center;gap:6px;color:var(--blue);font-size:.86rem;font-weight:800}
+.blog-card-featured .blog-card-image{aspect-ratio:16/10}
+
+.blog-article-image{margin:36px auto 0;border-radius:var(--radius-sm);overflow:hidden;box-shadow:var(--shadow-sm)}
+.blog-article-image img{width:100%;height:auto;display:block}
+.blog-meta-sep{margin:0 4px;color:#c3ccd6}
+.article-hero .article-byline{display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.blog-table{width:100%;border-collapse:collapse;font-size:.94rem}
+.blog-table th,.blog-table td{border:1px solid var(--line);padding:10px 14px;text-align:left}
+.blog-table th{background:var(--soft);color:var(--navy);font-weight:800}
+.blog-quote{border-left:4px solid var(--gold);margin:28px 0;padding:4px 0 4px 20px;font-style:italic;color:var(--navy);font-size:1.1rem}
+.blog-tag-row{display:flex;flex-wrap:wrap;gap:8px;margin:40px 0 0}
+.blog-tag-row span{background:var(--soft);color:var(--muted);border-radius:var(--radius-pill);padding:6px 14px;font-size:.78rem;font-weight:700}
+.blog-service-cta{align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.blog-service-cta strong{color:var(--navy);display:block;margin-bottom:4px}
+.blog-service-cta p{margin:0;color:var(--muted)}
+.blog-related-section .blog-grid{margin-top:6px}
+
+@media(max-width:1024px){
+  .blog-featured-grid,.blog-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:640px){
+  .blog-featured-grid,.blog-grid{grid-template-columns:1fr}
+  .blog-toolbar{align-items:flex-start;flex-direction:column}
+  .blog-service-cta{flex-direction:column;align-items:flex-start}
+}
+/* ===== Nationwide expansion (2026-08-13): Virtual Office state gating ===== */
+.addon-grid button.is-unavailable{flex-wrap:wrap;opacity:.6;cursor:not-allowed;background:#f7f7f8}
+.addon-grid button.is-unavailable:hover{background:#f7f7f8}
+.addon-unavailable-reason{flex-basis:100%;color:var(--warning);font-size:.74rem;margin-top:2px}

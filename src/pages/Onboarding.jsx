@@ -11,6 +11,7 @@ import OrganizerStep from './onboarding/steps/OrganizerStep'
 import EffectiveDateStep from './onboarding/steps/EffectiveDateStep'
 import EinAssistanceStep from './onboarding/steps/EinAssistanceStep'
 import AddOnsStep from './onboarding/steps/AddOnsStep'
+import DocumentsStep from './onboarding/steps/DocumentsStep'
 import PackageStep from './onboarding/steps/PackageStep'
 import AccountStep from './onboarding/steps/AccountStep'
 import ReviewStep from './onboarding/steps/ReviewStep'
@@ -20,7 +21,7 @@ import ConfirmationStep from './onboarding/steps/ConfirmationStep'
 const STEP_COMPONENTS = [
   BusinessNameStep, BusinessBasicsStep, ContactInfoStep, BusinessAddressStep,
   OwnershipStep, RegisteredAgentStep, OrganizerStep, EffectiveDateStep,
-  EinAssistanceStep, AddOnsStep, PackageStep, AccountStep,
+  EinAssistanceStep, AddOnsStep, DocumentsStep, PackageStep, AccountStep,
   ReviewStep, PaymentStep, ConfirmationStep
 ]
 
@@ -30,7 +31,7 @@ export default function Onboarding() {
 
   return (
     <>
-      <SEO title="Form Your LLC" description="Complete your LLC formation details. Available in 21 states." path="/formation-details" noindex />
+      <SEO title="Form Your LLC" description="Complete your LLC formation details. Available across all 50 states, Washington, D.C. & Puerto Rico." path="/formation-details" noindex />
       <OnboardingShellChrome wizard={wizard}>
         <StepComponent key={wizard.step} wizard={wizard} />
       </OnboardingShellChrome>

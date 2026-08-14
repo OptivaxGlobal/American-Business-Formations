@@ -23,11 +23,11 @@ export const addOnCatalog = [
   { id: 's-corp-election', name: 'S-Corp election (IRS Form 2553)', price: 130, recurring: null },
   { id: 'apostille', name: 'Apostille service', price: 450, recurring: null },
   { id: 'certificate-good-standing', name: 'Certificate of Good Standing / certified copy filing service', price: 70, recurring: null },
-  // Alternatives, not add-ons meant to be selected together — see
+  // Alternatives, not add-ons meant to be selected together see
   // src/pages/onboarding/steps/AddOnsStep.jsx, which enforces picking at
   // most one of the two.
-  { id: 'mail-forwarding', name: 'Mail forwarding (no lease agreement)', price: 20, recurring: 'per month' },
-  { id: 'virtual-office', name: 'Virtual office (includes lease agreement)', price: 29, recurring: 'per month' },
+  { id: 'mail-forwarding', name: 'Mail forwarding (no lease agreement)', price: 35, recurring: 'per month' },
+  { id: 'virtual-office', name: 'Virtual office (includes lease agreement)', price: 49, recurring: 'per month' },
   { id: 'expedited', name: 'Expedited processing', price: texas.expeditedFee, recurring: null }
 ]
 
@@ -72,9 +72,9 @@ export function getAddOn(id) {
 // should link to /pricing instead of stating a flat number.
 //
 // `governmentFee`/`governmentFeeRange`: llc-formation and
-// business-formation-filings are sold across all 21 supported states (see
+// business-formation-filings are sold across all 52 supported jurisdictions (see
 // src/data/states.js), so there is no single "the" filing fee to show on a
-// generic marketing page anymore — `governmentFeeRange` gives the real
+// generic marketing page anymore `governmentFeeRange` gives the real
 // min/max across every supported state instead of picking one state's
 // number to display as if it applied to everyone. The exact fee for the
 // state a visitor actually selects is always shown during onboarding and

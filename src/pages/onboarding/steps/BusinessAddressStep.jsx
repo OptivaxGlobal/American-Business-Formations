@@ -1,13 +1,23 @@
-import { MapPin } from 'lucide-react'
+import { MapPin, Info } from 'lucide-react'
 import { fieldAria } from '../../../lib/formErrors'
+import { getState } from '../../../data/states'
 
+// The principal business address itself (street/city/ZIP) is collected
+// once, on the earlier Business Basics step form.principalLine1/
+// principalCity/principalZip are the exact same fields read/written
+// there, so nothing here is a second, separate entry. This step confirms
+// that address (still editable, in case it needs a correction) and
+// collects what Business Basics doesn't: a different mailing address, and
+// address-privacy preference.
 export default function BusinessAddressStep({ wizard }) {
   const { form, set, errors, setErrors, handleFieldChange, markTouched, fieldRefs } = wizard
+  const selectedState = getState(form.state)
 
   return (
     <div className="step-panel">
       <MapPin className="step-icon" /><span>Business address</span>
-      <h1>Where is the business located?</h1>
+      <h1>Confirm your business address</h1>
+      <p className="onboarding-note"><Info size={15} /> This is the address you entered on Business Basics. Update it here if anything needs correcting.</p>
       <label>Principal office street address
         <input value={form.principalLine1} onChange={e => handleFieldChange('principalLine1', e.target.value)} onBlur={() => markTouched('principalLine1')} placeholder="123 Main St" autoComplete="address-line1" ref={el => fieldRefs.current.principalLine1 = el} {...fieldAria('principalLine1-error', errors.principalLine1)} />
         {errors.principalLine1 && <p id="principalLine1-error" className="field-error">{errors.principalLine1}</p>}
@@ -21,6 +31,7 @@ export default function BusinessAddressStep({ wizard }) {
           <input value={form.principalZip} onChange={e => handleFieldChange('principalZip', e.target.value)} onBlur={() => markTouched('principalZip')} placeholder="78701" inputMode="numeric" autoComplete="postal-code" ref={el => fieldRefs.current.principalZip = el} {...fieldAria('principalZip-error', errors.principalZip)} />
           {errors.principalZip && <p id="principalZip-error" className="field-error">{errors.principalZip}</p>}
         </label>
+        <label>State<input value={selectedState?.name || form.state} disabled /></label>
       </div>
       <label className="check-control">
         <input type="checkbox" checked={form.mailingSame} onChange={e => { set('mailingSame', e.target.checked); if (e.target.checked) setErrors(er => ({ ...er, mailingLine1: '', mailingCity: '', mailingZip: '' })) }} /> Mailing address is the same as the principal address

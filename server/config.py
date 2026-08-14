@@ -3,7 +3,7 @@ from datetime import timedelta
 from pathlib import Path
 
 # `python-dotenv` is in requirements.txt but nothing ever called
-# load_dotenv() — server/.env was silently never read by the running app in
+# load_dotenv() server/.env was silently never read by the running app in
 # every environment (local dev included), always falling back to hardcoded
 # defaults regardless of what was in the file. Loaded here, before any
 # os.getenv() call below, and only from a real file (never overrides a
@@ -18,7 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent
 
 
 # `os.getenv(key, default)` only falls back to `default` when the variable
-# is completely *absent* — a variable that's present but set to an empty
+# is completely *absent* a variable that's present but set to an empty
 # string (exactly what an unfilled field in a hosting panel's env-var UI
 # commonly produces, and what a `.env` file's `KEY=` line produces once
 # python-dotenv actually loads it) is returned as `""` instead, silently
@@ -49,7 +49,7 @@ class Config:
     # JS running on api.example.com, not example.com. If the backend ever
     # ends up on a different subdomain than the frontend (the realistic
     # outcome on Hostinger shared hosting, which can't run a persistent
-    # Flask process — see docs/deployment-checklist.md), the CSRF
+    # Flask process see docs/deployment-checklist.md), the CSRF
     # double-submit cookie (src/lib/api.js reads csrf_access_token via
     # document.cookie) becomes invisible to the frontend's JS unless this
     # is set to the shared parent domain, e.g. ".americanbusinessformations.com"

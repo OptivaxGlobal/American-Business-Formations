@@ -1,0 +1,12 @@
+{
+  "stateCode": "DC",
+  "source": "U.S. Census Bureau, 2023 Gazetteer Files (counties + incorporated places, FUNCSTAT=Active)",
+  "sourceUrl": "https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.html",
+  "generatedAt": "2026-08-13",
+  "counties": [
+    "District of Columbia"
+  ],
+  "cities": [
+    "Washington"
+  ]
+}

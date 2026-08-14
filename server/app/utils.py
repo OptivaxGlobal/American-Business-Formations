@@ -11,7 +11,7 @@ def utcnow():
     """Current UTC time as a naive datetime (no tzinfo).
 
     Every `db.DateTime` column in this app (models/*.py) is a plain,
-    dialect-default column — on SQLite (dev) that always returns a naive
+    dialect-default column on SQLite (dev) that always returns a naive
     datetime on read, and on PostgreSQL (production) `DateTime()` without
     `timezone=True` maps to TIMESTAMP WITHOUT TIME ZONE, which does the
     same. A value written as tz-aware (`datetime.now(timezone.utc)`) then

@@ -33,14 +33,14 @@ patchStorage('localStorage')
 patchStorage('sessionStorage')
 
 // `patchStorage` builds each storage's backing Map once, when this setup
-// module loads — with nothing resetting it, every test in the file shares
+// module loads with nothing resetting it, every test in the file shares
 // the exact same sessionStorage/localStorage instance. That's exactly the
 // kind of leak that intermittently made Onboarding.test.jsx fail (a
 // sessionStorage-persisted wizard draft from an earlier test in the file
 // was still present, occasionally landing right as the next test mounted,
 // so it opened already partway through the wizard instead of at step 1).
-// Clearing both after every test — not just Onboarding's own tests, any
-// future test relying on storage starting empty — closes it for good.
+// Clearing both after every test not just Onboarding's own tests, any
+// future test relying on storage starting empty closes it for good.
 afterEach(() => {
   globalThis.localStorage?.clear?.()
   globalThis.sessionStorage?.clear?.()

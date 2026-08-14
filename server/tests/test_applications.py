@@ -27,7 +27,11 @@ def test_create_application_saves_a_supported_formation_state(client, signup_pay
 
 def test_create_application_rejects_an_unsupported_formation_state(client, signup_payload):
     _signed_in_client(client, signup_payload)
-    res = client.post("/api/applications", json={"business_name": "Test LLC", "state": "PR"})
+    # ZZ is not a real jurisdiction code PR itself became a real supported
+    # jurisdiction in the 2026-08-13 nationwide expansion (see
+    # test_nationwide_states.py), so it's no longer a valid "unsupported"
+    # example here.
+    res = client.post("/api/applications", json={"business_name": "Test LLC", "state": "ZZ"})
     assert res.status_code == 422
     assert "state" in res.json["field_errors"]
 

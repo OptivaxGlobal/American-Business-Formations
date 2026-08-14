@@ -8,7 +8,8 @@ from ..models import (
     GoverningPerson, AuditLog, StatusHistory,
 )
 from ..services.email import send_email
-from ..services.states import is_supported_state, get_state_config, DEFAULT_STATE
+from ..services.geocoding import derive_county
+from ..services.states import is_supported_state, is_supported_entity_type, get_state_config, DEFAULT_STATE, COUNTY_REQUIRED_STATES
 from .notifications import notify_user
 from ..utils import ok, error, sanitize_text, utcnow
 from ..validations.address import validate_city, validate_street_address, validate_zip
@@ -18,7 +19,7 @@ from ..validations.formation import validate_effective_date, validate_ownership_
 
 bp = Blueprint("applications", __name__, url_prefix="/api/applications")
 
-ENTITY_TYPES = ("LLC", "Series LLC")
+ENTITY_TYPES = ("LLC", "Series LLC", "PLLC")
 MANAGEMENT_STRUCTURES = ("Member-managed", "Manager-managed")
 REGISTERED_AGENT_TYPES = ("abf", "self", "other")
 ORGANIZER_TYPES = ("self", "other")
@@ -47,7 +48,7 @@ def _build_address(data, prefix, line1, city, zip_code, state):
         line2=sanitize_text(data.get(f"{prefix}_line2"), 255),
         city=city or "",
         # Defaults to the business's own formation state rather than a
-        # hardcoded one — this address doesn't collect its own state field
+        # hardcoded one this address doesn't collect its own state field
         # in the wizard yet, and for the large majority of customers the
         # principal/registered/organizer address is in the same state
         # they're forming in. A customer whose address is genuinely in a
@@ -56,7 +57,11 @@ def _build_address(data, prefix, line1, city, zip_code, state):
         # drives the real filing fee, independent of this.
         state=state,
         postal_code=zip_code or "",
-        county=sanitize_text(data.get(f"{prefix}_county"), 120),
+        # Never trust a client-supplied county (Part 1 removed the field
+        # entirely from the customer-facing form) the only place a
+        # principal address's county is ever set is the server-side
+        # derive_county() call below, for the one state that needs it.
+        county=None,
         is_po_box=False,
     )
 
@@ -99,6 +104,16 @@ def create_application():
     entity_type = data.get("entity_type")
     if entity_type:
         _, entity_err = validate_choice(entity_type, ENTITY_TYPES, "Select a valid entity type.")
+        if not entity_err:
+            # Never trust the client's own idea of which entity types a
+            # state supports (Part 3) the same "server re-validates
+            # everything that affects a real record" pattern already used
+            # for the filing fee itself. Falls back to the business's
+            # existing state (or DEFAULT_STATE for a brand-new business)
+            # when this particular autosave call didn't include `state`.
+            effective_state = state_value or (business.state if business else DEFAULT_STATE)
+            if not is_supported_entity_type(effective_state, entity_type):
+                entity_err = "This entity type is not available in the selected state."
         if entity_err:
             errors["entity_type"] = entity_err
 
@@ -175,11 +190,48 @@ def create_application():
     business.purpose = sanitize_text(data.get("purpose"), 2000) or business.purpose
     business.management_structure = management_structure or business.management_structure
 
-    principal = _build_address(data, "principal", principal_line1, principal_city, principal_zip, business.state)
-    if principal:
-        db.session.add(principal)
-        db.session.flush()
-        business.principal_address_id = principal.id
+    # Principal business address (Business Basics no separate County
+    # field is ever collected here, see Part 1). Upserted onto the
+    # existing Address row rather than inserting a new one on every
+    # autosave both to avoid orphaning rows and, more importantly, so the
+    # county-derivation call below only ever re-runs the one time the
+    # address text actually changes, not on every debounced autosave.
+    if principal_line1:
+        existing_principal = business.principal_address
+        address_unchanged = bool(
+            existing_principal
+            and existing_principal.line1 == principal_line1
+            and existing_principal.city == (principal_city or "")
+            and existing_principal.postal_code == (principal_zip or "")
+            and existing_principal.state == business.state
+        )
+        if not address_unchanged:
+            if existing_principal:
+                existing_principal.line1 = principal_line1
+                existing_principal.line2 = sanitize_text(data.get("principal_line2"), 255)
+                existing_principal.city = principal_city or ""
+                existing_principal.postal_code = principal_zip or ""
+                existing_principal.state = business.state
+                existing_principal.county = None  # address changed any previously-derived county is stale until re-derived below
+            else:
+                principal = _build_address(data, "principal", principal_line1, principal_city, principal_zip, business.state)
+                db.session.add(principal)
+                db.session.flush()
+                business.principal_address_id = principal.id
+                existing_principal = principal
+
+        # County is never collected from the customer (Part 1). For the
+        # one state whose own formation document actually requires it
+        # (New York COUNTY_REQUIRED_STATES), derive it automatically
+        # from this verified address. Best-effort: derive_county() never
+        # raises and returns None on any failure, so a slow/unreachable
+        # geocoding API can never block saving or submitting an
+        # application the address is simply saved without a county,
+        # same as before this existed.
+        if business.state in COUNTY_REQUIRED_STATES and existing_principal and not existing_principal.county:
+            derived = derive_county(existing_principal.line1, existing_principal.city, business.state, existing_principal.postal_code)
+            if derived:
+                existing_principal.county = derived
 
     application = business.applications.order_by(FormationApplication.created_at.desc()).first()
     if not application or application.status != "draft":
@@ -194,6 +246,17 @@ def create_application():
     application.operating_agreement_requested = bool(
         data.get("operating_agreement_requested", application.operating_agreement_requested)
     )
+    # Generated-document review acknowledgement (Part 16) only advances
+    # when the client actually says the box was checked; an autosave from
+    # an earlier step (which never includes this key at all, see
+    # buildApplicationPayload) never touches these fields, so a prior
+    # approval is never silently cleared by continuing to edit other steps.
+    if data.get("formation_review_approved"):
+        application.formation_data_confirmed_at = utcnow()
+        try:
+            application.formation_data_version = int(data.get("formation_review_version") or ((application.formation_data_version or 0) + 1))
+        except (TypeError, ValueError):
+            application.formation_data_version = (application.formation_data_version or 0) + 1
 
     # Registered agent
     if ra_type:
@@ -208,6 +271,11 @@ def create_application():
         agent.consent_given = bool(data.get("registered_agent_consent"))
         if agent.consent_given and not agent.consent_given_at:
             agent.consent_given_at = utcnow()
+        # Electronic-signature evidence (Part 15) the typed full legal
+        # name captured alongside the consent checkbox on the wizard's
+        # Registered Agent step.
+        if data.get("registered_agent_signer_name"):
+            agent.signer_name = sanitize_text(data.get("registered_agent_signer_name"), 200)
         db.session.add(agent)
 
     # Organizer upsert-by-business (not a plain insert): without this, every

@@ -27,14 +27,14 @@ export default function OnboardingShellChrome({ wizard, children }) {
           <div><i style={{ width: `${((step + 1) / steps.length) * 100}%` }}></i></div>
           <p className="onboarding-selected-state">Selected formation state: <strong>{selectedState?.name || form.state}</strong></p>
         </div>
-        {formError && step < 14 && <p className="form-error-summary" role="alert">{formError}</p>}
+        {formError && step < steps.length - 1 && <p className="form-error-summary" role="alert">{formError}</p>}
 
         {children}
 
-        {step < 14 && (
+        {step < steps.length - 1 && (
           <div className="onboarding-actions">
             {step > 0 ? <button className="btn btn-ghost" onClick={goBack}><ArrowLeft /> Back</button> : <span />}
-            {step < 13
+            {step < steps.length - 2
               ? <button className="btn btn-primary" disabled={creatingAccount} aria-busy={creatingAccount} onClick={goNext}>{creatingAccount && <Loader2 className="spin" size={18} />}<span aria-live="polite">{creatingAccount ? 'Creating account...' : 'Continue'}</span> <ArrowRight /></button>
               : <button className="btn btn-primary" disabled={loading} aria-busy={loading} onClick={submitOrder}>{loading && <Loader2 className="spin" size={18} />}<span aria-live="polite">{loading ? 'Submitting...' : 'Submit Order Payment Arranged Separately'}</span> <ArrowRight /></button>}
           </div>

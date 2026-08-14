@@ -33,7 +33,7 @@ export default function Footer() {
       <div className="container footer-grid">
         <div className="footer-brand">
           <Logo light />
-          <p>A guided platform for forming and maintaining your LLC available for businesses forming in 21 states.</p>
+          <p>A guided platform for forming and maintaining your LLC available for businesses forming across all 50 states, Washington, D.C. &amp; Puerto Rico.</p>
           {socialLinks.length > 0 && (
             <div className="social-row">
               {socialLinks.map(({ label, href, icon: Icon, cls }) => (
@@ -58,6 +58,7 @@ export default function Footer() {
           <h4>Company</h4>
           <Link to="/about">About</Link>
           <Link to="/resources">Resources</Link>
+          <Link to="/blog">Blog</Link>
           <Link to="/privacy">Privacy Policy</Link>
           <Link to="/terms">Terms and Conditions</Link>
           <Link to="/refund-policy">Refund Policy</Link>
